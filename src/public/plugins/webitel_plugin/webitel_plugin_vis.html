@@ -1,0 +1,39 @@
+<div ng-controller="KbnWebitelPluginVisController" class="webitel-plugin-vis table-vis">
+	<div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
+		<h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+		<h4>No results found</h4>
+	</div>
+
+	<div ng-if="hasSomeRows">
+		<table ng-table="tableParams" show-filter="true" class="kbn-table table">
+          <thead>
+              <tr>
+                  <th ng-repeat="column in columns" ng-show="column.visible"
+                      class="text-center sortable" ng-class="{
+                          'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+                          'sort-desc': tableParams.isSortBy(column.field, 'desc')
+                        }"
+                      ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"
+                          >
+                      {{column.title}}
+                  </th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr ng-repeat="item in $data" >
+                  <td ng-repeat="column in columns" ng-show="column.visible" sortable="column.field"
+                          class="{{column.class}}" ng-class={{column.ngClass}}>
+                      <htmldiv style="width: 100%; height: 100%" ng-if="column.cellTemplate" content="column.cellTemplate"></htmldiv>
+
+                      <div ng-if="!column.cellTemplate">
+                          {{item[column.field]}}
+                      </div>
+
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+  
+  
+	</div>
+</div>
