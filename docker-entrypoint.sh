@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-chmod +x /kibana/bin/kibana
+echo 'Webitel Kibana '$VERSION
 
 # Add kibana as command if needed
 if [[ "$1" == -* ]]; then
