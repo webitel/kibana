@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+chmod +x /kibana/bin/kibana
+
 # Add kibana as command if needed
 if [[ "$1" == -* ]]; then
 	set -- kibana "$@"
