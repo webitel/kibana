@@ -27,7 +27,7 @@ define('webitelLibrary', ['require'], function() {
             VoiceMail: 'VOICEMAIL',
             DoNotDisturb: 'DND',
             None: 'NONE'
-            //        OnHook: '"ONHOOK"'
+//        OnHook: '"ONHOOK"'
         };
 
         WebitelAccountStatusTypes = {
@@ -51,8 +51,7 @@ define('webitelLibrary', ['require'], function() {
             Agent: 'AGENT-ERROR',
             Connection: 'CONNECTION-ERROR',
             Command: 'COMMAND-ERROR',
-            Event: 'EVENT-ERROR',
-            Script: 'SCRIPT-ERROR'
+            Event: 'EVENT-ERROR'
         };
 
         WebitelMuteType = {
@@ -76,19 +75,25 @@ define('webitelLibrary', ['require'], function() {
             Sip: 'sip'
         };
 
-        WebitelSipGatewayAttribute = {
-            Param: 'param',
-            Var: 'var',
-            OVar: 'ovar',
-            IVar: 'ivar'
-        };
-
-
-
         WebitelUserParamType = {
             User: 'user',
             Password: 'password',
             Role: 'role'
+        };
+
+
+        WebitelAgentStatus = {
+            LoggedOut: "Logged Out", // Cannot receive queue calls.
+            Available: "Available", // Ready to receive queue calls.
+            AvailableOnDemand: "Available (On Demand)", // State will be set to 'Idle' once the call ends (not automatically set to 'Waiting').
+            OnBreak: "On Break" // Still Logged in, but will not receive queue calls.
+        };
+
+        WebitelAgentState = {
+            Receiving: "Receiving",
+            Waiting: "Waiting", // Ready to receive calls.
+            Idle: "Idle", // Does nothing, no calls are given.
+            InAQueueCall: "In a queue call" // Currently on a queue call.
         };
         // END GENERAL CONSTANTS
 
@@ -104,23 +109,30 @@ define('webitelLibrary', ['require'], function() {
             var autoAnswerParam = parameters['autoAnswerParam'];
             var vertoRecordFile = parameters['vertoRecordFile'];
 
+            // TODO CC
+            var isAgent = parameters['agent'];
+            var agentCCStatus = {
+                "status": null,
+                "state": null
+            };
+            var dumpAgentCCStatus = null;
+
+            var webitelAgentStatusDef = WebitelAgentStatus.Available;
+            if (parameters['availableOnDemand']){
+                webitelAgentStatusDef = WebitelAgentStatus.AvailableOnDemand;
+            };
+
             var webrtc = parameters['webrtc'];
 
             var webrtc_domain = '';
 
             var domainUser = parameters['domain'];
-
+            // todo
             var webrtcPhone = null;
 
             if (webrtc) {
                 try {
-                    function getHostName(server) {
-                        var parser = document.createElement('a');
-                        parser.href = server;
-                        return parser.hostname.replace('www.', '');
-                    }
-                    // TODO
-                    webrtc_domain = domainUser = getHostName(location.hostname);
+                    webrtc_domain = domainUser;
                 } catch (e) {
                     console.error(e);
                 }
@@ -178,6 +190,7 @@ define('webitelLibrary', ['require'], function() {
                 var on = function(eventName, handler, type, cb) {
                     if (typeof  type === 'function') {
                         cb = type;
+
                         type = null
                     };
 
@@ -272,23 +285,17 @@ define('webitelLibrary', ['require'], function() {
                 Dtmf: 'dtmf',
                 Broadcast: 'broadcast',
                 Bind: 'bind',
-                Event: 'subscribe',
-                NixEvent: 'nixevent',
                 AttXfer2: 'att_xfer2',
-                VideoRefresh: 'video_refresh',
                 Domain: {
                     List: 'api domain list',
                     Create: 'api domain create',
-                    Remove: 'api domain remove',
-                    Change: 'api domain change',
-                    Item: 'api domain'
+                    Remove: 'api domain remove'
                 },
                 Account: {
                     List: 'api account list', //
                     Create: 'api account create',
                     Change: 'api account change',
-                    Remove: 'api account remove',
-                    Item: 'api account'
+                    Remove: 'api account remove'
                 },
                 Device: {
                     List: 'api device list',
@@ -304,34 +311,16 @@ define('webitelLibrary', ['require'], function() {
                 Rawapi: 'rawapi',
                 Eavesdrop: 'eavesdrop',
                 ChannelDump: 'channel_dump',
-                SipProfile: {
-                    List: 'sip_profile_list',
-                    Rescan: 'sip_gateway_rescan'
-                },
-
-                Gateway: {
-                    List: 'sip_gateway_list',
-                    Create: 'sip_gateway_create',
-                    Change: 'sip_gateway_change',
-                    Remove: 'sip_gateway_remove',
-                    Up: 'sip_gateway_up',
-                    Down: 'sip_gateway_down',
-                    Kill: 'sip_gateway_kill'
-                },
-
-                Show: {
-                    Channel: 'show_channel'
-                },
-
-                CDR: {
-                    GetRecordLink: "cdr_get_record_link"
-                },
-
+                Event: 'subscribe',
+                NixEvent: 'unsubscribe',
                 CallCenter: {
                     Ready: "cc ready",
                     Busy: "cc busy",
-                    Logout: "cc logout"
+                    Logout: "cc logout",
+                    Login: "cc login",
+                    Tiers: "cc tier from user"
                 }
+
             };
 
             var version = '3.0.1';
@@ -409,14 +398,14 @@ define('webitelLibrary', ['require'], function() {
 
             var WebitelUserEventTypes = {
                 UserCreate: 'USER_CREATE',
-                UserStatus: 'USER_STATE',
+                UserState: 'USER_STATE',
                 UserDestroy: 'USER_DESTROY',
                 UserChanged: 'USER_CHANGE',
                 AccountOnline: 'ACCOUNT_ONLINE',
                 AccountOffline: 'ACCOUNT_OFFLINE',
                 AccountStatus: 'ACCOUNT_STATUS',
 
-                //            AccountRole: 'ACCOUNT_ROLE',
+//            AccountRole: 'ACCOUNT_ROLE',
                 isValid: function (name) {
                     for (var key in this) {
                         if (this[key] == name) {
@@ -489,14 +478,6 @@ define('webitelLibrary', ['require'], function() {
 
             var OnWebitelReady = new WebitelEvent();
 
-            var OnWebitelLogin = new WebitelEvent();
-
-            var OnNewWebRTCCall = new WebitelEvent();
-
-            var OnVideoWebRTCCall = new WebitelEvent();
-
-            var OnDestroyWebRTCCall = new WebitelEvent();
-
             var WebitelError = function(errorType, message) {
                 this.getJSONObject = function() {
                     return {
@@ -541,6 +522,13 @@ define('webitelLibrary', ['require'], function() {
                 this.getScheme = function () {
                     return (attrs['scheme'])
                 };
+                this.getAgent = function () {
+                    return (attrs['agent'])
+                };
+
+                this.setAgent = function (val) {
+                    attrs['agent'] = Boolean(val);
+                };
 
                 this.getJSONObject = function() {
                     return {
@@ -551,7 +539,8 @@ define('webitelLibrary', ['require'], function() {
                         tag: that.getTag(),
                         online: that.getOnline(),
                         name: that.getName(),
-                        scheme: that.getScheme()
+                        scheme: that.getScheme(),
+                        agent: that.getAgent()
                     };
                 };
 
@@ -566,12 +555,27 @@ define('webitelLibrary', ['require'], function() {
                 };
 
                 this.setStatus = function(away, tag) {
+                    if ([WebitelAgentStatus.Available, WebitelAgentStatus.AvailableOnDemand].indexOf(away) > -1) {
+                        away = WebitelUserAwayCauseTypes.None;
+                    } else if ([WebitelAgentStatus.LoggedOut, WebitelAgentStatus.OnBreak].indexOf(away) > -1) {
+                        away = WebitelUserAwayCauseTypes.DoNotDisturb;
+                    };
+                    if (away == attrs['away'])
+                        return;
                     attrs['away'] = away;
                     attrs['tag'] = unescape(tag);
                     OnWebitelUserStatusChange.trigger(that.getJSONObject());
                 };
 
                 this.setState = function (state) {
+                    if (WebitelAgentState.Waiting === state) {
+                        state = WebitelAccountStatusTypes.Ready;
+                    } else if ([WebitelAgentState.Idle, WebitelAgentState.InAQueueCall, WebitelAgentState.Receiving]
+                            .indexOf(state) > -1) {
+                        state = WebitelAccountStatusTypes.Busy;
+                    };
+                    if (state == attrs['state'])
+                        return;
                     attrs['state'] = state;
                     OnWebitelUserStatusChange.trigger(that.getJSONObject());
                 }
@@ -611,6 +615,10 @@ define('webitelLibrary', ['require'], function() {
                             ? chn[WebitelCallChanelVariables.WJsOriginate].split('@')[0]
                             : chn[WebitelCallChanelVariables.WJsOriginate]
                     } else {
+                        if (/^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$/.
+                                test(chn[WebitelCallChanelVariables.CallerCalleeNumber])) {
+                            return account.split('@')[0]
+                        }
                         return chn[WebitelCallChanelVariables.CallerCalleeNumber] ||
                             that.getDestinationNumber();
                     }
@@ -711,7 +719,7 @@ define('webitelLibrary', ['require'], function() {
                 };
 
 
-                ///
+                /// FAVBET
                 this.getActivityId = function () {
                     return that.getActualChannel()[WebitelCallChanelVariables.WActivityId];
                 };
@@ -946,7 +954,7 @@ define('webitelLibrary', ['require'], function() {
                             user.setOnline(attrs['Event-Name'] == WebitelUserEventTypes.AccountOnline);
                         };
                         break;
-                    case WebitelUserEventTypes.UserStatus:
+                    case WebitelUserEventTypes.UserState:
                         var user = WebitelUsers.get(attrs[WebitelUserAttributes.Id]);
                         if (user) {
                             console.log('User ' + user.getId() + ' changed his status!');
@@ -984,6 +992,31 @@ define('webitelLibrary', ['require'], function() {
                          };*/
                         break;
                 };
+            };
+
+            var WebitelAgentEvent = function (attrs) {
+                switch (attrs['Event-Name']) {
+                    case WebitelAgentEventTypes.AgentStatus:
+                        var user = WebitelUsers.get(attrs['User-ID']);
+                        if (user) {
+                            console.log('Agent ' + user.getId() + ' changed his state!');
+                            user.setStatus(attrs['CC-Agent-Status']);
+                            if (account.split('@')[0] == attrs['User-ID'])
+                                agentCCStatus.status = attrs['CC-Agent-Status'];
+                            // TODO ...
+                        };
+                        break;
+                    case WebitelAgentEventTypes.AgentState:
+                        var user = WebitelUsers.get(attrs['User-ID']);
+                        if (user) {
+                            // TODO ...
+                            console.log('Agent ' + user.getId() + ' changed his status!');
+                            user.setState(attrs['CC-Agent-State']);
+                            if (account.split('@')[0] == attrs['User-ID'])
+                                agentCCStatus.state = attrs['CC-Agent-State'];
+                        };
+                        break;
+                }
             };
 
             var WebitelCallEvent = function(attrs) {
@@ -1094,6 +1127,15 @@ define('webitelLibrary', ['require'], function() {
                 } else {
                     var newCall = new WebitelCall(callId, e, WebitelCallStates.Rinding);
                     OngoingCalls.add(newCall);
+
+                    if (isAgent && !dumpAgentCCStatus && !e['variable_cc_queue']) {
+                        dumpAgentCCStatus = {
+                            "status": agentCCStatus['status'],
+                            "state": agentCCStatus['state']
+                        };
+                        if (agentCCStatus['status'] != WebitelAgentStatus.OnBreak)
+                            WebitelConnection.busyCallCenter();
+                    };
                 };
 
                 var webCall = WebrtcCalls.get(channelId);
@@ -1137,11 +1179,20 @@ define('webitelLibrary', ['require'], function() {
                     var callId = call['uuid'];
                     if (call.getCountChannel() == 1) {
                         OngoingCalls.remove(callId);
+
+                        // TODO CC
+                        if (isAgent && dumpAgentCCStatus && OngoingCalls.getLength() == 0) {
+                            if (dumpAgentCCStatus['status'] != WebitelAgentStatus.OnBreak)
+                                WebitelConnection.readyCallCenter();
+
+                            dumpAgentCCStatus = null;
+                        };
+
                         call.setState(WebitelCallStates.Ended);
                         /* Fix IntegrationID */
                         var newCallId;
                         if (call.getDirection() == "inbound") {
-                            newCallId = e['variable_originating_leg_uuid'] || e['Other-Leg-Unique-ID'];
+                            newCallId = e['Other-Leg-Unique-ID'] || channel['variable_originating_leg_uuid'];
                         } else {
                             newCallId = e['Unique-ID'];
                         }
@@ -1240,6 +1291,8 @@ define('webitelLibrary', ['require'], function() {
                     WebitelUserEvent(attrs);
                 } else if (WebitelCallEventTypes.isValid(type)) {
                     WebitelCallEvent(attrs);
+                } else if (attrs['webitel-event-name'] === 'cc') {
+                    WebitelAgentEvent(attrs);
                 };
 
                 /*
@@ -1256,24 +1309,6 @@ define('webitelLibrary', ['require'], function() {
                 this.response = response['exec-response'];
             };
 
-            function getWebrtcCallFromCallUUID (callUUID) {
-                var call = OngoingCalls.get(callUUID)
-                    ,channels
-                    ,channel
-                    ,webCall
-                    ;
-                if (!call) return null;
-                channels = call.getChannels();
-                for (var key in channels) {
-                    channel = channels[key];
-                    webCall = WebrtcCalls.get(channel);
-                    if (webCall) {
-                        return webCall;
-                    };
-                }
-                return null;
-            };
-
             //====================================================================
 
             var webrtcPhoneStart = function (option) {
@@ -1288,15 +1323,13 @@ define('webitelLibrary', ['require'], function() {
                     onMessage: function(verto, dialog, msg, data) {
                         console.log('---------VERTO onMessage----------');
                     },
-                    onError: function (dialog, err) {
-                        OnWebitelError.trigger(new WebitelError(WebitelErrorTypes.Call,
-                            err['message'] || err['name']).getJSONObject());
-                    },
                     onGetVideoContainer: function (dialog) {
-                        OnNewWebRTCCall.trigger(dialog);
+                        dialog.params.tag = webitel.video.addIncVideo(dialog.callID);
                     },
                     onDialogState: function(d) {
                         console.log('---------VERTO onDialogState----------');
+
+
                         switch (d.state) {
                             case WebitelVerto.enum.state.recovering:
                                 var newWebCall = {
@@ -1306,7 +1339,7 @@ define('webitelLibrary', ['require'], function() {
                                 };
 
                                 WebrtcCalls.add(newWebCall);
-                                WebitelConnection.channelDump(d.callID, function (res) {
+                                WebitelConnection.rawapi('uuid_dump ' + d.callID + ' json', function (res) {
                                     var jsonE;
                                     try {
                                         jsonE = JSON.parse(res);
@@ -1323,9 +1356,6 @@ define('webitelLibrary', ['require'], function() {
                                     };
                                     handleChannelCreateEvent (d.callID, jsonE);
                                 });
-                                if (d.params.useVideo) {
-                                    OnVideoWebRTCCall.trigger(d);
-                                };
                                 break;
                             case WebitelVerto.enum.state.ringing:
                                 var newWebCall = {
@@ -1342,6 +1372,7 @@ define('webitelLibrary', ['require'], function() {
                                 }
                                 console.log('verto.enum.state.ringing');
 
+                                d.params.tag = webitel.video.addIncVideo(d.callID);
                                 break;
 
                             case WebitelVerto.enum.state.trying:
@@ -1352,24 +1383,17 @@ define('webitelLibrary', ['require'], function() {
                                 WebrtcCalls.add(newWebCall);
                                 console.log('verto.enum.state.ringing');
                                 console.log('verto.enum.state.trying');
+
+                                d.params.tag = webitel.video.addIncVideo(d.callID);
                                 break;
 
-                            //case WebitelVerto.enum.state.early:
+                            case WebitelVerto.enum.state.early:
                             case WebitelVerto.enum.state.active:
                                 var webCall = WebrtcCalls.get(d.callID);
+
                                 if (webCall && webCall['attached']) {
                                     var _channel = ChanelCalls.get(d.callID);
                                     handleChannelAnswerEvent(d.callID, _channel);
-                                };
-
-                                if (d.lastState === WebitelVerto.enum.state.held) {
-                                    WebitelConnection.refreshVideo(d.callID);
-                                };
-
-                                //d.rtc.remoteStream && d.rtc.remoteStream.getVideoTracks().length > 0
-                                //if (d.params.useVideo && d.params.sdp.indexOf('m=video') > 0) {
-                                if (d.params.useVideo && d.rtc.mediaData.SDP.indexOf('m=video') > 0) {
-                                    OnVideoWebRTCCall.trigger(d);
                                 };
                                 break;
 
@@ -1378,7 +1402,8 @@ define('webitelLibrary', ['require'], function() {
                                 break;
                             case WebitelVerto.enum.state.destroy:
                                 console.log('verto.enum.state.destroy');
-                                OnDestroyWebRTCCall.trigger(d);
+                                var videoTag = document.getElementById('IncomingVideo-' + d.callID);
+                                if (videoTag) videoTag.remove();
                                 break;
 
                             case WebitelVerto.enum.state.held:
@@ -1403,21 +1428,20 @@ define('webitelLibrary', ['require'], function() {
                     login: login,
                     passwd: jssipConfiguration['password'],
                     socketUrl: jssipConfiguration['ws_servers'],
-                    ringFile: vertoRecordFile,
-                    videoParams: jssipConfiguration['videoParams'],
-                    //audioParams: {
-                    //    googAutoGainControl: false,
-                    //    googNoiseSuppression: false,
-                    //    googHighpassFilter: false
-                    //},
-                    //screenShare: true,
-                    localTag: jssipConfiguration['localTag'],
-                    iceServers: jssipConfiguration['iceServers'],
-                    attachAutoAnswer: jssipConfiguration['attachAutoAnswer']
+                    ringFile: jssipConfiguration['ringFile'],
 
+//                videoParams: {
+//                    "minWidth": "1280",
+//                    "minHeight": "720"
+//                },
+                    audioParams: {
+                        googAutoGainControl: false,
+                        googNoiseSuppression: false,
+                        googHighpassFilter: false
+                    },
+                    iceServers: false
                 }, callbacks);
                 webrtcPhone.login();
-
             };
 
             //Functions related to connection
@@ -1453,7 +1477,7 @@ define('webitelLibrary', ['require'], function() {
                         that.onReceivedMessage.trigger(event.data);
                     };
                     that._webSocket.onerror = function(e) {
-                        //                    that._status = ConnectionStatus.Disconnected;
+//                    that._status = ConnectionStatus.Disconnected;
                         webSocketStatus(that._webSocket);
                         console.error(e);
                     };
@@ -1488,17 +1512,25 @@ define('webitelLibrary', ['require'], function() {
                                         user = {
                                             login: res.response.login,
                                             role: res.response.role,
-                                            domain: res.response.domain
+                                            domain: res.response.domain,
+                                            agent: Boolean(res.response['cc-agent'])
                                         }
                                     };
-                                    that.onConnect.trigger(user);
                                     that.getAgents();
+                                    that.onConnect.trigger(user);
                                 } else {
                                     that.onDisconnect.trigger(res.response);
                                 };
                             });
                         authCommand.execute();
                     };
+                },
+
+                sendCommand: function(param, cb) {
+                    var c = new WebitelCommand('sendCommandWebitel', {
+                        'str': param
+                    }, cb);
+                    c.execute();
                 },
 
                 getWebSocketStatus: function () {
@@ -1518,43 +1550,46 @@ define('webitelLibrary', ['require'], function() {
 
                 getAgents: function() {
                     var that = WebitelConnection;
-                    that.login(function() {
-                        that.listUser(domainUser, function (res) {
-                            if (res.status === WebitelCommandResponseTypes.Success) {
-                                try {
-                                    var users = JSON.parse(res.response.response);
+                    that.listUser(domainUser, function (res) {
+                        if (res.status === WebitelCommandResponseTypes.Success) {
+                            try {
+                                var users = JSON.parse(res.response.response);
 
-                                    for (var key in users) {
-                                        var agent = new WebitelUser({
-                                            'id': users[key]['id'],
-                                            'domain': users[key]['domain'],
-                                            'scheme': users[key]['scheme'],
-                                            'online': users[key]['online'],
-                                            'state': users[key]['state'],
-                                            'away': users[key]['status'],
-                                            'tag': users[key]['descript'],
-                                            'name': users[key]['id']
-                                        });
-                                        WebitelUsers.add(agent.getId(), agent);
-                                    };
-                                    var currentUser = WebitelUsers.get(account.split('@')[0]);
-                                    currentUser.setOnline(true);
+                                for (var key in users) {
+                                    var agent = new WebitelUser({
+                                        'id': users[key]['id'],
+                                        'domain': users[key]['domain'],
+                                        'scheme': users[key]['scheme'],
+                                        'online': users[key]['online'],
+                                        'state': users[key]['state'],
+                                        'away': users[key]['status'],
+                                        'tag': users[key]['descript'],
+                                        'name': users[key]['id'],
+                                        'agent': Boolean(users[key]['agent'])
+                                    });
+                                    WebitelUsers.add(agent.getId(), agent);
+                                };
 
-                                } catch (e) {
-                                    // TODO !CM
-                                }
-
-                                OnWebitelReady.trigger();
+                                var currentUser = WebitelUsers.get(account.split('@')[0]);
+                                currentUser.setOnline(true);
+                            } catch (e) {
+                                // TODO !CM
                             }
-                        });
+                            that.login();
+                            OnWebitelReady.trigger();
+                        }
                     });
 
                 },
 
                 makeCall: function(extension, useVideo) {
-                    if ((!extension && extension != 0) /*|| !this.account()['online']*/)
+                    if ((!extension && extension != 0) || !this.account()['online'])
                         return false;
-                    extension = extension.replace(/\D/g, '');
+                    if (extension.indexOf('+') == 0) {
+                        extension = '+' + extension.replace(/\D/g, '');
+                    } else {
+                        extension = extension.replace(/\D/g, '');
+                    };
                     if (webrtc && webrtcPhone) {
                         webrtcPhone.newCall({
                             destination_number: extension,
@@ -1563,7 +1598,6 @@ define('webitelLibrary', ['require'], function() {
                             useVideo: useVideo,
                             useStereo: false
                         });
-
                     } else {
                         var params = {
                             "extension": extension,
@@ -1581,32 +1615,24 @@ define('webitelLibrary', ['require'], function() {
                 },
 
                 answer: function(callUUID, useVideo) {
-                    var webCall = getWebrtcCallFromCallUUID(callUUID);
-
-                    if (webCall && !webCall['answered']) {
-                        webCall['session'].answer({
-                            useVideo: useVideo
-                        });
-                        webCall['answered'] = true;
-                        return true;
-                    };
+                    var call = OngoingCalls.get(callUUID)
+                        ,channels
+                        ,channel
+                        ,webCall;
+                    if (!call) return false;
+                    channels = call.getChannels();
+                    for (var key in channels) {
+                        channel = channels[key];
+                        webCall = WebrtcCalls.get(channel);
+                        if (webCall && !webCall['answered']) {
+                            webCall['session'].answer({
+                                useVideo: useVideo
+                            });
+                            webCall['answered'] = true;
+                            return true;
+                        }
+                    }
                     return false;
-                },
-
-                setMute: function (callUUID, wath) {
-                    var webCall = getWebrtcCallFromCallUUID(callUUID);
-                    if (webCall) {
-                        return webCall['session'].setMute(wath);
-                    };
-                    return null;
-                },
-
-                getMute: function (callUUID) {
-                    var webCall = getWebrtcCallFromCallUUID(callUUID);
-                    if (webCall) {
-                        return webCall['session'].getMute();
-                    };
-                    return null;
                 },
 
                 sendMessage: function (extension, text, succeededCb, failedCb) {
@@ -1622,18 +1648,31 @@ define('webitelLibrary', ['require'], function() {
                     webrtcPhone.sendMessage('sip:' + extension + '@' + webrtc_domain, text, options);
                 },
 
-                setStatusReady: function(cb) {
+                setStatusReady: function(cb, cm) {
+                    // TODO CC
+                    if (dumpAgentCCStatus) {
+                        console.error(dumpAgentCCStatus);
+                        return;
+                    }
+
+                    if (isAgent && !cm) {
+                        this.readyCallCenter({}, cb);
+                        return;
+                    };
+
                     var _account = account.split('@')[0];
                     this.userUpdate(_account, domainUser, 'status', WebitelAccountStatusTypes.Ready, function (res) {
                         if (res.status == WebitelCommandResponseTypes.Success)
                             console.log('Status successfully changed to Ready!');
-
-                        if (cb)
-                            cb(res);
                     });
                 },
 
-                setStatusBusy: function(cause, tag, cb) {
+                setStatusBusy: function(cause, tag, cb, cm) {
+                    if (isAgent && !cm) {
+                        this.busyCallCenter({}, cb);
+                        return;
+                    };
+
                     var _cause = cause ? cause.toUpperCase() : '';
                     if (!(_cause == WebitelUserAwayCauseTypes.CallForwarding || _cause == WebitelUserAwayCauseTypes.DoNotDisturb ||
                         _cause == WebitelUserAwayCauseTypes.OnBreak || _cause == WebitelUserAwayCauseTypes.VoiceMail)) {
@@ -1647,11 +1686,10 @@ define('webitelLibrary', ['require'], function() {
                     this.userUpdate(_account, domainUser, 'status', _cause, function (res) {
                         if (res.status == WebitelCommandResponseTypes.Success)
                             console.log('Status successfully changed to Busy!');
-
                         if (cb)
                             cb(res);
-                    });
 
+                    });
                 },
 
                 hangupCall: function(callUUID) {
@@ -1697,13 +1735,29 @@ define('webitelLibrary', ['require'], function() {
                         channel;
                     if (call) {
                         channel = call.getActualChannel();
-                        // TODO switch_callstate_table CALLSTATE_CHART
-                        if (channel && (channel[WebitelCallChanelVariables.CallStateName] == "ACTIVE" ||
-                            channel[WebitelCallChanelVariables.CallStateName] == "RING_WAIT")) {
+                        if (channel && channel[WebitelCallChanelVariables.CallStateName] == "ACTIVE") {
                             this.hold(callUUID, callback);
                         } else {
                             this.unhold(callUUID, callback);
                         };
+                        /*
+                         try {
+                         for (var key in webCalls) {
+                         if (webCalls[key]['call-uuid'] == channels[0]) {
+                         webCalls[key]['session'].toggleHold();
+                         return;
+                         };
+                         };
+                         } catch(e) {
+
+                         };
+                         command = new WebitelCommand(
+                         WebitelCommandTypes.ToggleHold, {
+                         'channel-uuid': channels.join(',')
+                         },
+                         callback
+                         );
+                         command.execute(); */
                     }
                 },
 
@@ -1717,7 +1771,7 @@ define('webitelLibrary', ['require'], function() {
 
                         var _webCall = WebrtcCalls.get(channels[0]);
                         if (_webCall) {
-                            _webCall['session'].hold();
+                            _webCall['session'].hold(null, _webCall['session']);
                             if (callback) {
                                 callback();
                             }
@@ -1744,7 +1798,7 @@ define('webitelLibrary', ['require'], function() {
 
                         var _webCall = WebrtcCalls.get(channels[0]);
                         if (_webCall) {
-                            _webCall['session'].unhold();
+                            _webCall['session'].unhold(null, _webCall['session']);
                             if (callback) {
                                 callback();
                             }
@@ -1780,13 +1834,13 @@ define('webitelLibrary', ['require'], function() {
 
                 transferCall: function(callUUID, destination, callback) {
                     var call = OngoingCalls.get(callUUID),
-                        command;
+                        command, _channel;
                     if (call) {
                         destination = destination.replace(/\D/g, '');
-                        var actualChannel =  call.getActualChannel();
+                        _channel = call.getActualChannel();
                         command = new WebitelCommand(
                             WebitelCommandTypes.Transfer, {
-                                'channel-uuid': actualChannel['Other-Leg-Unique-ID'] || actualChannel['variable_originating_leg_uuid'],
+                                'channel-uuid': _channel['variable_cc_member_session_uuid'] || _channel['Other-Leg-Unique-ID'] || _channel['variable_originating_leg_uuid'],
                                 'destination': destination
                             },
                             callback
@@ -1800,14 +1854,14 @@ define('webitelLibrary', ['require'], function() {
                 attendedTransferCall: function(callUUID, destination) {
                     var call = OngoingCalls.get(callUUID);
                     if (!call || !destination) return false;
-
+                    destination = destination.replace(/\D/g, '');
                     var channel = call.getActualChannel();
                     var channelUUID = channel['Unique-ID'];
                     var cmd = new WebitelCommand(WebitelCommandTypes.AttXfer2, {
                         'channel-uuid': channelUUID,
-                        'extension': destination + '@' + account.split('@')[1],
+                        'extension': destination,
                         'user': account,
-                        'auto_answer_param': (webrtc && webrtcPhone) ? null : [autoAnswerParam || 'sip_h_Call-Info=answer-after=0'],
+                        'auto_answer_param': ['sip_h_Call-Info=answer-after=1'],
                         'parent_call_uuid': callUUID
                     });
                     cmd.execute();
@@ -1851,8 +1905,8 @@ define('webitelLibrary', ['require'], function() {
                     var command = new WebitelCommand(
                         'att_xfer_bridge', {
                             'channel-uuid-leg-a': channel['Unique-ID'],
-                            'channel-uuid-leg-b': channel['Other-Leg-Unique-ID'],
-                            'channel-uuid-leg-c': channelC['Other-Leg-Unique-ID']
+                            'channel-uuid-leg-b': channel['Other-Leg-Unique-ID'] || channel['variable_originating_leg_uuid'],
+                            'channel-uuid-leg-c': channelC['Other-Leg-Unique-ID'] || channelC['variable_originating_leg_uuid']
                         }
                     );
                     command.execute();
@@ -1892,19 +1946,71 @@ define('webitelLibrary', ['require'], function() {
                 },
 
                 login: function(handle) {
-                    var that = this,
-                        login = new WebitelCommand(WebitelCommandTypes.Login, null, function() {
-                            if (handle) {
-                                try {
-                                    handle.call(this, this);
-                                } catch (e) {
-                                    // TODO gen event script error
-                                    console.error(e);
-                                }
+                    var login = new WebitelCommand(WebitelCommandTypes.Login, null, function() {
+                        console.log('Successfuly logged in!');
+                        if (handle) {
+                            handle.call(this, this);
+                        }
+                    });
+                    login.execute();
+                },
+
+                readyCallCenter: function (opt, cb) {
+                    opt = opt || {};
+                    if (!opt['status'])
+                        opt['status'] = webitelAgentStatusDef;
+
+                    var cmd = new WebitelCommand(WebitelCommandTypes.CallCenter.Ready, opt, function() {
+                        console.log('Successfuly status CC agent ready!');
+                        if (cb) {
+                            cb.call(this, this);
+                        };
+                    });
+                    cmd.execute();
+                },
+
+                loginCallCenter: function (opt, cb) {
+                    opt = opt || {};
+                    if (!opt['status'])
+                        opt['status'] = webitelAgentStatusDef;
+
+                    var cmd = new WebitelCommand(WebitelCommandTypes.CallCenter.Login, opt, function(res) {
+                        console.log('Successfuly logged CC in!');
+                        if (res && res.response['response']) {
+                            var _json = JSON.parse(res.response['response']),
+                                _user = WebitelUsers.get(account.split('@')[0]);
+
+                            if (_user && _json['status']) {
+                                _user.setStatus(_json['status']);
                             };
-                            OnWebitelLogin.trigger();
-                        });
-                    ;
+
+                            if (_user && _json['state']) {
+                                _user.setState(_json['state']);
+                            };
+                        };
+                        if (cb) {
+                            cb.call(this, this);
+                        };
+                    });
+                    cmd.execute();
+                },
+
+                busyCallCenter: function (opt, cb) {
+                    var cmd = new WebitelCommand(WebitelCommandTypes.CallCenter.Busy, opt, function() {
+                        if (cb) {
+                            cb.call(this, this);
+                        }
+                    });
+                    cmd.execute();
+                },
+
+                logoutCallCenter: function (cb) {
+                    var login = new WebitelCommand(WebitelCommandTypes.CallCenter.Logout, null, function() {
+                        console.log('Successfuly logged CC in!');
+                        if (cb) {
+                            cb.call(this, this);
+                        }
+                    });
                     login.execute();
                 },
 
@@ -1920,30 +2026,10 @@ define('webitelLibrary', ['require'], function() {
                 },
 
                 // System Commands
-                createDomain: function(name, customerId, option, cb) {
-
-                    /**
-                     option = {
-							"parameters": [],
-							"variables": []
-						}
-                     */
-                    if (typeof option === 'function') {
-                        cb = option;
-                        option = null;
-                    }
+                createDomain: function(name, customerId, cb) {
                     var command = new WebitelCommand(WebitelCommandTypes.Domain.Create, {
-                        name: name,
-                        customerId: customerId,
-                        parameters: option
-                    }, cb);
-                    command.execute();
-                },
-
-
-                domainItem: function (name, cb) {
-                    var command = new WebitelCommand(WebitelCommandTypes.Domain.Item, {
-                        name: name
+                        name: '\"' + name + '\"',
+                        customerId: customerId
                     }, cb);
                     command.execute();
                 },
@@ -1970,18 +2056,8 @@ define('webitelLibrary', ['require'], function() {
                     command.execute();
                 },
 
-                updateDomain: function(name, params, cb) {
-                    /**
-                     * params = {
-					 *      "type": var || param
-					 *      "attribute": ["yo=yo"] || [{"yo": "yo"}]
-					 * }
-                     */
-                    var command = new WebitelCommand(WebitelCommandTypes.Domain.Change, {
-                        name: name,
-                        params: params
-                    }, cb);
-                    command.execute();
+                updateDomain: function() {
+                    // TODO
                 },
                 /*
                  *  Список всех пользователей и устройств
@@ -2020,36 +2096,11 @@ define('webitelLibrary', ['require'], function() {
                     }, _cb);
                     cmd.execute();
                 },
-
-                userItem: function (user, domain, cb) {
-                    if (typeof domain === 'function') {
-                        cb = domain;
-                        domain = null;
-                    };
-                    if (domain) {
-                        user += '@' + domain;
-                    };
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Account.Item, {
-                        "user": user
-                    }, cb);
-                    cmd.execute();
-                },
                 /*
                  @role {String}
                  <user>[:<password>][@<domain>]
                  */
-                createUser: function(role, login, password, domain, attr, cb) {
-                    /**
-                     * attr = {
-					 *       parameters: [],
-					 *       extensions: []
-					 * }
-                     */
-                    if (typeof attr === 'function') {
-                        cb = attr;
-                        attr = null;
-                    };
-
+                createUser: function(role, login, password, domain, cb) {
                     var _param =[];
                     _param.push(login);
                     if (password && password != '')
@@ -2058,8 +2109,7 @@ define('webitelLibrary', ['require'], function() {
 
                     var cmd = new WebitelCommand(WebitelCommandTypes.Account.Create, {
                         role: role,
-                        param: _param.join(''),
-                        attribute: attr
+                        param: _param.join('')
                     }, cb);
                     cmd.execute();
                 },
@@ -2069,11 +2119,6 @@ define('webitelLibrary', ['require'], function() {
                  <value>
                  */
                 updateUser: function(user, domain, paramName, paramValue, cb) {
-                    if (typeof paramValue === 'function') {
-                        cb = paramValue;
-                        paramValue = null;
-                    };
-
                     var _user = [];
                     _user.push(user);
                     if (domain)
@@ -2217,6 +2262,21 @@ define('webitelLibrary', ['require'], function() {
                     rawapi.execute();
                 },
 
+                genToken: function(password, cb) {
+                    var exec = new WebitelCommand('token_generate', {
+                        'password': password
+                    }, function (res) {
+                        if (cb) {
+                            if (res.staus == WebitelCommandResponseTypes.Success) {
+                                cb(JSON.parse(res['response']['response']))
+                            } else {
+                                cb(res['response']['response'])
+                            }
+                        }
+                    });
+                    exec.execute();
+                },
+
                 eavesdrop: function (user, channelId, side, cb) {
                     var rawapi = new WebitelCommand(
                         WebitelCommandTypes.Eavesdrop, {
@@ -2235,141 +2295,26 @@ define('webitelLibrary', ['require'], function() {
 
                 channelDump: function (channelId, cb) {
                     var cmd = new WebitelCommand(WebitelCommandTypes.ChannelDump, {
-                        'uuid': channelId
+                        'channel-uuid': channelId
                     }, cb);
                     cmd.execute();
                 },
 
-                genToken: function(password, cb) {
-                    var exec = new WebitelCommand('token_generate', {
-                        'password': password
-                    }, function (res) {
-                        if (cb) {
-                            if (res.staus == WebitelCommandResponseTypes.Success) {
-                                cb(JSON.parse(res['response']['response']))
-                            } else {
-                                cb(res['response']['response'])
-                            }
-                        }
+                getTiers: function (cb) {
+                    var cmd = new WebitelCommand(WebitelCommandTypes.CallCenter.Tiers, {}, function (res) {
+                        var _result, err;
+                        if (res.status === WebitelCommandResponseTypes.Fail) {
+                            err = new Error(res.response);
+                        } else {
+                            _result = JSON.parse(res.response);
+                        };
+
+                        if (cb)
+                            cb(err, _result);
+
                     });
-                    exec.execute();
-                },
-
-                sipProfileList: function (cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.SipProfile.List, {
-                    }, cb);
                     cmd.execute();
-                },
-
-                sipProfileRescan: function (profile, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.SipProfile.Rescan, {
-                        'profile': profile
-                    }, cb);
-                    cmd.execute();
-                },
-
-                gatewayList: function (domain, cb) {
-                    var _cb, _domain;
-                    if (typeof arguments[0] == "function") {
-                        _cb = arguments[0];
-                        _domain = null
-                    } else {
-                        _cb = cb;
-                        _domain = domain;
-                    };
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.List, {
-                        domain: _domain
-                    }, _cb);
-                    cmd.execute();
-                },
-
-                gatewayCreate: function (obj, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Create, obj, cb);
-                    cmd.execute();
-                },
-
-                gatewayChange: function (name, type, params, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Change, {
-                        'name': name,
-                        'type': type,
-                        'params': params
-                    }, cb);
-                    cmd.execute();
-                },
-
-                gatewayRemove: function (name, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Remove, {
-                        'name': name
-                    }, cb);
-                    cmd.execute();
-                },
-
-                gatewayUp: function (name, profile, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Up, {
-                        'name': name,
-                        'profile': profile
-                    }, cb);
-                    cmd.execute();
-                },
-
-                gatewayDown: function (name, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Down, {
-                        'name': name
-                    }, cb);
-                    cmd.execute();
-                },
-
-                gatewayKill: function (profile, gateway, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Gateway.Kill, {
-                        'profile': profile,
-                        'gateway': gateway
-                    }, cb);
-                    cmd.execute();
-                },
-
-                showChannel: function (domain, cb) {
-                    var _domain = domain, _cb = cb;
-                    if (typeof domain == "function") {
-                        _cb = domain;
-                        _domain = null;
-                    };
-                    var cmd = new WebitelCommand(WebitelCommandTypes.Channel.Show, {
-
-
-
-                        'domain': _domain
-                    }, _cb);
-                    cmd.execute();
-                },
-
-                getRecordFileFromUUID: function (uuid, cb) {
-                    var cmd = new WebitelCommand(WebitelCommandTypes.CDR.GetRecordLink, {
-                        'uuid': uuid
-                    }, cb);
-                    cmd.execute();
-                },
-
-                refreshVideo: function (uuid, cb) {
-                    /*var call = OngoingCalls.get(callUUID);
-                     if (!call) return false;
-
-                     var channel = call.getActualChannel();
-                     var channelUUID = channel['Unique-ID']; */
-                    var cmd = new WebitelCommand(WebitelCommandTypes.VideoRefresh, {
-                        'uuid': uuid
-                    }, cb);
-                    cmd.execute();
-                },
-
-                setMuteVideo: function (callUUID, wath) {
-                    var webCall = getWebrtcCallFromCallUUID(callUUID);
-                    if (webCall) {
-                        return webCall['session'].setMuteVideo(wath);
-                    };
-                    return null;
                 }
-
-
             };
 
             WebitelConnection.onReceivedMessage.subscribe(function(message) {
@@ -2450,6 +2395,7 @@ define('webitelLibrary', ['require'], function() {
                 connect: WebitelConnection.connect,
 
                 /**
+                 *  TODO не работает
                  *  выход из Webitel.
                  **/
                 disconnect: WebitelConnection.disconnect,
@@ -2464,6 +2410,12 @@ define('webitelLibrary', ['require'], function() {
                  *  Войти в Webitel.
                  **/
                 login: WebitelConnection.login,
+                readyCallCenter: WebitelConnection.readyCallCenter,
+                busyCallCenter: WebitelConnection.busyCallCenter,
+                logoutCallCenter: WebitelConnection.logoutCallCenter,
+                loginCallCenter: WebitelConnection.loginCallCenter,
+                getTiers: WebitelConnection.getTiers,
+
 
                 /**
                  *  Выйти из Webitel.
@@ -2471,17 +2423,23 @@ define('webitelLibrary', ['require'], function() {
                 logout: WebitelConnection.logout,
 
                 /**
+                 * TODO не работает
                  *  Установить статус пользователя в состояние @code
                  * **/
                 busy: WebitelConnection.setStatusBusy,
 
                 /**
+                 *  TODO не работает
                  *  Установить статус пользователя Готов
                  **/
+                bindNumber: WebitelConnection.bindNumber,
+
+                // TODO не работает
                 ready: WebitelConnection.setStatusReady,
 
                 /**
                  *  Событие пользователя в состоянии "Готов"
+                 *  TODO не работает
                  **/
                 onReady: OnWebitelReady.subscribe,
 
@@ -2579,11 +2537,6 @@ define('webitelLibrary', ['require'], function() {
                  **/
                 onUserStatusChange: OnWebitelUserStatusChange.subscribe,
                 unUserStatusChange: OnWebitelUserStatusChange.unsubscribe,
-
-                /**
-                 * Событие успешного входа пользователя.
-                 */
-                onUserLogin: OnWebitelLogin.subscribe,
 
                 /**
                  * Событие добавления информации о пользователе Webitel.
@@ -2734,7 +2687,6 @@ define('webitelLibrary', ['require'], function() {
 
                 // TODO
                 domainUpdate: WebitelConnection.updateDomain,
-                domain: WebitelConnection.domainItem,
 
                 /*
                  * Список всех устройств и пользователей.
@@ -2742,7 +2694,6 @@ define('webitelLibrary', ['require'], function() {
                  * @cb {Function} - callback Функция обратного вызова.
                  */
                 list_users: WebitelConnection.list_users,
-                user: WebitelConnection.userItem,
 
                 /*
                  * Список пользователей
@@ -2830,6 +2781,13 @@ define('webitelLibrary', ['require'], function() {
                 unServerEvent: EventMixin.off,
 
                 /*
+                 * Генарация токена для REST запросов.
+                 * @password {String}: пароль активного подключения.
+                 * @callback {Function} - callback Функция обратного вызова.
+                 */
+                genToken: WebitelConnection.genToken,
+
+                /*
                  * Информация про текущего пользователя.
                  * @callback {Function} - callback Функция обратного вызова.
                  */
@@ -2840,87 +2798,14 @@ define('webitelLibrary', ['require'], function() {
                  * @return {ConnectionStatus}
                  */
                 socketStatus: WebitelConnection.getWebSocketStatus,
-
-                onNewWebRTCCall: OnNewWebRTCCall.subscribe,
-                onDestroyWebRTCCall: OnDestroyWebRTCCall.subscribe,
-                onVideoWebRTCCall: OnVideoWebRTCCall.subscribe,
-                /**
-                 *
-                 */
-                videoRefresh: WebitelConnection.refreshVideo,
-                setMuteVideo: WebitelConnection.setMuteVideo,
-
-                /**
-                 * Mute audio.
-                 * @param {WebitelMuteType} - Р·РЅР°С‡РµРЅРёРµ;
-                 **/
-                setMute: WebitelConnection.setMute,
-                getMute: WebitelConnection.getMute,
-
-
-                // SYS
+                //
                 getVar: WebitelConnection.getVariable,
                 setVar: WebitelConnection.setVariable,
-
-                /*
-                 *  Список шлюзов.
-                 *  @domain {String} - домен шлюза.
-                 *  @callback {Function} - callback Функция обратного вызова.
-                 */
-                gatewayList: WebitelConnection.gatewayList,
-
-                gatewayCreate: WebitelConnection.gatewayCreate,
-                /*
-                 *  Изменить шлюз.
-                 *  @name {String}: имя шлюза.
-                 *  @type {WebitelSipGatewayAttribute}: тип параметра.
-                 *  @params {Array}: масив объектов параметров.
-                 *  @callback {Function} - callback Функция обратного вызова.
-                 */
-                gatewayChange: WebitelConnection.gatewayChange,
-
-                /*
-                 *  Удалить шлюз.
-                 *  @name {String}: имя шлюза.
-                 *  @callback {Function} - callback Функция обратного вызова.
-                 */
-                gatewayRemove: WebitelConnection.gatewayRemove,
-
-                /*
-                 *  Активация шлюза.
-                 *  @name {String}: имя шлюза.
-                 *  @profile {String}: имя профайла.
-                 *  @callback {Function} - callback Функция обратного вызова.
-                 */
-                gatewayUp: WebitelConnection.gatewayUp,
-
-                /*
-                 *  Деактивация шлюза.
-                 *  @name {String}: имя шлюза.
-                 *  @callback {Function} - callback Функция обратного вызова.
-                 */
-                gatewayDown: WebitelConnection.gatewayDown,
-
-                gatewayKill: WebitelConnection.gatewayKill,
-
-
-                /*
-                 * Список каналов.
-                 * @domain {String}: домен.
-                 * @callback {Function} - callback Функция обратного вызова.
-                 */
-                showChannel: WebitelConnection.showChannel,
+                reloadAgents: WebitelConnection.reloadAgents,
                 getAgentsList: WebitelConnection.getAgentsList,
                 rawapi: WebitelConnection.rawapi,
                 eavesdrop: WebitelConnection.eavesdrop,
-                displace: WebitelConnection.displace,
-
-                genToken: WebitelConnection.genToken,
-                sipProfileList: WebitelConnection.sipProfileList,
-                sipProfileRescan: WebitelConnection.sipProfileRescan,
-
-                getRecordFileFromUUID: WebitelConnection.getRecordFileFromUUID,
-                channelDump: WebitelConnection.channelDump
+                displace: WebitelConnection.displace
             };
 
             return resultInterface;
@@ -2975,7 +2860,8 @@ define('webitelLibrary', ['require'], function() {
                 headers: []
             })
         };
-
-        return Webitel;
     };
+
+    return Webitel;
+
 });

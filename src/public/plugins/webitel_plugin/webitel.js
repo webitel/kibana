@@ -91,15 +91,24 @@ define('components/webitel/hashCollection', ['require', 'components/webitel/even
 	return WebitelHashCollection;
 });
 
-define('components/webitel/courier', ['require', 'angular', 'services/webitelSocket', 'components/webitel/hashCollection'], function (require) {
+define('components/webitel/courier', ['require', 'angular', 'services/webitelSocket', 'text!config', 'components/webitel/hashCollection'], function (require) {
+	var config = require('text!config');
+	config = JSON.parse(config);
 	var webitel = require('services/webitelSocket');
 	var angular = require('angular');
 	var HashCollection = require('components/webitel/hashCollection');
 	
 	require('modules').get('kibana/webitel')
-		.service('webitel', function ($rootScope) {
+		.service('webitel', function ($rootScope, $http) {
 
 			var domains = [];
+
+			var hashQueue = new HashCollection('id');
+			hashQueue.getData = function (domain, cb) {
+				httpApi('/api/v2/callcenter/queues?domain=' + domain, function (err, res) {
+					cb( (res && typeof res.info === 'object' && res.info) || [] );
+				});
+			};
 
 			var hashListUsers = new HashCollection('id');
 			hashListUsers['domainsInit'] = [];
@@ -168,6 +177,34 @@ define('components/webitel/courier', ['require', 'angular', 'services/webitelSoc
 			};
 
 			var hashListQueue = new HashCollection('id');
+			if (webitel.domainSession) {
+				hashQueue.getData(webitel.domainSession, function (items) {
+					var countRefresh = items.length,
+						currentQueue = 0;
+					angular.forEach(items, function (item) {
+						httpApi('/api/v2/callcenter/queues/' + item['name'] + '/members?domain=' + webitel.domainSession,
+						function (err, res) {
+							if (err) {
+								console.error(err);
+							} else {
+								angular.forEach(res.info, function (member) {
+									if (member['state'] == "Abandoned") return;
+									var rec = {
+										"id": member['uuid'],
+										"CC-Member-CID-Name": member['cid_name'],
+										"CC-Member-CID-Number": member['cid_number'],
+										"CC-Queue": member['queue']
+									};
+									hashListQueue.add(member['uuid'], rec);
+								});
+							};
+							if (currentQueue++ == (countRefresh - 1)) {
+								$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
+							};
+						});
+					});
+				});
+			};
 			hashListQueue.getData = function (params, cb) {
 				var res = [];
 				var collection = hashListQueue.collection;
@@ -177,10 +214,45 @@ define('components/webitel/courier', ['require', 'angular', 'services/webitelSoc
 				cb(res);
 			};
 
+			var hashMembersCount = new HashCollection('id');
+			hashMembersCount.getData = function (params, cb) {
+				var domain = params['domain'];
+				var queue = params['queue'] + '@' + domain;
+				var collection = hashMembersCount.collection;
+				if (collection.length == 0) {
+					httpApi('/api/v2/callcenter/queues?domain=' + domain, function (err, res) {
+						var queus =  (res && typeof res.info === 'object' && res.info) || [];
+						angular.forEach(queus, function (item) {
+							hashListAgent.add(item['name'] + '@' + item['domain'], {
+								count: 0
+							});
+						});
+						cb(hashMembersCount.get(queue).count);
+					});
+				} else {
+					var tmp = hashMembersCount.get(queue);
+					cb(tmp ? tmp.count : 0);
+				};
+
+			};
+
+
 			var commandLinkToData = {
 				'list_users': hashListUsers,
 				'userList': hashListAgent,
-				'queueList': hashListQueue
+				'queueList': hashListQueue,
+				'getQueue': hashQueue,
+				'membersCount': hashMembersCount,
+				'agentList': {
+					getData: function (params, cb) {
+						var scope = params.scope;
+						var domain = params.domain;
+						var queueName = scope.vis.params.queue.name;
+						httpApi('/api/v2/callcenter/queues/' + queueName + '/tiers?domain=' + domain, function (err, res) {
+							cb( (res && typeof res.info === 'object' && res.info) || [] );
+						});
+					}
+				}
 			};
 
 			webitel.onServerEvent("USER_STATE", function (e) {
@@ -301,75 +373,96 @@ define('components/webitel/courier', ['require', 'angular', 'services/webitelSoc
 
 			webitel.onServerEvent("CC::BRIDGE-AGENT-START", function (e) {
 
-				console.error(e);
+				console.warn(e);
 
 			});
 
 			webitel.onServerEvent("CC::AGENT-OFFERING", function (e) {
 				// 2
-				var id = e['CC-Member-Session-UUID'];
+				var id = e['CC-Member-UUID'];
 				var rec = hashListQueue.get(id);
 				if (rec) {
 					rec['CC-Agent'] = e['CC-Agent']
 				};
-				console.error(e);
+				console.warn(e);
 
 				$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
 			});
 
 			webitel.onServerEvent("CC::BRIDGE-AGENT-END", function (e) {
 				// 2
-				var id = e['CC-Member-Session-UUID'];
+				var id = e['CC-Member-UUID'];
 				var rec = hashListQueue.get(id);
 				if (rec) {
 					rec['CC-Agent'] = ''
 				};
-				console.error(e);
+				console.warn(e);
 
 				$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
 			});
 
 			webitel.onServerEvent("CC::BRIDGE-AGENT-FAIL", function (e) {
 				// 2
-				var id = e['CC-Member-Session-UUID'];
+				var id = e['CC-Member-UUID'];
 				var rec = hashListQueue.get(id);
 				if (rec) {
 					rec['CC-Agent'] = ''
 				};
-				console.error(e);
-
 				$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
+				console.warn(e);
 			});
 
 			webitel.onServerEvent("CC::MEMBERS-COUNT", function (e) {
-				console.error(e);
+				var queue = hashMembersCount.get(e['CC-Queue']);
+				if (queue) {
+					queue['count'] = e['CC-Count'];
+				} else {
+					hashMembersCount.add(e['CC-Queue'], {
+						count: e['CC-Count']
+					});
+				};
+				$rootScope.$broadcast('webitel:dataChange', ["membersCount"]);
+				console.warn(hashMembersCount.collection);
 			});
 
 			webitel.onServerEvent("CC::MEMBER-QUEUE-START", function (e) {
 				// 1
 				var rec = {
-					"id": e["CC-Member-Session-UUID"],
+					"id": e["CC-Member-UUID"],
 					"CC-Member-CID-Name": e["CC-Member-CID-Name"],
 					"CC-Member-CID-Number": e["CC-Member-CID-Number"],
 					"CC-Queue": e["CC-Queue"]
 				};
-				hashListQueue.add(e["CC-Member-Session-UUID"], rec);
-				console.error(e);
+				hashListQueue.add(e["CC-Member-UUID"], rec);
+				console.warn(e);
 
 				$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
-
-				console.error(e);
 			});
 
 			webitel.onServerEvent("CC::MEMBER-QUEUE-END", function (e) {
-				var id = e['CC-Member-Session-UUID'];
+				var id = e['CC-Member-UUID'];
 				hashListQueue.remove(id);
 
-				console.error(e);
+				console.warn(e);
 
 				$rootScope.$broadcast('webitel:dataChange', ["queueList"]);
 			});
 
+			function httpApi(url, cb) {
+				var req = {
+					method: 'GET',
+					url: config.webitelSession['hostname'] + url,
+					headers: {
+						'x-key': config.webitelSession['key'],
+						'x-access-token': config.webitelSession['token']
+					}
+				};
+				$http(req).success(function(res){
+					cb(null, res);
+				}).error(function(e){
+					cb(e);
+				});
+			};
 
 			return {
 				getData: function (commandName, params, cb) {
@@ -397,10 +490,10 @@ define('components/webitel/courier', ['require', 'angular', 'services/webitelSoc
 						cb(domains)
 					}
 				},
+				getQueue: hashQueue.getData,
 				domainSession: webitel.domainSession
 			};
 		});
-
 });
 
 define('services/webitelSocket', ['require', 'text!config', 'webitelLibrary'], function(require) {
@@ -410,7 +503,7 @@ define('services/webitelSocket', ['require', 'text!config', 'webitelLibrary'], f
 		return;
 	};
 
-	var webitel = new Webitel({
+	var webitel = window.webitel = new Webitel({
 		account: webitelSession['login'],
 		debug: true,
 		reconnect: false,
@@ -424,7 +517,8 @@ define('services/webitelSocket', ['require', 'text!config', 'webitelLibrary'], f
 
 
 define('plugins/webitel_plugin/webitel_handler_type', ['require'], function(require) {
-	return [{
+	return [
+	/*{
 		id: 1,
 		name: 'User list',
 		handleName: 'list_users',
@@ -436,34 +530,67 @@ define('plugins/webitel_plugin/webitel_handler_type', ['require'], function(requ
 			{ title: 'online', field: 'online', visible: true, cellTemplate: "<span style='text-align: center;' class='fa fa-circle' ng-class='{\"w-online\" : item[column.field] == true, \"w-offline\" : item[column.field] != true}'></span>" },
 			{ title: 'state', field: 'state', visible: true}
 		]
-	}, {
+	}, */
+	{
 		id: 2,
-		name: 'Agent list',
+		name: 'User list',
+		subType: "table",
 		handleName: 'userList',
 		columns: [
 			{ title: 'Name', field: 'id', visible: true, filter: '' },
-			{ title: 'domain', field: 'domain', visible: true },
-			{ title: 'online', field: 'online', visible: true, cellTemplate: "<span style='text-align: center;' class='fa fa-circle' ng-class='{\"w-online\" : item[column.field] == true, \"w-offline\" : item[column.field] != true}'></span>" },
-			{ title: 'role', field: 'role', visible: true },
-			{ title: 'scheme', field: 'scheme', visible: true },
+			{ title: 'Domain', field: 'domain', visible: true },
+			{ title: 'Online', field: 'online', visible: true, cellTemplate: "<span style='text-align: center;' class='fa fa-circle' ng-class='{\"w-online\" : item[column.field] == true, \"w-offline\" : item[column.field] != true}'></span>" },
+			{ title: 'Role', field: 'role', visible: true },
+			{ title: 'Agent', field: 'agent', visible: true },
+			{ title: 'Scheme', field: 'scheme', visible: true },
 			//{ title: 'timer', field: 'timer', visible: true, cellTemplate: "<timer>{{timer}}</timer>" },
-			{ title: 'state', field: 'state', visible: true, ngClass: '{"w-account-onhook" : item[column.field] == "ONHOOK" || item[column.field] == "Waiting", "w-account-nonreg": item[column.field] == "NONREG", "w-account-isbusy": item[column.field] == "ISBUSY" || item[column.field] == "In a queue call", "w-account-receiving": item[column.field] == "Receiving"}' },
-			{ title: 'status', field: 'status', visible: true },
-			{ title: 'descript', field: 'descript', visible: true },
+			{ title: 'State', field: 'state', visible: true, ngClass: '{"w-account-onhook" : item[column.field] == "ONHOOK" || item[column.field] == "Waiting", "w-account-nonreg": item[column.field] == "NONREG", "w-account-isbusy": item[column.field] == "ISBUSY" || item[column.field] == "In a queue call", "w-account-receiving": item[column.field] == "Receiving"}' },
+			{ title: 'Status', field: 'status', visible: true },
+			{ title: 'Description', field: 'descript', visible: true },
 		]
-	}, {
+	},
+	{
 		id: 3,
 		name: "Live queue",
+		subType: "table",
 		handleName: "queueList",
 		columns: [
 			{ title: 'Caller Name', field: 'CC-Member-CID-Name', visible: true, filter: '' },
 			{ title: 'Caller Number', field: 'CC-Member-CID-Number', visible: true },
 			{ title: 'Queue', field: 'CC-Queue', visible: true },
-			{ title: 'Agent', field: 'CC-Agent', visible: true },
-			//{ title: 'scheme', field: 'scheme', visible: true },
-			//{ title: 'state', field: 'state', visible: true },
+			{ title: 'Agent', field: 'CC-Agent', visible: true }
 		]
-	}];
+	},
+	{
+		id: 4,
+		name: "Agent list",
+		subType: "table",
+		handleName: "agentList",
+		columns: [
+			{ title: 'Name', field: 'name', visible: true, filter: '' },
+			{ title: 'busy_delay_time', field: 'busy_delay_time', visible: true },
+			{ title: 'calls_answered', field: 'calls_answered', visible: true },
+			{ title: 'last_bridge_end', field: 'last_bridge_end', visible: true },
+			{ title: 'last_bridge_start', field: 'last_bridge_start', visible: true },
+			{ title: 'last_offered_call', field: 'last_offered_call', visible: true },
+			{ title: 'last_status_change', field: 'last_status_change', visible: true },
+			{ title: 'no_answer_count', field: 'no_answer_count', visible: true },
+			{ title: 'no_answer_delay_time', field: 'no_answer_delay_time', visible: true },
+			{ title: 'ready_time', field: 'ready_time', visible: true },
+			{ title: 'reject_delay_time', field: 'reject_delay_time', visible: true },
+			{ title: 'state', field: 'state', visible: true },
+			{ title: 'status', field: 'status', visible: true },
+			{ title: 'talk_time', field: 'talk_time', visible: true },
+			{ title: 'wrap_up_time', field: 'wrap_up_time', visible: true }
+		]
+	},
+	{
+		id: 5,
+		name: "Members count",
+		subType: "text",
+		handleName: "membersCount"
+	}
+	];
 });
 
 define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'services/webitelSocket', 'ng-table', 'modules', 'plugins/webitel_plugin/webitel_handler_type'],function (require) {
@@ -487,9 +614,19 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 			var webitelEventDataChange = $scope.$on('webitel:dataChange', function (e, data) {
 				// TODO проверить нужно ли рефрешить...
 				if (data && data.indexOf($scope.vis.params.type && $scope.vis.params.type.handleName) > -1) {
-					$scope.tableParams.reload();
+					if ($scope.vis.params.type.subType == 'table') {
+						$scope.tableParams.reload();
+					} else if ($scope.vis.params.type.subType == 'text') {
+						webitel.getData($scope.vis.params.type.handleName,
+							{domain: $scope.vis.params.domain, queue: $scope.vis.params.queue.name},
+							function (res) {
+								$scope.text = res;
+							});
+					}
 				};
 			});
+
+			$scope.text = '0';
 
 			$scope.$watch('vis.params.type', function (val) {
 				if (!val) {
@@ -506,14 +643,15 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 				});
 
 				$scope.vis.params.defSorting = null;
-				
+				// TODO
 				$scope.tableParams.reload();
 				$scope.vis.params.type = val;
 			});
 
 			$scope.$watch('vis.params.domain', function (val) {
 				$scope.vis.params.domain = val;
-				$scope.tableParams.reload();
+				if ($scope.vis.params.type.subType == 'table')
+					$scope.tableParams.reload();
 			});
 
 			$scope.$watch('vis.params.top', function (val) {
@@ -521,7 +659,7 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 					$scope.tableParams.count(val)
 				}
 			});
-
+			$scope.isGroupBy = false;
 			$scope.hasSomeRows = true;
 			$scope.tableParams = new ngTableParams({
 					page: 1,
@@ -529,11 +667,12 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 				},
 				{
 					counts: [],
+					groupBy: 'asd',
 					//total: 10,
 					getData: function($defer, params) {
 						if (!$scope.vis.params.type) return;
 
-						webitel.getData($scope.vis.params.type.handleName, {domain: $scope.vis.params.domain}, function (res) {
+						webitel.getData($scope.vis.params.type.handleName, {domain: $scope.vis.params.domain, scope: $scope}, function (res) {
 							var data = res || [];
 							var sorting = params.sorting(),
 								orderedData;
@@ -613,11 +752,17 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 		.controller('KbnWebitelPluginTypeController', function($scope, webitel) {
 			$scope.typeData = typeData;
 			$scope.showDomains = !webitel.domainSession;
+
+			$scope.getQueue = function () {
+				webitel.getQueue(webitel.domainSession, function (res) {
+					$scope.queueData = res;
+				});
+			};
 			$scope.getDomains = function () {
 				webitel.getDomains(function (res) {
 					$scope.domains = res;
 				})
-			}
+			};
 	});
 });
 
@@ -652,9 +797,9 @@ define('plugins/webitel_plugin/webitel_plugin_vis',['require', 'services/webitel
 
 // Init
 define('plugins/webitel_plugin/index',['require','registry/vis_types','plugins/webitel_plugin/webitel_plugin_vis'],function (require) {
-	require('registry/vis_types').register(function (Private) {
-		return Private(require('plugins/webitel_plugin/webitel_plugin_vis'));
-	});
+	//require('registry/vis_types').register(function (Private) {
+	//	return Private(require('plugins/webitel_plugin/webitel_plugin_vis'));
+	//});
 });
 
 // END IGOR

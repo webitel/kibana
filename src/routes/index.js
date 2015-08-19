@@ -20,8 +20,11 @@ router.get('/config', function (req, res, next) {
       "domain": req.session.user['domain'],
       "login": req.session.user['username'],
       "password": req.session.user['password'],
+      "token": req.session.user['token'],
+      "key": req.session.user['key'],
       "role": req.session.user['role'],
-      "ws": req.session.user['ws']
+      "ws": req.session.user['ws'],
+      "hostname": req.session.user['hostname']
     };
   } else {
     return res.status(401).end();

@@ -27,6 +27,8 @@ kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_tim
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
 
+kibana.webitelAuthUri = kibana.webitel_auth || 'http://localhost:10022';
+
 // Check if the local public folder is present. This means we are running in
 // the NPM module. If it's not there then we are running in the git root.
 var public_folder = path.resolve(__dirname, '..', 'public');
@@ -64,7 +66,7 @@ var config = module.exports = {
   //webitel
   webitelAuth             : true,
   webitelMongoUri         : 'mongodb://pre.webitel.com:27017/webitel',
-  webitelAuthUri          : 'http://10.10.10.25:10022'
+  webitelAuthUri          : kibana.webitelAuthUri
 };
 
 config.plugins = listPlugins(config);

@@ -69,6 +69,7 @@ var auth = {
                         var user = JSON.parse(Buffer.concat(chunks).toString('utf8'));
                         user['ws'] = WSS_SERVER;
                         user['password'] = jsonBody.password;
+                        user['hostname'] = config.webitelAuthUri;
 
                         return cb(null, user);
                     } catch (e) {

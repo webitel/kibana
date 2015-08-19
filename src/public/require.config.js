@@ -81,6 +81,9 @@ require.config({
     // },
     "webitel": {
       deps: ['angular']
+    },
+    'timer': {
+      deps: ['angular', 'humanize-duration']
     }
   },
   waitSeconds: 60
