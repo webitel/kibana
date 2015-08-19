@@ -4,7 +4,7 @@ set -e
 echo 'Webitel Kibana '$VERSION
 
 if [ "$SSL" ]; then
-        cp -rf 	/kibana/config/kibana-ssl.yml /kibana/config/kibana.yml
+        cp -rf 	/kibana/config/kibana_ssl.yml /kibana/config/kibana.yml
 fi
 
 # Add kibana as command if needed
