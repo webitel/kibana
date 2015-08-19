@@ -3,6 +3,10 @@ set -e
 
 echo 'Webitel Kibana '$VERSION
 
+if [ "$SSL" ]; then
+        cp -rf 	/kibana/config/kibana-ssl.yml /kibana/config/kibana.yml
+fi
+
 # Add kibana as command if needed
 if [[ "$1" == -* ]]; then
 	set -- kibana "$@"
