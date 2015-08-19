@@ -21,7 +21,7 @@ if [ "$1" = 'kibana' ]; then
 	fi
 
        	if [ "$CORE_URL" -o "$CORE_PORT_10022_TCP" ]; then
-		: ${ELASTICSEARCH_URL:='http://core:10022'}
+		: ${CORE_URL:='http://core:10022'}
 		sed -ri "s!^(webitel_auth:).*!\1 '$CORE_URL'!" /kibana/config/kibana.yml
 	else
 		echo >&2 'warning: missing CORE_PORT_10022_TCP or CORE_URL'
