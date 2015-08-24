@@ -25,7 +25,7 @@ var auth = {
             else if (/.\/_msearch\?./i.test(req.url)) {
                 req.rawBody = req.rawBody.toString('utf8');
                 req.rawBody = req.rawBody.replace(/"index":"([\s\S]*?)"/gi, function (a, b) {
-                    return '"index":"' + b + user['domain'] + '"';
+                    return '"index":"' + b + '-' + user['domain'] + '"';
                 });
             }
         };

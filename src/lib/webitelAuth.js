@@ -5,14 +5,13 @@
 var session = require('express-session');
 var auth = require('../webitel/auth');
 
-
 module.exports = function (app) {
     app.use(session({
-        secret: 'keyboard cat',
+        secret: 'webitel as sahkdlasj',
         resave: false,
         saveUninitialized: false
-        //cookie: { secure: false, maxAge: 60000 }
     }));
+
 
     app.use(function (req, res, next) {
         var chunks = [];
