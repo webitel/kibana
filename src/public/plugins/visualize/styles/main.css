@@ -472,6 +472,17 @@
   padding: 5px;
   margin-bottom: 5px;
 }
+.vis-editor-sidebar label {
+  -webkit-box-flex: 2;
+  -moz-box-flex: 2;
+  -webkit-flex: 2 0 0;
+  -ms-flex: 2 0 0;
+  flex: 2 0 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-bottom: 0;
+}
 .vis-editor .visualization-options {
   padding: 5px;
 }

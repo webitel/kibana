@@ -147,6 +147,7 @@ components/filter_bar/lib/mapFilter.js
 components/filter_bar/lib/mapAndFlattenFilters.js
 components/filter_bar/query_filter.js
 components/filter_manager/filter_manager.js
+plugins/settings/saved_object_registry.js
 bower_components/FileSaver/FileSaver.js
 components/vis/_agg_config.js
 components/agg_response/tabify/_table.js
@@ -200,7 +201,6 @@ components/doc_table/doc_table.js
 text!plugins/dashboard/components/panel/panel.html
 plugins/dashboard/components/panel/panel.js
 plugins/dashboard/services/_saved_dashboard.js
-plugins/settings/saved_object_registry.js
 plugins/dashboard/services/saved_dashboards.js
 css!plugins/dashboard/styles/main
 text!plugins/dashboard/index.html
@@ -520,7 +520,6 @@ text!plugins/settings/sections/advanced/advanced_row.html
 plugins/settings/sections/advanced/advanced_row.js
 text!plugins/settings/sections/advanced/index.html
 plugins/settings/sections/advanced/index.js
-bower_components/inflection/lib/inflection.js
 text!plugins/settings/sections/objects/_view.html
 plugins/settings/sections/objects/_view.js
 text!plugins/settings/sections/objects/_objects.html

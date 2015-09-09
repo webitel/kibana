@@ -86,6 +86,6 @@ doc-viewer .doc-viewer td,
 doc-viewer .doc-viewer pre {
   font-family: "Lucida Console", Monaco, monospace;
 }
-doc-viewer .doc-viewer .content {
+doc-viewer .doc-viewer-content {
   margin-top: 5px;
 }

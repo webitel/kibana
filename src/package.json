@@ -10,10 +10,10 @@
     "dashboards",
     "dashboarding"
   ],
-  "version": "4.1.1",
+  "version": "4.1.2",
   "build": {
-    "number": "7489",
-    "sha": "bd4fcb654a2fa062c9a99853ac5f776965ab7637"
+    "number": "7562",
+    "sha": "34af16e285598b21b9449a3e57560c89b0d11eb8"
   },
   "repository": {
     "type": "git",

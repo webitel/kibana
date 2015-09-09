@@ -81,7 +81,7 @@ doc-table {
   flex: 1 1 100%;
 }
 doc-table .discover-table-datafield {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 doc-table .loading {
   opacity: 0.5;

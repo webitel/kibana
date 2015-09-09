@@ -58,7 +58,7 @@ var config = module.exports = {
   kibana                  : kibana,
   package                 : require(packagePath),
   htpasswd                : htpasswdPath,
-  buildNum                : '7489',
+  buildNum                : '7562',
   maxSockets              : kibana.maxSockets,
   log_file                : kibana.log_file,
   request_timeout         : kibana.request_timeout,
