@@ -79,3 +79,4 @@ bundled_plugin_ids:
  - plugins/table_vis/index
  - plugins/vis_types/index
  - plugins/visualize/index
+ - plugins/iframe/index
