@@ -38,6 +38,7 @@ require.config({
     marked: 'bower_components/marked/lib/marked',
     numeral: 'bower_components/numeral/numeral',
     'ng-table': 'bower_components/ng-table/ng-table',
+    'webitel_iframe': 'plugins/iframe/iframe',
     'webitel': 'plugins/webitel_plugin/webitel',
     'webitelLibrary': 'plugins/webitel_plugin/webitelLib'
   },
@@ -76,6 +77,9 @@ require.config({
     //   deps: ['angular']
     // },
     "webitel": {
+      deps: ['angular']
+    },
+    "webitel_iframe": {
       deps: ['angular']
     },
     'timer': {
