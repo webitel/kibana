@@ -5,10 +5,10 @@ port: 5601
 host: "0.0.0.0"
 
 # The Elasticsearch instance to use for all your queries.
-elasticsearch_url: "http://elasticsearch:9200"
+elasticsearch_url: "http://pre.webitel.com:9200"
 
 #webitel auth URL
-webitel_auth: "http://core:10022"
+webitel_auth: "https://pre.webitel.com:10022"
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -73,7 +73,7 @@ bundled_plugin_ids:
  - plugins/doc/index
  - plugins/kibana/index
  - plugins/markdown_vis/index
- #- plugins/webitel_plugin/index
+ - plugins/webitel_plugin/index
  - plugins/metric_vis/index
  - plugins/settings/index
  - plugins/table_vis/index

@@ -754,7 +754,7 @@ define('plugins/webitel_plugin/webitel_plugin_vis_controller',['require', 'servi
 			$scope.showDomains = !webitel.domainSession;
 
 			$scope.getQueue = function () {
-				webitel.getQueue(webitel.domainSession, function (res) {
+				webitel.getQueue($scope.domains, function (res) {
 					$scope.queueData = res;
 				});
 			};
