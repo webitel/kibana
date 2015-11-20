@@ -1,0 +1,26 @@
+.member-list table {
+    border-collapse: separate;
+    border-spacing: 0 5px;
+}
+
+.member-list .in-queue {
+    background-color: #e8e8e8;
+}
+.member-list .receiving {
+    background-color: #fcf8e3;
+}
+.member-list .in-call {
+    background-color: #dff0d8;
+}
+
+.member-list tr td:first-child,
+.member-list tr th:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.member-list tr td:last-child,
+.member-list tr th:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}

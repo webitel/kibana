@@ -73,10 +73,13 @@ bundled_plugin_ids:
  - plugins/doc/index
  - plugins/kibana/index
  - plugins/markdown_vis/index
- #- plugins/webitel_plugin/index
  - plugins/metric_vis/index
  - plugins/settings/index
  - plugins/table_vis/index
  - plugins/vis_types/index
  - plugins/visualize/index
  - plugins/iframe/index
+ - plugins/webitel_plugin/webitel
+ - plugins/webitel_plugin/user_status/index
+ - plugins/webitel_plugin/member_counts/index
+ - plugins/webitel_plugin/member_list/index

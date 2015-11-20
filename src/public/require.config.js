@@ -39,8 +39,9 @@ require.config({
     numeral: 'bower_components/numeral/numeral',
     'ng-table': 'bower_components/ng-table/ng-table',
     'webitel_iframe': 'plugins/iframe/iframe',
-    'webitel': 'plugins/webitel_plugin/webitel',
-    'webitelLibrary': 'plugins/webitel_plugin/webitelLib'
+    'webitelLibrary': 'plugins/webitel_plugin/webitelLib',
+    'timer': 'bower_components/angular-timer/dist/angular-timer',
+    'humanize-duration': 'bower_components/humanize-duration/humanize-duration'
   },
   shim: {
     angular: {
@@ -83,7 +84,7 @@ require.config({
       deps: ['angular']
     },
     'timer': {
-      deps: ['angular', 'humanize-duration']
+      deps: ['angular', 'humanize-duration', 'moment']
     }
   },
   waitSeconds: 60

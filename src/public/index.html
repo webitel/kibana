@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="styles/theme/elk.ico">
     <title>Kibana 4</title>
     <link rel="stylesheet" href="styles/main.css?_b=7562">
+    <link rel="stylesheet" href="bower_components/ng-table/ng-table.min.css">
 
   </head>
   <body kibana ng-class="'application-' + activeApp.id">
@@ -30,6 +31,7 @@
 
     <script src="bower_components/requirejs/require.js?_b=7562"></script>
     <script src="require.config.js?_b=7562"></script>
+    <script src="plugins/webitel_plugin/webitel.js"></script>
     <script>
       var showCacheMessage = location.href.indexOf('?embed') < 0 && location.href.indexOf('&embed') < 0;
       if (!showCacheMessage) document.getElementById('cache-message').style.display = 'none';
