@@ -71,6 +71,7 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'services/webite
 
                         angular.forEach(jsonData, function (item) {
                             item['description'] = decodeURI(item['descript']) || '';
+                            item['name'] = decodeURI(item['name']) || '';
                             hashListAgent.add(item['domain'] + ":" + item['id'], item);
                         });
 

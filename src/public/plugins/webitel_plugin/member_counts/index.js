@@ -143,11 +143,20 @@ define('plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller', [],
                         return;
                     };
 
-                    var agents = res && res.info;
-                    angular.forEach(agents, function (item) {
-                        $scope.countAgents++;
-                        item['line_status'] = getLineStatusFS(item.state, item.status);
-                        $scope.users[item.name] = item;
+                    webitel.getData('userList', {domain: val.domain}, function (result) {
+                        var _tmpNames = {};
+                        angular.forEach(result, function (agent) {
+                            _tmpNames[agent['id'] + '@' + agent['domain']] = agent['name'];
+                        });
+
+                        var agents = res && res.info;
+                        angular.forEach(agents, function (item) {
+                            $scope.countAgents++;
+                            item['webitel_name'] = _tmpNames[item['name']];
+                            item['line_status'] = getLineStatusFS(item.state, item.status);
+                            $scope.users[item.name] = item;
+                        });
+
                     });
                 });
             });
