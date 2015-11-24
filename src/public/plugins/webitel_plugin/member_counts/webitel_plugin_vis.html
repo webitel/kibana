@@ -1,10 +1,10 @@
 <div ng-controller="KbnWebitelPluginMemberCountsVisController" class="webitel-plugin-vis table-vis">
-    <div ng-if="!vis.params.queue" class="table-vis-error">
+    <div ng-if="!vis.params.queue || !vis.params.domain" class="table-vis-error">
         <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
         <h4>No results found</h4>
     </div>
 
-    <div class="external-wrapper">
+    <div class="external-wrapper"  ng-if="vis.params.queue && vis.params.domain">
         <div class="internal-wrapper">
 
             <div class="w-panel-def">
@@ -75,8 +75,9 @@
             <hr class="w-hr">
             <div class="members-count-users" tabindex="5001">
                 <ul class="list-unstyled transaction-list">
-                    <li ng-repeat="item in users" ng-style=""
+                    <li ng-repeat="(key, item) in users | OrderByLine:'line_status'" ng-style=""
                         ng-class="{'available': item.line_status=='available', 'busy': item.line_status=='busy', 'onbreak': item.line_status=='onbreak', 'offline': item.line_status=='offline'}">
+
                         <span class="tran-text" style="width: inherit">{{item.webitel_name}} ({{parseName(item.name)}})</span>
                         <span class="pull-left fa fa-phone"></span>
                         <span class="pull-right text-muted">{{item.state}}</span>

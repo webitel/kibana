@@ -2,32 +2,74 @@
  * Created by i.navrotskyj on 10.11.2015.
  * */
 define('services/webitelSocket', ['require', 'text!config', 'webitelLibrary'], function(require) {
-    var Webitel = require('webitelLibrary');
-    var webitelSession = JSON.parse(require('text!config')).webitelSession;
-    if (!webitelSession) {
-        return;
-    };
 
-    var webitel = window.webitel = new Webitel({
-        account: webitelSession['login'],
-        debug: true,
-        reconnect: false,
-        secret: webitelSession['password'],
-        server: webitelSession['ws']
-    });
-    webitel.connect();
-    webitel.domainSession = webitelSession['domain'];
-    return webitel;
+
+
+    //return webitel;
+    return 1
 });
 
 define('plugins/webitel_plugin/webitel', ['require', 'angular', 'services/webitelSocket', 'text!config', 'components/webitel/hashCollection'], function (require) {
     var config = require('text!config');
     config = JSON.parse(config);
-    var webitel = require('services/webitelSocket');
+    //var webitel = require('services/webitelSocket');
     var angular = require('angular');
     var HashCollection = require('components/webitel/hashCollection');
+
+    var Webitel = require('webitelLibrary');
+    var webitelSession = config.webitelSession;
+    if (!webitelSession) {
+        return;
+    };
+
     require('modules').get('kibana')
-        .service('webitel', function ($rootScope, $http, $filter, $interval, localStorage) {
+        .service('webitel', function ($rootScope, $http, $q) {
+            var deferred = $q.defer();
+            var webitel = window.webitel = new Webitel({
+                account: webitelSession['login'],
+                debug: true,
+                reconnect: false,
+                secret: webitelSession['password'],
+                server: webitelSession['ws']
+            });
+            webitel.connect();
+            webitel.domainSession = webitelSession['domain'];
+
+            webitel.onConnect(function () {
+                deferred.resolve({
+                    getData: function (commandName, params, cb) {
+                        if (!commandLinkToData[commandName]) return;
+
+                        commandLinkToData[commandName].getData(params, cb);
+                    },
+                    getDomains: function (cb) {
+                        if (domains.length === 0) {
+                            webitel.domainList(function () {
+                                var table = this.parseDataTable(),
+                                    res = [],
+                                    domainIndex = table.headers.indexOf('domain');
+
+                                angular.forEach(table.data, function (item, i) {
+                                    res.push({
+                                        id: i,
+                                        name: item[domainIndex]
+                                    });
+                                });
+                                domains = res;
+                                cb(res);
+                            });
+                        } else {
+                            cb(domains)
+                        }
+                    },
+                    getQueue: hashQueue.getData,
+                    getQueueByDomain: getQueueByDomain,
+                    httpApi: httpApi,
+                    onServerEvent: webitel.onServerEvent,
+                    unServerEvent: webitel.unServerEvent,
+                    domainSession: webitel.domainSession
+                });
+            });
 
             var domains = [];
 
@@ -71,7 +113,7 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'services/webite
 
                         angular.forEach(jsonData, function (item) {
                             item['description'] = decodeURI(item['descript']) || '';
-                            item['name'] = decodeURI(item['name']) || '';
+                            item['name'] = item['name'] ? decodeURI(item['name']) : item.id;
                             hashListAgent.add(item['domain'] + ":" + item['id'], item);
                         });
 
@@ -188,39 +230,7 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'services/webite
                 });
             };
 
-            return {
-                getData: function (commandName, params, cb) {
-                    if (!commandLinkToData[commandName]) return;
-
-                    commandLinkToData[commandName].getData(params, cb);
-                },
-                getDomains: function (cb) {
-                    if (domains.length === 0) {
-                        webitel.domainList(function () {
-                            var table = this.parseDataTable(),
-                                res = [],
-                                domainIndex = table.headers.indexOf('domain');
-
-                            angular.forEach(table.data, function (item, i) {
-                                res.push({
-                                    id: i,
-                                    name: item[domainIndex]
-                                });
-                            });
-                            domains = res;
-                            cb(res);
-                        });
-                    } else {
-                        cb(domains)
-                    }
-                },
-                getQueue: hashQueue.getData,
-                getQueueByDomain: getQueueByDomain,
-                httpApi: httpApi,
-                onServerEvent: webitel.onServerEvent,
-                unServerEvent: webitel.unServerEvent,
-                domainSession: webitel.domainSession
-            };
+            return deferred.promise;
         });
 });
 

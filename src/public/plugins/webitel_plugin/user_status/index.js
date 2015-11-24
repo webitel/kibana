@@ -5,8 +5,7 @@ define('plugins/webitel_plugin/user_status/config', ['require'], function(requir
         subType: "table",
         handleName: 'userList',
         columns: [
-            { title: 'Name', field: 'name', visible: true, filter: '' },
-            { title: 'Number', field: 'id', visible: true, filter: '' },
+            { title: 'Name', field: 'id', visible: true, filter: '' },
             { title: 'Domain', field: 'domain', visible: true },
             { title: 'Online', field: 'online', visible: true, cellTemplate: "<span style='text-align: center;' class='fa fa-circle' ng-class='{\"w-online\" : item[column.field] == true, \"w-offline\" : item[column.field] != true}'></span>" },
             { title: 'Role', field: 'role', visible: true },
@@ -20,7 +19,7 @@ define('plugins/webitel_plugin/user_status/config', ['require'], function(requir
     }
 });
 
-define('plugins/webitel_plugin/user_status/webitel_plugin_vis_controller',['require', 'services/webitelSocket', 'ng-table', 'modules', 'plugins/webitel_plugin/user_status/config', 'plugins/webitel_plugin/webitel'],function (require) {
+define('plugins/webitel_plugin/user_status/webitel_plugin_vis_controller',['require', 'ng-table', 'modules', 'plugins/webitel_plugin/user_status/config', 'plugins/webitel_plugin/webitel'],function (require) {
     require('ng-table');
     var typeData = require('plugins/webitel_plugin/user_status/config');
 
@@ -28,103 +27,110 @@ define('plugins/webitel_plugin/user_status/webitel_plugin_vis_controller',['requ
 
     module
         .controller('KbnWebitelPluginVisController', function ($scope, $filter, NgTableParams, webitel) {
-            if (Object.keys($scope.vis.params).length == 0)
-                $scope.vis.params = {fake: true};
+            webitel.then(function (webitel) {
+                
+                if (Object.keys($scope.vis.params).length == 0)
+                    $scope.vis.params = {fake: true};
 
-            $scope.domainSession = webitel.domainSession;
+                $scope.domainSession = webitel.domainSession;
 
-            if ($scope.domainSession) {
-                $scope.vis.params.domain = $scope.domainSession;
-            };
-
-            $scope.$watch('vis.params.domain', function (val) {
-                $scope.vis.params.domain = val;
-                $scope.tableParams.reload()
-            });
-
-            $scope.$watch('vis.params.columns', function (val) {
-                $scope.filtersObj = {};
-                angular.forEach(val, function (item, key) {
-                    if (item['filter'] && item['filter'] != '')
-                        $scope.filtersObj[key] = item['filter'];
-                });
-                if (val)
-                    $scope.tableParams.reload();
-            });
-
-            // TODO
-
-            $scope.$on('$destroy', function () {
-                webitelEventDataChange();
-            });
-
-            var webitelEventDataChange = $scope.$on('webitel:changeHashListUsers', function (e, data) {
-                $scope.tableParams && $scope.tableParams.reload()
-            });
-
-            $scope.$watch('vis.params.top', function (val) {
-                val = val || 10;
-                if (val > 0) {
-                    $scope.tableParams.count(val)
+                if ($scope.domainSession) {
+                    $scope.vis.params.domain = $scope.domainSession;
                 };
-                $scope.vis.params.top = val;
-            });
-            //todo
-            if (Object.keys($scope.vis.params).length == 0)
-                $scope.vis.params = {fake: true};
 
-            $scope.hasSomeRows = true;
-            $scope.tableParams = new NgTableParams({
+                $scope.$watch('vis.params.domain', function (val) {
+                    $scope.vis.params.domain = val;
+                    $scope.tableParams.reload()
+                });
 
-                },
-                {
-                    counts: [],
-                    getData: function($defer, params) {
-                        webitel.getData(typeData.handleName, {domain: $scope.vis.params.domain, scope: $scope}, function (res) {
-                            var data = res || [];
-                            var sorting = params.sorting(),
-                                orderedData;
+                $scope.$watch('vis.params.columns', function (val) {
+                    $scope.filtersObj = {};
+                    angular.forEach(val, function (item, key) {
+                        if (item['filter'] && item['filter'] != '')
+                            $scope.filtersObj[key] = item['filter'];
+                    });
+                    if (val)
+                        $scope.tableParams.reload();
+                });
 
-                            //$scope.vis.params.defSort = sorting;
+                // TODO
 
-                            orderedData = sorting ?
-                                $filter('orderBy')(data, params.orderBy()) :
-                                data;
+                $scope.$on('$destroy', function () {
+                    webitelEventDataChange();
+                });
 
-                            orderedData = $scope.filtersObj ?
-                                $filter('filter')(orderedData, $scope.filtersObj) :
-                                orderedData;
+                var webitelEventDataChange = $scope.$on('webitel:changeHashListUsers', function (e, data) {
+                    $scope.tableParams && $scope.tableParams.reload()
+                });
 
-                            $scope.hasSomeRows = data.length > 0;
+                $scope.$watch('vis.params.top', function (val) {
+                    val = val || 10;
+                    if (val > 0) {
+                        $scope.tableParams.count(val)
+                    };
+                    $scope.vis.params.top = val;
+                });
+                //todo
+                if (Object.keys($scope.vis.params).length == 0)
+                    $scope.vis.params = {fake: true};
 
-                            params.total(orderedData.length );
-                            //if ($scope.vis.params.top > 0) {
-                            //	params.count($scope.vis.params.top);
-                            //} else {
-                            //	params.count(data.length + 1);
-                            //};
+                $scope.hasSomeRows = true;
+                $scope.tableParams = new NgTableParams({
 
-                            $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-                        });
-                    }
-                })
+                    },
+                    {
+                        counts: [],
+                        getData: function($defer, params) {
+                            webitel.getData(typeData.handleName, {domain: $scope.vis.params.domain, scope: $scope}, function (res) {
+                                var data = res || [];
+                                var sorting = params.sorting(),
+                                    orderedData;
 
+                                //$scope.vis.params.defSort = sorting;
 
+                                orderedData = sorting ?
+                                    $filter('orderBy')(data, params.orderBy()) :
+                                    data;
+
+                                orderedData = $scope.filtersObj ?
+                                    $filter('filter')(orderedData, $scope.filtersObj) :
+                                    orderedData;
+
+                                $scope.hasSomeRows = data.length > 0;
+
+                                params.total(orderedData.length );
+                                //if ($scope.vis.params.top > 0) {
+                                //	params.count($scope.vis.params.top);
+                                //} else {
+                                //	params.count(data.length + 1);
+                                //};
+
+                                $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+                            });
+                        }
+                    })
+            })
         })
-        .controller('KbnWebitelPluginTypeController', function ($scope, webitel) {
-            $scope.showDomains = !webitel.domainSession;
-            $scope.columns = typeData.columns;
-            $scope.getDomains = function () {
-                //if (!$scope.showDomains) return;
-                webitel.getDomains(function (res) {
+        .controller('KbnWebitelPluginTypeController', function ($scope, webitel, $q) {
+            webitel.then(function (api) {
+                $scope.showDomains = !api.domainSession;
+                if (!$scope.showDomains) return;
+
+                api.getDomains(function (res) {
                     $scope.domains = res;
                 })
+            });
+            $scope.showDomains = false;
+            $scope.columns = typeData.columns;
+
+            $scope.getDomains = function () {
+
             };
         })
     ;
 });
 
-define('plugins/webitel_plugin/user_status/webitel_plugin_vis',['require', 'services/webitelSocket', 'css!plugins/webitel_plugin/user_status/webitel_plugin.css','plugins/webitel_plugin/user_status/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/user_status/webitel_plugin_vis.html','text!plugins/webitel_plugin/user_status/webitel_plugin_vis_params.html'],
+define('plugins/webitel_plugin/user_status/webitel_plugin_vis',['require', 'css!plugins/webitel_plugin/user_status/webitel_plugin.css','plugins/webitel_plugin/user_status/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/user_status/webitel_plugin_vis.html','text!plugins/webitel_plugin/user_status/webitel_plugin_vis_params.html'],
     function (require) {
 
         // we need to load the css ourselves
