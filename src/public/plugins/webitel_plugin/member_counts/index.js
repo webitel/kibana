@@ -219,7 +219,7 @@ define('plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller', [],
     ;
 });
 
-define('plugins/webitel_plugin/member_counts/webitel_plugin_vis',['require', 'services/webitelSocket', 'css!plugins/webitel_plugin/member_counts/plugin.css', 'plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/member_counts/webitel_plugin_vis.html','text!plugins/webitel_plugin/member_counts/webitel_plugin_vis_params.html'],
+define('plugins/webitel_plugin/member_counts/webitel_plugin_vis',['require', 'css!plugins/webitel_plugin/member_counts/plugin.css', 'plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/member_counts/webitel_plugin_vis.html','text!plugins/webitel_plugin/member_counts/webitel_plugin_vis_params.html'],
     function (require) {
 
         // we need to load the css ourselves

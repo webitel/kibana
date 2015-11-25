@@ -1,18 +1,10 @@
 /**
  * Created by i.navrotskyj on 10.11.2015.
  * */
-define('services/webitelSocket', ['require', 'text!config', 'webitelLibrary'], function(require) {
 
-
-
-    //return webitel;
-    return 1
-});
-
-define('plugins/webitel_plugin/webitel', ['require', 'angular', 'services/webitelSocket', 'text!config', 'components/webitel/hashCollection'], function (require) {
+define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary', 'text!config', 'components/webitel/hashCollection'], function (require) {
     var config = require('text!config');
     config = JSON.parse(config);
-    //var webitel = require('services/webitelSocket');
     var angular = require('angular');
     var HashCollection = require('components/webitel/hashCollection');
 

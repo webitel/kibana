@@ -410,7 +410,7 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
     ;
 });
 
-define('plugins/webitel_plugin/member_list/webitel_plugin_vis',['require', 'services/webitelSocket', 'css!plugins/webitel_plugin/member_list/plugin.css', 'plugins/webitel_plugin/member_list/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/member_list/webitel_plugin_vis.html','text!plugins/webitel_plugin/member_list/webitel_plugin_vis_params.html'],
+define('plugins/webitel_plugin/member_list/webitel_plugin_vis',['require', 'css!plugins/webitel_plugin/member_list/plugin.css', 'plugins/webitel_plugin/member_list/webitel_plugin_vis_controller','plugins/vis_types/template/template_vis_type','text!plugins/webitel_plugin/member_list/webitel_plugin_vis.html','text!plugins/webitel_plugin/member_list/webitel_plugin_vis_params.html'],
     function (require) {
 
         // we also need to load the controller and used by the template
