@@ -905,7 +905,7 @@ define('webitelLibrary', ['require'], function() {
                 if (callback) {
                     this.callback = function () {
                         try {
-                            this.responseText = arguments[0].response.response;
+                            this.responseText = arguments[0].response.response || arguments[0].response;
                         } catch (e){
 
                         }

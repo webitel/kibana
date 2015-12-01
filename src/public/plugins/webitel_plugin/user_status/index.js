@@ -5,7 +5,8 @@ define('plugins/webitel_plugin/user_status/config', ['require'], function(requir
         subType: "table",
         handleName: 'userList',
         columns: [
-            { title: 'Name', field: 'id', visible: true, filter: '' },
+            { title: 'Id', field: 'id', visible: true, filter: '' },
+            { title: 'Name', field: 'name', visible: true, filter: '' },
             { title: 'Domain', field: 'domain', visible: true },
             { title: 'Online', field: 'online', visible: true, cellTemplate: "<span style='text-align: center;' class='fa fa-circle' ng-class='{\"w-online\" : item[column.field] == true, \"w-offline\" : item[column.field] != true}'></span>" },
             { title: 'Role', field: 'role', visible: true },

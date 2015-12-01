@@ -8,8 +8,8 @@
         <table ng-table="tableParams" class="table table-condensed table-bordered">
             <tr ng-repeat="row in $data" style="text-align: center; " ng-class="{'w-account-onhook' : row.state == 'ONHOOK',
                             'w-account-nonreg': row.state == 'NONREG', 'w-account-onbreak': row.status == 'ONBREAK', 'w-account-isbusy': row.state == 'ISBUSY'}">
-                <td data-title="vis.params.columns.name.title" sortable="'name'" ng-if="!!vis.params.columns.name.visible">{{row.name}}</td>
                 <td data-title="vis.params.columns.id.title" sortable="'id'" ng-if="!!vis.params.columns.id.visible">{{row.id}}</td>
+                <td data-title="vis.params.columns.name.title" sortable="'name'" ng-if="!!vis.params.columns.name.visible">{{row.name}}</td>
                 <td data-title="vis.params.columns.domain.title" sortable="'domain'" ng-if="!!vis.params.columns.domain.visible">{{row.domain}}</td>
                 <td data-title="vis.params.columns.online.title" sortable="'online'" ng-if="!!vis.params.columns.online.visible">
                     <span style='text-align: center;' class='fa fa-circle' ng-class="{'w-online': row.online == true, 'w-offline': row.online == false}"></span>
