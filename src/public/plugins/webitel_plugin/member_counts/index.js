@@ -67,7 +67,7 @@ define('plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller', [],
                 webitel.onServerEvent("CC::MEMBERS-COUNT", onChange,  {all: true});
 
                 $scope.$watch('vis.params.domain', function (val) {
-                    $scope.vis.params.domain = val;
+                    $scope.vis.params.domain = webitel.domainSession || val;
                 });
 
                 var queueName = '';
@@ -124,7 +124,7 @@ define('plugins/webitel_plugin/member_counts/webitel_plugin_vis_controller', [],
                 });
 
                 $scope.$watch('vis.params.queue', function (val) {
-                    if (!val || (val && val.domain != $scope.vis.params.domain)) {
+                    if (!val || (val && (val.domain != (webitel.domainSession || $scope.vis.params.domain)))) {
                         $scope.vis.params.queue = null;
                         return;
                     };
