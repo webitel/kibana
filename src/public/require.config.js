@@ -41,13 +41,20 @@ require.config({
     'webitel_iframe': 'plugins/iframe/iframe',
     'webitelLibrary': 'plugins/webitel_plugin/webitelLib',
     'timer': 'bower_components/angular-timer/dist/angular-timer',
-    'humanize-duration': 'bower_components/humanize-duration/humanize-duration'
+    'humanize-duration': 'bower_components/humanize-duration/humanize-duration',
+
+    'webitel_cti': 'plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel',
+    'jscrollpane': 'plugins/webitel_plugin/cti_panel/WebitelPanel/js/jquery.jscrollpane.min',
+    'simplemodal': 'plugins/webitel_plugin/cti_panel/WebitelPanel/js/jquery.simplemodal.1.4.4.min',
+    'selectBox': 'plugins/webitel_plugin/cti_panel/WebitelPanel/js/jquery.selectBox',
+    'verto': 'plugins/webitel_plugin/cti_panel/WebitelPanel/js/webitel_verto',
   },
   shim: {
     angular: {
       deps: ['jquery'],
       exports: 'angular'
     },
+
     gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
     'angular-route': ['angular'],
     'elasticsearch': ['angular'],

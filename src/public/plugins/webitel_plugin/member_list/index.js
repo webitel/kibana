@@ -35,7 +35,6 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                 if (webitel.domainSession)
                     $scope.vis.params.domain = webitel.domainSession;
 
-
                 $scope.hasSomeRows = true;
 
                 $scope.$on('$destroy', function () {
@@ -144,6 +143,7 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                     var _ct = Date.now();
                     var rec = {
                         "id": e["CC-Member-UUID"],
+                        "session_uuid": e["variable_call_uuid"],
                         "Time": new Date().toLocaleTimeString(),
                         "createdOn": _ct,
                         'CC-Agent': [],
@@ -234,6 +234,13 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                 webitel.onServerEvent("CC::BRIDGE-AGENT-END", onBridgeAgentEnd,  {all: true});
                 webitel.onServerEvent("CC::BRIDGE-AGENT-FAIL", onAgentFail,  {all: true});
 
+                $scope.eavesdrop = function (uuid, side) {
+                    webitel._instance.eavesdrop(null, uuid, side)
+                };
+
+                $scope.useWebPhone = function () {
+                    return !!webitel.useWebPhone
+                };
 
                 $scope.parseAgents = function (agents) {
                     if (angular.isArray(agents)) {
@@ -247,8 +254,6 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                     if (!createdOn) return '00:00:00';
                     return (Math.ceil((currentDate - createdOn) / 1000) + '').toHHMMSS();
                 };
-
-
 
                 String.prototype.toHHMMSS = function () {
                     var sec_num = parseInt(this, 10);
@@ -323,6 +328,7 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                                             var _joinTime = +member['joined_epoch'] * 1000;
                                             var rec = {
                                                 "id": member['uuid'],
+                                                "session_uuid": member['session_uuid'],
                                                 "Time": new Date(_joinTime).toLocaleTimeString(),
                                                 "createdOn": _joinTime,
                                                 'CC-Agent': [],

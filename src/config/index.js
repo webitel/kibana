@@ -66,7 +66,8 @@ var config = module.exports = {
   //webitel
   webitelAuth             : true,
   webitelMongoUri         : 'mongodb://pre.webitel.com:27017/webitel',
-  webitelAuthUri          : kibana.webitelAuthUri
+  webitelAuthUri          : kibana.webitelAuthUri,
+  webitelWebrtc           : kibana.webitel_webrtc
 };
 
 config.plugins = listPlugins(config);

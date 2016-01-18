@@ -24,7 +24,8 @@ router.get('/config', function (req, res, next) {
       "key": req.session.user['key'],
       "role": req.session.user['role'],
       "ws": req.session.user['ws'],
-      "hostname": req.session.user['hostname']
+      "hostname": req.session.user['hostname'],
+      "webrtc": config.webitelWebrtc
     };
   } else {
     return res.status(401).end();

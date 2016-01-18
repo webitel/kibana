@@ -7,6 +7,7 @@
             <!--<col width="10%" />-->
             <!--<col width="10%" />-->
         <!--</colgroup>-->
+
         <tr class="ng-table-group" ng-repeat-start="group in $groups">
             <td colspan="3">
                 <div>
@@ -57,6 +58,11 @@
 
             <td sortable="'CC_Agent'" data-title="vis.params.columns['CC_Agent'].title||'Agent'">
                 {{parseAgents(item['CC_Agent'])}}
+            </td>
+            <td ng-show="useWebPhone()" style="width: 15px">
+                <a class="btn" ng-click="eavesdrop(item['session_uuid'], parseAgents(item['CC_Agent']))">
+                    <i class="fa fa-plug"></i>
+                </a>
             </td>
         </tr>
         <tr ng-repeat-end>

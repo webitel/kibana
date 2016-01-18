@@ -2,7 +2,10 @@
  * Created by i.navrotskyj on 10.11.2015.
  * */
 
+
+
 define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary', 'text!config', 'components/webitel/hashCollection'], function (require) {
+
     var config = require('text!config');
     config = JSON.parse(config);
     var angular = require('angular');
@@ -27,7 +30,44 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
             webitel.connect();
             webitel.domainSession = webitelSession['domain'];
 
-            webitel.onConnect(function () {
+            //webitel.onConnect(function () {
+            //    deferred.resolve({
+            //        getData: function (commandName, params, cb) {
+            //            if (!commandLinkToData[commandName]) return;
+            //
+            //            commandLinkToData[commandName].getData(params, cb);
+            //        },
+            //        getDomains: function (cb) {
+            //            if (domains.length === 0) {
+            //                webitel.domainList(function () {
+            //                    var table = this.parseDataTable(),
+            //                        res = [],
+            //                        domainIndex = table.headers.indexOf('domain');
+            //
+            //                    angular.forEach(table.data, function (item, i) {
+            //                        res.push({
+            //                            id: i,
+            //                            name: item[domainIndex]
+            //                        });
+            //                    });
+            //                    domains = res;
+            //                    cb(res);
+            //                });
+            //            } else {
+            //                cb(domains)
+            //            }
+            //        },
+            //        getQueue: hashQueue.getData,
+            //        getQueueByDomain: getQueueByDomain,
+            //        httpApi: httpApi,
+            //        onServerEvent: webitel.onServerEvent,
+            //        unServerEvent: webitel.unServerEvent,
+            //        domainSession: webitel.domainSession,
+            //        _instance: webitel
+            //    });
+            //});
+            //
+            webitel.onReady(function () {
                 deferred.resolve({
                     getData: function (commandName, params, cb) {
                         if (!commandLinkToData[commandName]) return;
@@ -59,9 +99,10 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
                     httpApi: httpApi,
                     onServerEvent: webitel.onServerEvent,
                     unServerEvent: webitel.unServerEvent,
-                    domainSession: webitel.domainSession
+                    domainSession: webitel.domainSession,
+                    _instance: webitel
                 });
-            });
+            })
 
             var domains = [];
 
@@ -178,7 +219,7 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
                 };
                 agent['status'] = e['Account-Status'];
                 agent['state'] = e['Account-User-State'];
-                agent['description'] = e["Account-Status-Descript"] ? decodeURI(decodeURI(e["Account-Status-Descript"])) : '';
+                agent['description'] = e["Account-Status-Descript"] ? decodeURI(e["Account-Status-Descript"]) : '';
                 // todo
                 $rootScope.$broadcast('webitel:changeHashListUsers', {});
             }, false);
@@ -224,6 +265,8 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
 
             return deferred.promise;
         });
+
+
 });
 
 define('components/webitel/event', function () {
