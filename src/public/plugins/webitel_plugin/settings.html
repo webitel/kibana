@@ -1,0 +1,37 @@
+<a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true">Session
+    <span class="caret"></span></a>
+<div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default" onclick="event.stopPropagation();">
+    <div class="panel panel-default" style="margin: 4px;border: 0; width: 171px">
+        <div class="panel-content">
+            <div in-if="true" ng-controller="WebitelSession">
+                <div class="form-group">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" class="ng-pristine ng-valid ng-untouched" ng-model="useWebphone"> Webphone
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-group" ng-show="useWebphone">
+                        <label>
+                            <input type="checkbox" class="ng-pristine ng-valid ng-untouched" ng-model="useWebrtc"  ng-disabled="!useWebphone"> Webrtc
+                        </label>
+                        <label>
+                            <input type="checkbox" class="ng-pristine ng-valid ng-untouched" ng-model="useWebrtcLeft"  ng-disabled="!useWebphone"> Left
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-info" ng-click="save()" style="width: 100%">
+                        <i class="fa fa-floppy-o fa-fw"></i>Save
+                    </a>
+                </div>
+            </div>
+            <div class="form-group">
+                <a id="logout" href="/logout" class="btn btn-primary" style="width: 100%">
+                    <i class="fa fa-sign-out fa-fw"></i>Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

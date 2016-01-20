@@ -1735,7 +1735,7 @@
                     var _account = account.split('@')[0],
                         _cause = _cause;
                     if (tag) {
-                        _cause += "('" + tag + "')";
+                        _cause += "('" + tag.replace(/\n/g, ' ') + "')";
                     };
                     this.userUpdate(_account, domainUser, 'status', _cause, function (res) {
                         if (res.status == WebitelCommandResponseTypes.Success)

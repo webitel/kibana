@@ -2,8 +2,6 @@
  * Created by i.navrotskyj on 10.11.2015.
  * */
 
-
-
 define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary', 'text!config', 'components/webitel/hashCollection'], function (require) {
 
     var config = require('text!config');
@@ -16,6 +14,21 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
     if (!webitelSession) {
         return;
     };
+
+    // TODO
+    require('modules').get('kibana')
+        .directive('wSettings', function () {
+            if (~config.plugins.indexOf('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel')) {
+                return {
+                    restrict: 'EA',
+                    templateUrl: 'plugins/webitel_plugin/settings.html'
+                };
+            } else {
+                return {
+                    template: '<a href="/logout" style="width: 100%">\n<i class="fa fa-sign-out fa-fw"></i>Logout</a>'
+                };
+            }
+        });
 
     require('modules').get('kibana')
         .service('webitel', function ($rootScope, $http, $q) {

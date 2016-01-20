@@ -10,6 +10,8 @@ elasticsearch_url: "http://elasticsearch:9200"
 #webitel auth URL
 webitel_auth: "http://core:10022"
 
+webitel_webrtc: "wss://pre.webitel.com:8082"
+
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
 elasticsearch_preserve_host: true
@@ -83,3 +85,4 @@ bundled_plugin_ids:
  - plugins/webitel_plugin/user_status/index
  - plugins/webitel_plugin/member_counts/index
  - plugins/webitel_plugin/member_list/index
+ - plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel
