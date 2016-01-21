@@ -2306,7 +2306,12 @@
                     rawapi.execute();
                 },
 
-                eavesdrop: function (user, channelId, option, cb) {
+                eavesdrop: function (user, channelId, options, cb) {
+                    if (typeof option == 'string') {
+                        options = {
+                            "side": options
+                        }
+                    }
                     option = option || {};
                     var side = option.side;
                     var display = option.display;

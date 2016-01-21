@@ -147,18 +147,18 @@ table td {
 }
 .t-menu_messages-am {
     display: inline-block;
-    margin-right: 4px;
-    margin-top: 20%;
-    height: 22px;
-    min-width: 14px;
+    margin-right: 3px;
+    margin-top: 36%;
+    height: 20px;
+    min-width: 20px;
     line-height: 22px;
     vertical-align: middle;
     text-align: center;
-    font-size: 11px;
+    font-size: 9px;
     color: #ffffff;
     background: #00a9f0;
-    padding: 0 4px;
-    border-radius: 22px;
+    padding: 0 3px;
+    border-radius: 13px;
 }
 /*---/t-menu---*/
 

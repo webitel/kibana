@@ -20,7 +20,7 @@
 
 WEBITEL_PANEL_JQUERY = $;
 define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require', 'text!config', 'plugins/webitel_plugin/webitel', 'verto',  'jscrollpane', 'simplemodal', 'selectBox',  'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/style.css',
-        'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/jquery.jscrollpane.css', 'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/jquery.selectBox.css', 'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/fonts.css'], function (require) {
+        'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/jquery.jscrollpane.css', 'css!plugins/webitel_plugin/cti_panel/WebitelPanel/css/jquery.selectBox.css'], function (require) {
 
 
     var module = require('modules').get('kibana');
