@@ -1664,10 +1664,7 @@
                             "user": account
                         };
                         var call = new WebitelCommand(WebitelCommandTypes.Call,
-                            params,
-                            function(sender) {
-                                console.log(sender);
-                            }
+                            params
                         );
                         call.execute();
                     };
@@ -2309,12 +2306,16 @@
                     rawapi.execute();
                 },
 
-                eavesdrop: function (user, channelId, side, cb) {
+                eavesdrop: function (user, channelId, option, cb) {
+                    option = option || {};
+                    var side = option.side;
+                    var display = option.display;
                     var rawapi = new WebitelCommand(
                         WebitelCommandTypes.Eavesdrop, {
                             'user': user,
                             'channel-uuid': channelId,
-                            'side': side
+                            'side': side,
+                            'display': display,
                         },
                         cb
                     );

@@ -38,7 +38,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
 
     //WebitelSessionController.$inject = ['$scope','$injector'];
 
-    function WebitelSessionController($scope, localStorage) {
+    function WebitelSessionController($scope, localStorage, Notifier) {
         var webitelPanel;
 
         $scope.useWebphone = localStorage.get("useWebphone");
@@ -68,6 +68,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
                 webitelPanel = WebitelPanel({
                     defUserPic: 'plugins/webitel_plugin/cti_panel/WebitelPanel/img/t-userpic_default__img.png',
                     'instance': w._instance,
+                    'notifier': new Notifier(),
                     '_is_webrtc': $scope.useWebrtc,
                     'style': $scope.useWebrtcLeft ? 'left' : null,
                     "webrtc_server": $scope.useWebrtc && webrtcConf
@@ -93,6 +94,11 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
         var IS_WEBRTC;
 
         var DEF_USER_PIC = configuration.defUserPic;
+        var notifier = configuration.notifier || {
+                error: function (msg) {
+                    console.error(msg)
+                }
+            };
 
         var INI_WEBITEL = false;
 
@@ -725,7 +731,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
                     {class: 't-box-recent-arrow-icon', innerHtml: {tag: '<div>', attrs: {class: 't-recent-arrow-icon'}}},
                     {class: 't-time', innerValue: 'time', innerHtml: {}},
                     {class: 't-usernum', innerValue: 'number', innerHtml: {}},
-                    {class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
+                   // {class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
                     {class: 't-username', innerValue: 'username', innerHtml: {}},
                     {class: 't-box-btn', innerHtml: {tag: '<a>', attrs: {href: '#', class: 't-btn t-btn__call'}}}
                 ];
@@ -808,7 +814,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
                 {class: 't-box-recent-arrow-icon', innerHtml: {tag: '<div>', attrs: {class: 't-recent-arrow-icon'}}},
                 {class: 't-time', innerValue: 'time', innerHtml: {}},
                 {class: 't-usernum', innerValue: 'number', innerHtml: {}},
-                {class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
+                //{class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
                 {class: 't-username', innerValue: 'username', innerHtml: {}},
                 {class: 't-box-btn', innerHtml: {tag: '<a>', attrs: {class: 't-btn t-btn__call',
                     click: function () {
@@ -902,7 +908,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
                     {class: 't-box-recent-arrow-icon', innerHtml: {tag: '<div>', attrs: {class: 't-recent-arrow-icon'}}},
                     {class: 't-time'},
                     {class: 't-usernum', innerValue: 'number', innerHtml: {}},
-                    {class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
+                   // {class: 't-userpic', innerHtml: {tag: '<img>', attrs: {width: '31px', height: '31px', innerValue: 'userpic'}}},
                     {class: 't-username', innerValue: 'username', innerHtml: {}},
                     {class: 't-box-btn t-alert-box__first', innerHtml: {tag: '<a>', attrs: {href: '#'}}},
                     {class: 't-box-btn', innerHtml: {tag: '<a>', attrs: {href: '#', class: 't-btn t-btn__call-2'}}},
@@ -2026,7 +2032,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
                     verticalGutter: 0
                 };
 
-                scrollPane = $('.pane').jScrollPane(pane_params);
+                var scrollPane = $('.pane').jScrollPane(pane_params);
 
                 /*----------check box----------*/
                 function changeCheck(el) {
@@ -2746,7 +2752,7 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
             });
 
             webitel.onNewCall(function (newCall) {
-                if(newCall['direction'] == 'outbound') {
+                if(newCall['direction'] == 'outbound' || newCall['direction'] == 'callback') {
                     var newCallInfo = {
                         class: 't-status__07 t-recent_arrow__up',
                         id: newCall['uuid'].replace('.',''),
@@ -2844,6 +2850,9 @@ define('plugins/webitel_plugin/cti_panel/WebitelPanel/webitel_panel', ['require'
             });
 
             webitel.onHangupCall(function (removeCall) {
+                if (!~['NORMAL_CLEARING', 'ORIGINATOR_CANCEL'].indexOf(removeCall.hangup_cause)) {
+                    notifier.error("CTI: hangup cause - " + removeCall.hangup_cause, null, 5000)
+                }
                 WebitelPanelActions.hangUpCall($, removeCall['uuid']);
                 if (AlertMenuObjectsArray.length == 0) {
                     VideoControl.hide();

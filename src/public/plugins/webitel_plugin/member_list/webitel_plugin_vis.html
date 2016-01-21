@@ -60,7 +60,7 @@
                 {{parseAgents(item['CC_Agent'])}}
             </td>
             <td ng-show="useWebPhone()" style="width: 15px">
-                <a class="btn" ng-click="eavesdrop(item['session_uuid'], parseAgents(item['CC_Agent']))">
+                <a class="btn" ng-click="eavesdrop(item['session_uuid'], parseAgents(item['CC_Agent']), item['CC_Member_CID_Number'])">
                     <i class="fa fa-plug"></i>
                 </a>
             </td>

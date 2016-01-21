@@ -234,8 +234,11 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                 webitel.onServerEvent("CC::BRIDGE-AGENT-END", onBridgeAgentEnd,  {all: true});
                 webitel.onServerEvent("CC::BRIDGE-AGENT-FAIL", onAgentFail,  {all: true});
 
-                $scope.eavesdrop = function (uuid, side) {
-                    webitel._instance.eavesdrop(null, uuid, side)
+                $scope.eavesdrop = function (uuid, side, display) {
+                    webitel._instance.eavesdrop(null, uuid, {
+                        "side": null,
+                        "display": display
+                    })
                 };
 
                 $scope.useWebPhone = function () {
