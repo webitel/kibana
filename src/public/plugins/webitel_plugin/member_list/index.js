@@ -242,7 +242,7 @@ define('plugins/webitel_plugin/member_list/webitel_plugin_vis_controller', ['req
                 };
 
                 $scope.useWebPhone = function () {
-                    return !!webitel.useWebPhone
+                    return !!webitel.domainSession
                 };
 
                 $scope.parseAgents = function (agents) {

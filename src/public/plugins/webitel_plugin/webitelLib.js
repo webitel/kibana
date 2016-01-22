@@ -2307,14 +2307,14 @@
                 },
 
                 eavesdrop: function (user, channelId, options, cb) {
-                    if (typeof option == 'string') {
+                    if (typeof options == 'string') {
                         options = {
                             "side": options
                         }
                     }
-                    option = option || {};
-                    var side = option.side;
-                    var display = option.display;
+                    options = options || {};
+                    var side = options.side;
+                    var display = options.display;
                     var rawapi = new WebitelCommand(
                         WebitelCommandTypes.Eavesdrop, {
                             'user': user,
