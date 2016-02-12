@@ -24,7 +24,7 @@ if [ "$1" = 'kibana' ]; then
 		echo >&2
 	fi
 
-       	if [ "$CORE_URL" -o "$CORE_PORT_10022_TCP" ]; then
+if [ "$CORE_URL" -o "$CORE_PORT_10022_TCP" ]; then
 		: ${CORE_URL:='http://core:10022'}
 		sed -ri "s!^(webitel_auth:).*!\1 '$CORE_URL'!" /kibana/config/kibana.yml
 	else
@@ -33,6 +33,17 @@ if [ "$1" = 'kibana' ]; then
 		echo >&2 '  or -e CORE_URL=http://core:10022 ?'
 		echo >&2
 	fi
+
+if [ "$FS_URL" -o "$FS_PORT_8082_TCP" ]; then
+		: ${FS_URL:='wss://freeswitch:8082'}
+		sed -ri "s!^(webitel_webrtc:).*!\1 '$FS_URL'!" /kibana/config/kibana.yml
+	else
+		echo >&2 'warning: missing FS_PORT_8082_TCP or FS_URL'
+		echo >&2 '  Did you forget to --link freeswitch:freeswitch'
+		echo >&2 '  or -e FS_URL=wss://freeswitch:8082 ?'
+		echo >&2
+	fi
+
 
 	set -- "$@"
 fi
