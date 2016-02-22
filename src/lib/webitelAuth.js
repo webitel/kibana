@@ -35,7 +35,7 @@ module.exports = function (app) {
 
     app.post('/login', function (req, res, next) {
         if (!req.rawBody) {
-            return res.redirect('/login');
+            return res.redirect('./login');
         };
 
         auth.login(req.rawBody, function (err, user) {

@@ -25,7 +25,7 @@ define('plugins/webitel_plugin/webitel', ['require', 'angular', 'webitelLibrary'
                 };
             } else {
                 return {
-                    template: '<a href="/logout" style="width: 100%">\n<i class="fa fa-sign-out fa-fw"></i>Logout</a>'
+                    template: '<a href="./logout" style="width: 100%">\n<i class="fa fa-sign-out fa-fw"></i>Logout</a>'
                 };
             }
         });

@@ -52,7 +52,7 @@ router.use(function (req, res, next) {
 
   //webitel
   if (!req.session['user']) {
-    return res.status(401).redirect('/kibana/login');
+    return res.status(401).redirect('./login');
   };
 
   // Add a slash to the end of the URL so resolve doesn't remove it.
