@@ -8,7 +8,7 @@ host: "0.0.0.0"
 elasticsearch_url: "http://elasticsearch:9200"
 
 #webitel auth URL
-webitel_auth: "http://core:10022"
+webitel_auth: "http://engine:10022"
 #webitel verto server
 webitel_webrtc: "wss://pre.webitel.com:8082"
 

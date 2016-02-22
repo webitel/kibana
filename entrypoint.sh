@@ -24,13 +24,13 @@ if [ "$1" = 'kibana' ]; then
 		echo >&2
 	fi
 
-if [ "$CORE_URL" -o "$CORE_PORT_10022_TCP" ]; then
-		: ${CORE_URL:='http://core:10022'}
-		sed -ri "s!^(webitel_auth:).*!\1 '$CORE_URL'!" /kibana/config/kibana.yml
+if [ "$ENGINE_URL" -o "$ENGINE_PORT_10022_TCP" ]; then
+		: ${CORE_URL:='http://engine:10022'}
+		sed -ri "s!^(webitel_auth:).*!\1 '$ENGINE_URL'!" /kibana/config/kibana.yml
 	else
-		echo >&2 'warning: missing CORE_PORT_10022_TCP or CORE_URL'
-		echo >&2 '  Did you forget to --link webitel_core:core'
-		echo >&2 '  or -e CORE_URL=http://core:10022 ?'
+		echo >&2 'warning: missing ENGINE_PORT_10022_TCP or ENGINE_URL'
+		echo >&2 '  Did you forget to --link engine:engine'
+		echo >&2 '  or -e ENGINE_URL=http://engine:10022 ?'
 		echo >&2
 	fi
 
