@@ -4,7 +4,7 @@
 var config = require('../config');
 var url = require('url').parse(config.webitelAuthUri);
 var http = require(url.protocol.replace(':', ''));
-var WSS_SERVER = (config.webitelAuthUri || '').replace(/http/, 'ws');
+var WSS_SERVER = (config.webitelPublicUri || '').replace(/http/, 'ws');
 
 function joinStringFromIndex(x1, x2, i) {
     return x1.slice(0, i) + x2 + x1.slice(i)
@@ -69,7 +69,7 @@ var auth = {
                         var user = JSON.parse(Buffer.concat(chunks).toString('utf8'));
                         user['ws'] = WSS_SERVER;
                         user['password'] = jsonBody.password;
-                        user['hostname'] = config.webitelAuthUri;
+                        user['hostname'] = config.webitelPublicUri;
 
                         return cb(null, user);
                     } catch (e) {

@@ -1611,6 +1611,7 @@
                 getAgents: function(currentSession) {
                     var that = WebitelConnection;
                     that.login(function() {
+                        OnWebitelReady.trigger(currentSession);
                         that.listUser(domainUser, function (res) {
                             if (res.status === WebitelCommandResponseTypes.Success) {
                                 try {
@@ -1637,7 +1638,7 @@
                                     // TODO !CM
                                 }
 
-                                OnWebitelReady.trigger(currentSession);
+
                             }
                         });
                     });

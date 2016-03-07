@@ -17,16 +17,16 @@ if [ "$1" = 'kibana' ]; then
 	if [ "$ELASTICSEARCH_URL" -o "$ELASTICSEARCH_PORT_9200_TCP" ]; then
 		: ${ELASTICSEARCH_URL:='http://elasticsearch:9200'}
 		sed -ri "s!^(elasticsearch_url:).*!\1 '$ELASTICSEARCH_URL'!" /kibana/config/kibana.yml
-	else
-		echo >&2 'warning: missing ELASTICSEARCH_PORT_9200_TCP or ELASTICSEARCH_URL'
-		echo >&2 '  Did you forget to --link some-elasticsearch:elasticsearch'
-		echo >&2 '  or -e ELASTICSEARCH_URL=http://some-elasticsearch:9200 ?'
-		echo >&2
+	fi
+
+if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
+		: ${$ENGINE_AUTH_URL:='http://engine:10022'}
+		sed -ri "s!^(webitel_auth:).*!\1 '$ENGINE_AUTH_URL'!" /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_URL" -o "$ENGINE_PORT_10022_TCP" ]; then
-		: ${CORE_URL:='http://engine:10022'}
-		sed -ri "s!^(webitel_auth:).*!\1 '$ENGINE_URL'!" /kibana/config/kibana.yml
+		: ${ENGINE_URL:='http://engine:10022'}
+		sed -ri "s!^(webitel_public_uri:).*!\1 '$ENGINE_URL'!" /kibana/config/kibana.yml
 	else
 		echo >&2 'warning: missing ENGINE_PORT_10022_TCP or ENGINE_URL'
 		echo >&2 '  Did you forget to --link engine:engine'
