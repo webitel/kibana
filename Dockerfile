@@ -8,11 +8,16 @@ ENV KIBANA_VERSION 4.5.2
 
 RUN mkdir /kibana
 COPY bin /kibana/bin
-COPY src /kibana/src
-COPY optimize /kibana/optimize
 COPY config /kibana/config
-COPY plugins /kibana/plugins
-COPY LICENSE.txt /kibana/
+COPY installedPlugins /kibana/installedPlugins
+COPY optimize /kibana/optimize
+COPY src /kibana/src
+COPY tasks /kibana/tasks
+COPY webpackShims /kibana/webpackShims
+
+COPY package.json /kibana/
+COPY Gruntfile.js /kibana/
+
 ENV PATH /kibana/bin:$PATH
 
 ENV NODE_TLS_REJECT_UNAUTHORIZED 0

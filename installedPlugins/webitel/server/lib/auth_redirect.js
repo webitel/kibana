@@ -18,7 +18,6 @@ import { includes } from 'lodash';
  */
 export default function factory({ onError, redirectUrl, strategy, testRequest }) {
   return function authenticate(request, reply) {
-    console.log('auth ', request.session);
     testRequest(strategy, request, (err, credentials) => {
       if (err) {
         if (shouldRedirect(request.raw.req)) {
@@ -35,4 +34,4 @@ export default function factory({ onError, redirectUrl, strategy, testRequest })
 
 export function shouldRedirect(req) {
   return includes(req.headers.accept, 'html');
-};
+}
