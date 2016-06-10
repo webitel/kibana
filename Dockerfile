@@ -22,7 +22,9 @@ ENV PATH /kibana/bin:$PATH
 
 ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 
-RUN cd /kibana && npm install && npm cache clear && \
+RUN apt-get update && apt-get install -y --force-yes --no-install-recommends git && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    cd /kibana && npm install && npm cache clear && \
     cd /kibana/installedPlugins/webitel && npm install && npm cache clear
 
 COPY ./entrypoint.sh /
