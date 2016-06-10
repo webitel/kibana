@@ -22,7 +22,7 @@ ENV PATH /kibana/bin:$PATH
 
 ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 
-RUN apt-get update && apt-get install -y --force-yes --no-install-recommends git build-essential && \
+RUN apt-get update && apt-get install -y --force-yes --no-install-recommends git build-essential libexpat1-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     cd /kibana && npm install && npm cache clear && \
     cd /kibana/installedPlugins/webitel && npm install && npm cache clear

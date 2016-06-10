@@ -72,7 +72,7 @@ module.exports = (kibana) => new kibana.Plugin({
               return callback(null, false);
             }
 
-            return callback(null, true, cached.account);
+            return callback(null, true, cached);
           });
         }
       });
