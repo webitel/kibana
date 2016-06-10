@@ -15,7 +15,7 @@ target
 /esvm
 .htpasswd
 .eslintcache
-installedPlugins
+installedPlugins/webitel/node_modules
 disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
