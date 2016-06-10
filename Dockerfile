@@ -24,7 +24,7 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 
 RUN apt-get update && apt-get install -y --force-yes --no-install-recommends git make && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    cd /kibana && npm install && npm cache clear && \
+    /kibana/bin/kibana && \
     cd /kibana/installedPlugins/webitel && npm install && npm cache clear
 
 COPY ./entrypoint.sh /
