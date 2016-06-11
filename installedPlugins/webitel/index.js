@@ -24,7 +24,7 @@ module.exports = (kibana) => new kibana.Plugin({
 
   uiExports: {
     chromeNavControls: ['plugins/webitel/views/logout_button'],
-    visTypes: ['plugins/webitel/iframe'],
+    visTypes: ['plugins/webitel/accounts', 'plugins/webitel/iframe'],
     apps: [{
       id: 'login',
       title: 'Login',

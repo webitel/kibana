@@ -1,5 +1,5 @@
 define(function () {
-  return function MappingSetupService(kbnIndex, es) {
+  return function MappingSetupService(kbnIndex, es, config) {
     let angular = require('angular');
     let _ = require('lodash');
     let mappingSetup = this;
@@ -32,7 +32,14 @@ define(function () {
         // limit the response to just the _source field for each index
         field: '_source'
       }).then(function (resp) {
-        return _.keys(resp[indexName.split('-')[0]].mappings);
+        try {
+          if (config.get('domainName')) {
+            indexName += '-' + config.get('domainName');
+          }
+        } catch (e) {
+          console.error(e)
+        }
+        return _.keys(resp[indexName].mappings);
       });
     });
 

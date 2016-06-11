@@ -35,15 +35,20 @@ function createProxy(server, method, route, config) {
         let credentials = request.auth.credentials;
         if (!credentials) {
           return reply(new Error('Session unauthorized'));
-        }
+        };
         if (credentials.domain) {
           if (/.\/_mapping\/./i.test(uri)) {
-            uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf(/_mapping/));
-          } else if (/.\/_msearch\?./i.test(uri)) {
-            options.payload = options.payload.replace(/"index":"([\s\S]*?)"/gi, function (a, b) {
-              return '"index":"' + b + '-' + credentials.domain + '"';
-            });
+            uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_mapping'));
+          } else if (/.kibana\//.test(uri)) {
+            uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('.kibana') + 7);
+          } else if (/\/_field_stats/i.test(uri)) {
+            uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_field_stats') );
           }
+        }
+        if (options.payload) {
+          options.payload = options.payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
+            return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
+          });
         }
         console.log(uri, options.payload);
 
@@ -96,6 +101,7 @@ function createProxy(server, method, route, config) {
 createProxy.createPath = function createPath(path) {
   const pre = '/elasticsearch';
   const sep = path[0] === '/' ? '' : '/';
+  console.log(`proxy: ${pre}${sep}${path}`);
   return `${pre}${sep}${path}`;
 };
 

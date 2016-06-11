@@ -4,6 +4,7 @@ import {validateIndex} from '../../../lib/createIndex'
 
 module.exports = (server) => {
   const success = {statusCode: 200, payload: 'success'};
+  const baseUrl = server.config().get('webitel.engineUri');
 
   server.route({
     method: 'POST',
@@ -16,6 +17,7 @@ module.exports = (server) => {
           request.auth.session.clear();
           return reply(Boom.unauthorized(err));
         }
+        user.password = password;
         request.server.app.cache.set(user.key, user, 0, (err) => {
           if (err) {
             reply(Boom.unauthorized(err));
@@ -37,6 +39,14 @@ module.exports = (server) => {
           password: Joi.string().required()
         }
       }
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/webitel/v1/whoami',
+    handler(request, reply) {
+      return reply({statusCode: 200, credentials: request.auth.credentials, engineUri: baseUrl});
     }
   });
 

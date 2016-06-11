@@ -17,7 +17,7 @@ export function validateIndex (server, domainName, cb) {
 
         if (!exists) {
             createIndex(client, index)
-                .then(createConfig(client, index, id, buildNum)
+                .then(createConfig(client, index, id, buildNum, domainName)
                     .catch(setupError)
                     .then(createIndexPattern(client, index)
                         .then(cb))
@@ -54,7 +54,7 @@ function createIndex(client, index) {
     });
 }
 
-function createConfig(client, index, id, buildNum) {
+function createConfig(client, index, id, buildNum, domainName) {
     console.log(`Create config ${index}`);
     return client.create({
         index: index,
@@ -62,7 +62,8 @@ function createConfig(client, index, id, buildNum) {
         id: id,
         body: {
             "buildNum": buildNum,
-            "defaultIndex": "cdr-*"
+            "defaultIndex": "cdr-*",
+            "domainName": domainName || null
         }
     });
 }
