@@ -1,0 +1,152 @@
+/* New style */
+.external-wrapper {
+    width: 100%;
+    height: 100px;
+    /*background: white;*/
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 17px;
+    padding-left: 17px;
+}
+.internal-wrapper {
+    position: relative;
+    /*background: yellow;*/
+    height: 100px;
+}
+.custom.w-panel-def {
+    padding: 5px 5px 7px 7px;
+}
+
+.custom.w-panel {
+    margin-top: 100px;
+}
+
+/*************/
+
+.w-list-group {
+    padding-left: 0;
+    margin-bottom: 20px;
+    height:100%; width:80%;
+    overflow:hidden; overflow-y:scroll;
+}
+
+.w-panel-def .media-body .progress {
+    margin-bottom: 5px;
+    background-color: rgb(104, 144, 187);
+}
+
+.w-panel-def .media-body .progress .progressbar-back-text {
+    position: absolute;
+    margin-left: 15px;
+    color: white;
+}
+
+.w-panel-def .progress-group {
+    margin-top: 5px;
+    margin-right: 25px;
+    margin-left: 20px;
+}
+.members-count-users {
+    outline-width: 0px;
+}
+.members-count-users  .fa-phone {
+    font-size: 24px;
+    margin-left: 20px;
+}
+.progress-group .progress .progress-bar {
+    line-height: 15px;
+}
+
+.members-count-users .available .fa-phone{
+    color: #31c471;
+}
+.members-count-users .busy .fa-phone{
+    color: #e74c3c;;
+}
+.members-count-users .onbreak .fa-phone{
+    color: #f39c12;
+}
+.members-count-users .offline .fa-phone{
+    color: #444444;
+}
+
+/*.progress-bar-default {*/
+    /*background-color: #e74c3c;*/
+/*}*/
+
+.w-list-group-item {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+.w-list-group-item-success {
+    /*color: #3c763d;*/
+    background-color: #dff0d8;
+}
+
+.w-list-group-item:first-child {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.w-list-group-item:last-child {
+    margin-bottom: 0;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+/***** 6.5 PANELS & WIDGETS STYLES *****/
+.w-panel {
+    position: relative;
+}
+
+.w-panel-def {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    padding: 5px 5px 7px 7px;
+}
+
+
+.w-hr {
+    opacity: 0.3;
+    margin: 0px 0 0 0;
+    border-width: 2px;
+}
+.w-fixed {
+    background: #76a7dc;
+    color: #fff;
+    padding-left: 25px;
+}
+
+
+.transaction-list li {
+    padding: 7px 0;
+    border-bottom: 1px solid #ebeff2;
+    clear: both;
+    /* position:relative */
+}
+
+.transaction-list i {
+    width: 20px;
+    position: absolute;
+    top: 10px;
+    font-size: 12px
+}
+
+.transaction-list .tran-text {
+    padding-left: 25px;
+    white-space: nowrap;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 115px
+}
+
+.transaction-list .tran-price {
+    margin-left: 30px
+}

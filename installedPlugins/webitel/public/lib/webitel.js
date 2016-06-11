@@ -264,10 +264,11 @@ define(function (require) {
                     function httpApi(url, cb) {
                         var req = {
                             method: 'GET',
-                            url: config.webitelSession['hostname'] + url,
+                            url: webitelSession['hostname'] + url,
                             headers: {
-                                'x-key': config.webitelSession['key'],
-                                'x-access-token': config.webitelSession['token']
+                                'Content-Type': 'application/json;charset=UTF-8',
+                                'x-key': webitelSession['key'],
+                                'x-access-token': webitelSession['token']
                             }
                         };
                         $http(req).success(function(res){

@@ -13,6 +13,7 @@
 
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://localhost:9200"
+server.xsrf.disableProtection: true
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -54,6 +55,7 @@ elasticsearch.url: "http://localhost:9200"
 
 # Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
+
 # elasticsearch.requestTimeout: 30000
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
@@ -70,7 +72,7 @@ elasticsearch.url: "http://localhost:9200"
 # logging.dest: stdout
 
 # Set this to true to suppress all logging output.
-logging.silent: false
+logging.silent: true
 
 # Set this to true to suppress all logging output except for error messages.
 # logging.quiet: false
@@ -78,7 +80,6 @@ logging.silent: false
 # Set this to true to log all events, including system usage information and all requests.
 # logging.verbose: false
 
-
-webitel.engineUri: "https://pre.webitel.com/engine"
+webitel.engineUri: "http://10.10.10.25:10022"
 webitel.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
 webitel.sessionTimeout: 1800000

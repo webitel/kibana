@@ -20,7 +20,10 @@ module.exports = function (kbnServer, server, config) {
       strictHeader: false
     },
     routes: {
-      cors: config.get('server.cors'),
+      cors: {
+        origin: ['*'],
+        additionalHeaders:  ['Content-type', 'Accept', 'X-Access-Token', 'X-Key', 'Server', 'X-Powered-By', 'Access-Control-Max-Age']
+      },
       payload: {
         maxBytes: config.get('server.maxPayloadBytes')
       }

@@ -36,13 +36,13 @@ module.exports = () => Joi.object({
       cert: Joi.string(),
       key: Joi.string()
     }).default(),
-    cors: Joi.when('$dev', {
-      is: true,
-      then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
-      }),
-      otherwise: Joi.boolean().default(false)
-    }),
+    // cors: Joi.when('$dev', {
+    //   is: true,
+    //   then: Joi.object().default({
+    //     origin: ['*://localhost:9876'] // karma test server
+    //   }),
+    //   otherwise: Joi.boolean().default(false)
+    // }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
       token: Joi.string().optional().notes('Deprecated')

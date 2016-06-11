@@ -5,7 +5,10 @@
 define(function (require) {
     var typeData = require('plugins/webitel/accounts/config');
 
-    var module = require('ui/modules').get('kibana/webitel/accounts', ['kibana']);
+    var module = require('ui/modules').get('kibana/webitel/accounts', ['kibana', 'ngTable']);
+
+    require('plugins/webitel/bower_components/ng-table/ng-table.less');
+    require('plugins/webitel/bower_components/ng-table/ng-table.min');
 
     module
         .controller('KbnWebitelPluginVisController', function ($scope, $filter, NgTableParams, webitel) {

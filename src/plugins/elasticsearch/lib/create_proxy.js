@@ -44,12 +44,14 @@ function createProxy(server, method, route, config) {
           } else if (/\/_field_stats/i.test(uri)) {
             uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_field_stats') );
           }
+
+          if (options.payload) {
+            options.payload = options.payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
+              return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
+            });
+          }
         }
-        if (options.payload) {
-          options.payload = options.payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
-            return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
-          });
-        }
+
         console.log(uri, options.payload);
 
         let contentType = request.headers['content-type'];
