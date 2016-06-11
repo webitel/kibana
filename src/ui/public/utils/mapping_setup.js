@@ -32,7 +32,7 @@ define(function () {
         // limit the response to just the _source field for each index
         field: '_source'
       }).then(function (resp) {
-        return _.keys(resp[indexName].mappings);
+        return _.keys(resp[indexName.split('-')[0]].mappings);
       });
     });
 

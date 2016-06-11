@@ -22,7 +22,6 @@
     "url": "http://github.com/webitel/kibana/issues"
   },
   "license": "Apache-2.0",
-
   "scripts": {
     "test": "grunt test",
     "test:dev": "grunt test:dev",
@@ -107,7 +106,7 @@
     "moment": "2.10.6",
     "moment-timezone": "0.4.1",
     "raw-loader": "0.5.1",
-    "request": "2.61.0",
+    "request": "^2.61.0",
     "requirefrom": "0.2.0",
     "rimraf": "2.4.3",
     "rjs-repack-loader": "1.0.6",

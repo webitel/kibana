@@ -1,5 +1,6 @@
 const Boom = require('boom');
 const Joi = require('joi');
+import {validateIndex} from '../../../lib/createIndex'
 
 module.exports = (server) => {
   const success = {statusCode: 200, payload: 'success'};
@@ -20,6 +21,8 @@ module.exports = (server) => {
             reply(Boom.unauthorized(err));
           }
           request.auth.session.set({ sid: user.key });
+          if (user.domain)
+              validateIndex(server, user.domain);
           reply(success);
         });
       });
