@@ -4,10 +4,10 @@
 }
 
 .member-list .in-queue {
-    background-color: #e8e8e8;
+    background-color: rgba(232, 232, 232, 0.27);
 }
 .member-list .receiving {
-    background-color: #fcf8e3;
+    background-color: rgba(226, 196, 38, 0.31);
 }
 .member-list .in-call {
     background-color: rgb(87, 193, 123);
