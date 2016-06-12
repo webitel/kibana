@@ -25,13 +25,13 @@ define(function (require) {
     require('ui/modules').get('kibana')
         .service('webitel', function ($rootScope, $http, $q, config) {
             var deferred = $q.defer();
-
             $http.get('../api/webitel/v1/whoami')
                 .then(function (res) {
                     
                     var webitelSession = res.data.credentials;
                     webitelSession.domain = webitelSession.username.split('@')[1];
                     webitelSession.ws = res.data.engineUri.replace(/http/,'ws');
+                    webitelSession.wsWebRtc = res.data.webRtcUri;
                     webitelSession.hostname = res.data.engineUri;
 
                     var webitel = window.webitel = new Webitel({
@@ -87,6 +87,10 @@ define(function (require) {
                                 if (!commandLinkToData[commandName]) return;
 
                                 commandLinkToData[commandName].getData(params, cb);
+                            },
+                            getSession: function () {
+                                // TODO
+                                return webitelSession;
                             },
                             getDomains: function (cb) {
                                 if (domains.length === 0) {

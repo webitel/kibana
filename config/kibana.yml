@@ -81,5 +81,6 @@ logging.silent: false
 # logging.verbose: false
 
 webitel.engineUri: "http://10.10.10.25:10022"
+webitel.webRtcUri: "wss://pre.webitel.com:8082"
 webitel.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
 webitel.sessionTimeout: 1800000

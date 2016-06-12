@@ -5,6 +5,7 @@ import {validateIndex} from '../../../lib/createIndex'
 module.exports = (server) => {
   const success = {statusCode: 200, payload: 'success'};
   const baseUrl = server.config().get('webitel.engineUri');
+  const webRtcUri = server.config().get('webitel.webRtcUri'); //webRtcUri
 
   server.route({
     method: 'POST',
@@ -46,7 +47,7 @@ module.exports = (server) => {
     method: 'GET',
     path: '/api/webitel/v1/whoami',
     handler(request, reply) {
-      return reply({statusCode: 200, credentials: request.auth.credentials, engineUri: baseUrl});
+      return reply({statusCode: 200, credentials: request.auth.credentials, engineUri: baseUrl, webRtcUri: webRtcUri});
     }
   });
 

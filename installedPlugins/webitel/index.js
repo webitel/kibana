@@ -14,6 +14,7 @@ module.exports = (kibana) => new kibana.Plugin({
       enabled: Joi.boolean().default(true),
       sid: Joi.string().default('sid'),
       engineUri: Joi.string().default('http://localhost'),
+      webRtcUri: Joi.string().default('http://localhost:8082'),
       encryptionKey: Joi.string(),
       sessionTimeout: Joi.number().default(30 * 60 * 1000),
       // Only use this if SSL is still configured, but it's configured outside of the Kibana server

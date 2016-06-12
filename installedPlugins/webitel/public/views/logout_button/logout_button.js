@@ -1,3 +1,4 @@
+require('plugins/webitel/cti/ctiPanel');
 require('ui/registry/chrome_nav_controls').register(function () {
   return {
     name: 'logout button',
