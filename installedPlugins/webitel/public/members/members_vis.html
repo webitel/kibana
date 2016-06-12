@@ -1,0 +1,85 @@
+<div ng-controller="KbnWebitelPluginMemberListVisController" class="webitel-plugin-vis table-vis">
+    <ul>
+        <li ng-repeat="t in tData">
+            {{t.uuid}}
+        </li>
+    </ul>
+    <table ng-table="tableParams" class="member-list table table-condensed table-bordered table-hover" ng-init="$groupRow.show=false">
+        <!--<colgroup>-->
+            <!--<col width="60%" />-->
+            <!--<col width="20%" />-->
+            <!--<col width="10%" />-->
+            <!--<col width="10%" />-->
+        <!--</colgroup>-->
+
+        <tr class="ng-table-group" ng-repeat-start="group in $groups">
+            <td colspan="3">
+                <div>
+                    <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
+                    <strong>{{ group.value }}</strong>
+                </div>
+            </td>
+        </tr>
+        <tr ng-hide="group.$hideRows" ng-repeat="item in group.data" ng-class="{ 'in-queue': item['status'] == 'In queue', 'receiving': item['status'] == 'Receiving', 'in-call': item['status'] == 'In queue Call'}">
+
+            <td sortable="'Time'" data-title="vis.params.columns['Time'].title||'Time'"
+                    >
+                {{item['Time']}}
+            </td>
+
+            <td sortable="'CC_Member_CID_Name'" data-title="vis.params.columns['CC_Member_CID_Name'].title||'Caller Name'"
+                    >
+                {{item['CC_Member_CID_Name']}}
+            </td>
+
+            <td sortable="'CC_Member_CID_Number'" data-title="vis.params.columns['CC_Member_CID_Number'].title||'Caller Number'">
+                {{item['CC_Member_CID_Number']}}
+            </td>
+
+            <td sortable="'CC_Queue'" data-title="vis.params.columns['CC_Queue'].title||'Queue'" groupable="'CC_Queue'">
+                {{item['CC_Queue']}}
+            </td>
+
+            <td sortable="'cc_start_position'" data-title="vis.params.columns['cc_start_position'].title||'Join position'">
+                {{item['cc_start_position']}}
+            </td>
+
+            <td sortable="'cc_current_position'" data-title="vis.params.columns['cc_current_position'].title||'Position'" >
+                {{item['cc_current_position']}}
+            </td>
+
+            <td sortable="'status'" data-title="vis.params.columns['status'].title||'Status'">
+                {{item['status']}}
+            </td>
+
+            <td data-title="'In queue'" sortable="'createdOn'">
+                {{item['answeredOn'] > 0 ? getTime(item['answeredOn'], item['createdOn']) :getTime(currentDate, item['createdOn'])}}
+            </td>
+
+            <td data-title="'In call'" sortable="'answeredOn'">
+                {{getTime(currentDate, item['answeredOn'])}}
+            </td>
+
+            <td sortable="'CC_Agent'" data-title="vis.params.columns['CC_Agent'].title||'Agent'">
+                {{parseAgents(item['CC_Agent'])}}
+            </td>
+            <td ng-show="useWebPhone()" style="width: 15px">
+                <a class="btn" ng-click="eavesdrop(item['session_uuid'], parseAgents(item['CC_Agent']), item['CC_Member_CID_Number'])">
+                    <i class="fa fa-plug"></i>
+                </a>
+            </td>
+        </tr>
+        <tr ng-repeat-end>
+            <td class="text-success text-right"><strong>Summary:</strong></td>
+            <td><em>{{sum(group.data)}}</em></td>
+        </tr>
+        <tfoot ng-if="isLastPage()">
+        <tr>
+            <td class="text-success text-right"><strong>Grant Total:</strong></td>
+            <td><em>{{totalCalls}}</em></td>
+        </tr>
+        </tfoot>
+    </table>
+
+
+</div>

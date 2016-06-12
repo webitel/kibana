@@ -72,7 +72,7 @@ server.xsrf.disableProtection: true
 # logging.dest: stdout
 
 # Set this to true to suppress all logging output.
-logging.silent: true
+logging.silent: false
 
 # Set this to true to suppress all logging output except for error messages.
 # logging.quiet: false
