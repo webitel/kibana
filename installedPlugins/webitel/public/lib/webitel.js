@@ -27,7 +27,7 @@ define(function (require) {
             var deferred = $q.defer();
             $http.get('../api/webitel/v1/whoami')
                 .then(function (res) {
-                    
+
                     var webitelSession = res.data.credentials;
                     webitelSession.domain = webitelSession.username.split('@')[1];
                     webitelSession.ws = res.data.engineUri.replace(/http/,'ws');
@@ -269,6 +269,7 @@ define(function (require) {
                         var req = {
                             method: 'GET',
                             url: webitelSession['hostname'] + url,
+                            'kbnXsrfToken': false,
                             headers: {
                                 'Content-Type': 'application/json;charset=UTF-8',
                                 'x-key': webitelSession['key'],

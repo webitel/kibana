@@ -6,14 +6,13 @@
 
 # If you are running kibana behind a proxy, and want to mount it at a path,
 # specify that path here. The basePath can't end in a slash.
-# server.basePath: ""
+server.basePath: "/kibana"
 
 # The maximum payload size in bytes on incoming server requests.
 # server.maxPayloadBytes: 1048576
 
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://localhost:9200"
-server.xsrf.disableProtection: true
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
@@ -80,7 +79,9 @@ logging.silent: false
 # Set this to true to log all events, including system usage information and all requests.
 # logging.verbose: false
 
-webitel.engineUri: "http://10.10.10.25:10022"
+server.xsrf.disableProtection: true
+
+webitel.engineUri: "https://pre.webitel.com/engine"
 webitel.webRtcUri: "wss://pre.webitel.com:8082"
 webitel.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
 webitel.sessionTimeout: 604800000
