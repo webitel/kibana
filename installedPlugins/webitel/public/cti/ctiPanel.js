@@ -39,10 +39,11 @@ define(function (require) {
 
 
             function startWebphone() {
-                if (webitelPanel) return;
+                if (webitelPanel ) return;
                 var injector = angular.element(document).injector();
                 injector.get('webitel').then(function(w) {
                     var webitelSession = w.getSession();
+                    if (!webitelSession.domain) return;
                     w.useWebPhone = true;
                     var webrtcConf = {};
                     if (webitelSession) {
@@ -1925,7 +1926,7 @@ define(function (require) {
                         overlayClose: true,
                         closeClass: 'modalClose',
                         onOpen: function(dialog) {
-                            $('select', dialog.data[0]).selectBox({ autoWidth: true });
+                            $('select', dialog.data[0]).selectBox({ autoWidth: false });
                             dialog.overlay.fadeIn('fast', function() {
                                 dialog.data.hide();
                                 dialog.container.fadeIn('fast', function() {
@@ -2016,6 +2017,7 @@ define(function (require) {
                     scrollbarWidth: 19,
                     autoReinitialise: true,
                     verticalDragMaxHeight: 200,
+                    // contentWidth: 100,
                     verticalDragMinHeight: 15,
                     verticalGutter: 0
                 };

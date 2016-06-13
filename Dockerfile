@@ -20,6 +20,7 @@ COPY Gruntfile.js /kibana/
 
 ENV PATH /kibana/bin:$PATH
 
+ENV NODE_ENV production
 ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 
 RUN apt-get update && apt-get install -y --force-yes git build-essential python python-dev && \

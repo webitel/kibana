@@ -69,7 +69,7 @@
             , self     = this;
 
         control
-            .width(select.outerWidth())
+            // .width(select.outerWidth())
             .addClass(select.attr('class'))
             .attr('title', select.attr('title') || '')
             .attr('tabindex', tabIndex)
@@ -205,13 +205,13 @@
                 .insertAfter(select);
 
             // Set label width
-            var labelWidth =
-                control.width()
-                - arrow.outerWidth()
-                - (parseInt(label.css('paddingLeft')) || 0)
-                - (parseInt(label.css('paddingRight')) || 0);
-
-            label.width(labelWidth);
+            // var labelWidth =
+            //     control.width()
+            //     - arrow.outerWidth()
+            //     - (parseInt(label.css('paddingLeft')) || 0)
+            //     - (parseInt(label.css('paddingRight')) || 0);
+            //
+            // label.width(labelWidth);
             this.disableSelection(control);
         }
         // Store data for later use and show the control

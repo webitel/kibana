@@ -1611,7 +1611,6 @@
                 getAgents: function(currentSession) {
                     var that = WebitelConnection;
                     that.login(function() {
-                        OnWebitelReady.trigger(currentSession);
                         that.listUser(domainUser, function (res) {
                             if (res.status === WebitelCommandResponseTypes.Success) {
                                 try {
@@ -1633,7 +1632,7 @@
                                     };
                                     var currentUser = WebitelUsers.get(account.split('@')[0]);
                                     currentUser.setOnline(true);
-
+                                    OnWebitelReady.trigger(currentSession);
                                 } catch (e) {
                                     // TODO !CM
                                 }

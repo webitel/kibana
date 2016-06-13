@@ -240,6 +240,7 @@ table td {
 }
 .t-content td {
     height: 47px;
+    max-width: 100%;
     border-right: 1px solid #757575;
 }
 
@@ -248,7 +249,7 @@ table td {
 /*---/t-window---*/
 /*---/t-status---*/
 .t-content .t-status {
-    min-width: 10px;
+    min-width: 6px;
     border-right: none;
     height: 100%;
 }
@@ -285,6 +286,7 @@ td.t-userpic, div.t-userpic {
 }
 .t-username {
     padding-right: 12px;
+    width: 100px;
 }
 .t-username:before {
     /*content: '';*/
