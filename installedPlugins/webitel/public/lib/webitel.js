@@ -41,7 +41,7 @@ define(function (require) {
                         secret: webitelSession['password'],
                         server: webitelSession['ws']
                     });
-                    webitel.connect();
+
                     webitel.domainSession = webitelSession['domain'];
 
                     //webitel.onConnect(function () {
@@ -120,7 +120,9 @@ define(function (require) {
                             domainSession: webitel.domainSession,
                             _instance: webitel
                         });
-                    })
+                    });
+
+                    webitel.connect();
 
                     var domains = [];
 

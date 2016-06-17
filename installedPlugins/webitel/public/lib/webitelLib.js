@@ -1611,35 +1611,38 @@
                 getAgents: function(currentSession) {
                     var that = WebitelConnection;
                     that.login(function() {
-                        that.listUser(domainUser, function (res) {
-                            if (res.status === WebitelCommandResponseTypes.Success) {
-                                try {
-                                    var users = JSON.parse(res.response.response);
+                        if (domainUser) {
+                            that.listUser(domainUser, function (res) {
+                                if (res.status === WebitelCommandResponseTypes.Success) {
+                                    try {
+                                        var users = JSON.parse(res.response.response);
 
-                                    for (var key in users) {
-                                        var agent = new WebitelUser({
-                                            'id': users[key]['id'],
-                                            'domain': users[key]['domain'],
-                                            'scheme': users[key]['scheme'],
-                                            'online': users[key]['online'],
-                                            'state': users[key]['state'],
-                                            'away': users[key]['status'],
-                                            'tag': users[key]['descript'],
-                                            'name': users[key]['name'],
-                                            'agent': Boolean(users[key]['agent'])
-                                        });
-                                        WebitelUsers.add(agent.getId(), agent);
-                                    };
-                                    var currentUser = WebitelUsers.get(account.split('@')[0]);
-                                    currentUser.setOnline(true);
-                                    OnWebitelReady.trigger(currentSession);
-                                } catch (e) {
-                                    // TODO !CM
+                                        for (var key in users) {
+                                            var agent = new WebitelUser({
+                                                'id': users[key]['id'],
+                                                'domain': users[key]['domain'],
+                                                'scheme': users[key]['scheme'],
+                                                'online': users[key]['online'],
+                                                'state': users[key]['state'],
+                                                'away': users[key]['status'],
+                                                'tag': users[key]['descript'],
+                                                'name': users[key]['name'],
+                                                'agent': Boolean(users[key]['agent'])
+                                            });
+                                            WebitelUsers.add(agent.getId(), agent);
+                                        };
+                                        var currentUser = WebitelUsers.get(account.split('@')[0]);
+                                        currentUser.setOnline(true);
+                                        OnWebitelReady.trigger(currentSession);
+                                    } catch (e) {
+                                        // TODO !CM
+                                    }
                                 }
+                            });
+                        } else  {
+                            OnWebitelReady.trigger(currentSession);
+                        }
 
-
-                            }
-                        });
                     });
 
                 },
