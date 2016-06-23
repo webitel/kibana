@@ -9,6 +9,7 @@ define(function () {
             { title: 'Time', field: 'Time', show: true, filter: '', 'sortable': 'Time', 'groupable': 'Time' },
             { title: 'Caller Name', field: 'CC_Member_CID_Name', show: true, filter: '', 'sortable': 'CC_Member_CID_Name', 'groupable': 'CC-Member-CID-Name' },
             { title: 'Caller Number', field: 'CC_Member_CID_Number', show: true, 'sortable': 'CC-Member-CID-Number', 'groupable': 'CC-Member-CID-Number' },
+            { title: 'Destination number', field: 'Caller_Destination_Number', show: true, 'sortable': 'Caller-Destination-Number', 'groupable': 'Caller-Destination-Number' },
             { title: 'Queue', field: 'CC_Queue', show: true, 'sortable': 'CC-Queue', 'groupable': 'CC-Queue' },
             { title: 'Agent', field: 'CC_Agent', show: true, 'sortable': 'CC-Agent', 'groupable': 'CC-Agent' },
             { title: 'Join position', field: 'cc_start_position', show: true, 'sortable': 'cc_start_position', 'groupable': 'cc_start_position' },

@@ -14,15 +14,25 @@
     <div class="form-group" style="margin-top: 20px;">
         <label ng-if="$index < 1 || groupName !== 'buckets'" class="ng-scope">Columns</label>
         <table class="table" ng-table="tableParamsCol" >
+            <thead>
+            <tr>
+                <th st-ratio="20" >Field ID</th>
+                <th st-ratio="40" >Title</th>
+                <th st-ratio="40" >Filter</th>
+            </tr>
+            </thead>
+            <tbody style="word-break: break-word;">
             <tr ng-repeat="column in columns">
                 <td data-title="'Field ID'">
                     {{column.field}}
                 </td>
-                <td data-title="'Title'">
+                <td  data-title="'Title'">
                     <input class="form-control" type="text" ng-model="vis.params.columns[column.field].title"
                            ng-init="vis.params.columns[column.field].title=vis.params.columns[column.field].title||column.title"/>
                 </td>
-
+                <td data-title="'Filter'">
+                    <input class="form-control" type="text" ng-model="vis.params.columns[column.field].filter" />
+                </td>
                 <td style="display: none">
                     <input class="form-control" type="text" ng-model="vis.params.columns[column.field].field" ng-show="false"
                            ng-init="vis.params.columns[column.field].field=vis.params.columns[column.field].field||column.field"/>
@@ -39,11 +49,13 @@
                 </td>
 
 
-                <td data-title="'Visible'">
+                <td style="display: none" data-title="'Visible'">
                     <input type="checkbox" ng-model="vis.params.columns[column.field].show"
                            ng-init="vis.params.columns[column.field].show=vis.params.columns[column.field].show||column.show">
                 </td>
             </tr>
+            </tbody>
+
         </table>
 
     </div>

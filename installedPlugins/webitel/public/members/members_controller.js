@@ -124,7 +124,7 @@ define(function (require) {
                 $interval(updateHashListQueue, 1000);
 
                 function eventInDomain(queue) {
-                    return queue.substr(queue.indexOf('@') + 1) == $scope.vis.params.domain;
+                    return queue.substr(queue.indexOf('@') + 1) == (webitel.domainSession || $scope.vis.params.domain);
                 };
 
                 var onCreateMembers = function (e) {
@@ -139,6 +139,7 @@ define(function (require) {
                         "CC-Member-CID-Name": e["CC-Member-CID-Name"],
                         "CC-Member-CID-Number": e["CC-Member-CID-Number"],
                         "CC-Queue": e["CC-Queue"],
+                        "Caller-Destination-Number": e["Caller-Destination-Number"],
                         // TODO resume member score ?? add join position in fs
                         "score": +e["variable_cc_base_score"] || 0,
                         "status": "In queue",
@@ -263,13 +264,23 @@ define(function (require) {
                 var data = [];
                 function updateData () {
                     data.length = 0;
+                    var _data = [];
                     angular.forEach(hashListQueue.collection, function (item) {
                         var _t = {};
                         for (var key in item) {
                             _t[key.replace(/-/g, '_')] = item[key]
                         };
-                        data.push(_t);
+                        _data.push(_t);
                     });
+                    // console.warn(1,_data);
+                    _data = $scope.filtersObj ?
+                        $filter('filter')(_data, $scope.filtersObj) :
+                        _data;
+                    angular.forEach(_data, function (i) {
+                        data.push(i)
+                    });
+
+                    // console.warn(2, data);
                     $scope.totalCalls = data.length;
                     $scope.currentDate = Date.now();
                     $scope.tableParams && $scope.tableParams.reload()
@@ -288,12 +299,15 @@ define(function (require) {
                 self.getCurrentPosition = webitel.getCurrentPosition;
 
                 $scope.$watch('vis.params.columns', function (val) {
+                    $scope.filtersObj = {};
                     if (val) {
                         self.cols.length = 0;
-                        angular.forEach(val, function (item) {
+                        angular.forEach(val, function (item, key) {
                             self.cols.push(item);
+                            if (item['filter'] && item['filter'] != '')
+                                $scope.filtersObj[key] = item['filter'];
                         });
-                    };
+                    }
                 });
 
                 $scope.$watch('vis.params.domain', function (val) {
