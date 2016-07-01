@@ -183,16 +183,15 @@
             var WebitelEventMixin = function() {
                 var _eventHandlers = [];
 
-                function commandEvent(eventName, type, all, callback, scopeCb) {
+                function commandEvent(eventName, type, options, callback, scopeCb) {
                     if (eventName.indexOf(' ') != -1 || eventName == "ALL") {
                         if (typeof scopeCb == "function") scopeCb(false);
                         throw new Error('Wrong event');
                     };
-
-                    var srvEvents = new WebitelCommand(type, {
-                        event: eventName,
-                        all: all
-                    }, callback);
+                    if (!options)
+                        options = {};
+                    options.event = eventName;
+                    var srvEvents = new WebitelCommand(type, options, callback);
                     srvEvents.execute();
                 };
 
@@ -215,8 +214,7 @@
                         if (cb) cb(true);
                         return
                     } else {
-                        var _all = type.all;
-                        commandEvent(eventName, WebitelCommandTypes.Event, _all, function (response) {
+                        commandEvent(eventName, WebitelCommandTypes.Event, type, function (response) {
                             if (response.status === WebitelCommandResponseTypes.Success)
                             //_eventHandlers[eventName].push(handler);
                                 if (cb) cb(response);
@@ -241,7 +239,7 @@
                         return
                     }
 
-                    commandEvent(eventName, WebitelCommandTypes.NixEvent, null, function(response) {
+                    commandEvent(eventName, WebitelCommandTypes.NixEvent, type, function(response) {
                         //if (response.status === WebitelCommandResponseTypes.Success)
                         //    for(var i=0; i<handlers.length; i++) {
                         //        handlers.splice(i--, 1);
