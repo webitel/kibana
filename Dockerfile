@@ -2,7 +2,7 @@ FROM node:slim
 MAINTAINER Vitaly Kovalyshyn "v.kovalyshyn@webitel.com"
 
 ENV VERSION
-ENV WEBITEL_MAJOR 3.3
+ENV WEBITEL_MAJOR 3.4
 ENV WEBITEL_REPO_BASE https://github.com/webitel
 ENV KIBANA_VERSION 4.5.2
 
