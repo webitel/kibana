@@ -11,11 +11,13 @@ target
 .idea
 *.iml
 *.log
-/test/output
+/test/screenshots/failure/*.png
+/test/screenshots/session/*.png
+/html_docs
 /esvm
 .htpasswd
 .eslintcache
-installedPlugins/webitel/node_modules
+data
 disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
@@ -24,3 +26,4 @@ selenium
 .babelcache.json
 *.swp
 *.swo
+installedPlugins/webitel/node_modules

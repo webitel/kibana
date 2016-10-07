@@ -18,7 +18,7 @@ define(function (require) {
             },
             controller: WebitelSessionController
         }
-    })
+    });
 
 //WebitelSessionController.$inject = ['$scope','$injector'];
 

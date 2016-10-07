@@ -4,11 +4,11 @@ const { resolve } = require('url');
 const { assign, defaults } = require('lodash');
 import Wreck from 'wreck';
 
-
 function createProxy(server, method, route, config) {
-  const agent = createAgent(server);
+  /* WEBITEL */
   const timeout = server.config().get('elasticsearch.requestTimeout');
   const mapUriFn = mapUri(server);
+  const elasticsearchUrl = server.config().get('elasticsearch.url');
   const options = {
     method: method,
     path: createProxy.createPath(route),
@@ -35,7 +35,7 @@ function createProxy(server, method, route, config) {
         let credentials = request.auth.credentials;
         if (!credentials) {
           return reply(new Error('Session unauthorized'));
-        };
+        }
         if (credentials.domain) {
           if (/.\/_mapping\/./i.test(uri)) {
             uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_mapping'));
@@ -43,6 +43,8 @@ function createProxy(server, method, route, config) {
             uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('.kibana') + 7);
           } else if (/\/_field_stats/i.test(uri)) {
             uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_field_stats') );
+          } else if (!new RegExp(`${elasticsearchUrl}[/\/]?_search`, 'i').test(uri)) {
+            uri = joinStringFromIndex(uri, credentials.domain, uri.indexOf('/_search'));
           }
 
           if (options.payload) {
@@ -61,7 +63,7 @@ function createProxy(server, method, route, config) {
         let protocol = uri.split(':', 1)[0];
 
         if (request.info.remoteAddress &&
-            request.info.remotePort) {
+          request.info.remotePort) {
 
           options.headers['x-forwarded-for'] = (options.headers['x-forwarded-for'] ? options.headers['x-forwarded-for'] + ',' : '') + request.info.remoteAddress;
           options.headers['x-forwarded-port'] = (options.headers['x-forwarded-port'] ? options.headers['x-forwarded-port'] + ',' : '') + request.info.remotePort;
@@ -70,8 +72,8 @@ function createProxy(server, method, route, config) {
         // Create the request and pipe the response
         Wreck.request(request.method, uri, options, (err, res) => {
           let response = reply(res)
-              .ttl(null)
-              .code(res.statusCode)
+            .ttl(null)
+            .code(res.statusCode)
 
         });
       });
@@ -91,7 +93,7 @@ function createProxy(server, method, route, config) {
   if (method != "GET" && method != 'HEAD') {
     options.config.payload = {
       output: 'data',
-        parse: false
+      parse: false
     }
   }
 
@@ -103,12 +105,10 @@ function createProxy(server, method, route, config) {
 createProxy.createPath = function createPath(path) {
   const pre = '/elasticsearch';
   const sep = path[0] === '/' ? '' : '/';
-  console.log(`proxy: ${pre}${sep}${path}`);
   return `${pre}${sep}${path}`;
 };
 
 module.exports = createProxy;
-
 
 function joinStringFromIndex(x1, x2, i) {
   return x1.slice(0, i) + '-' + x2 + x1.slice(i)

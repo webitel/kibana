@@ -1,3 +1,5 @@
+import routeBasedNotifierProvider from 'ui/route_based_notifier';
+
 define(function (require) {
   return function TermsAggDefinition(Private) {
     let _ = require('lodash');
@@ -6,6 +8,7 @@ define(function (require) {
     let AggConfig = Private(require('ui/Vis/AggConfig'));
     let Schemas = Private(require('ui/Vis/Schemas'));
     let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
     let orderAggSchema = (new Schemas([
       {
@@ -143,6 +146,9 @@ define(function (require) {
             }
 
             if (orderAgg.type.name === 'count') {
+              if (dir === 'asc') {
+                routeBasedNotifier.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
+              }
               order._count = dir;
               return;
             }
