@@ -54,7 +54,6 @@ elasticsearch.url: "http://elasticsearch:9200"
 
 # Time in milliseconds to wait for responses from the back end or elasticsearch.
 # This must be > 0
-
 # elasticsearch.requestTimeout: 30000
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
@@ -81,6 +80,8 @@ logging.silent: false
 
 server.xsrf.disableProtection: true
 
+#webitel.userName: "igor"
+#webitel.password: "yo"
 webitel.engineUri: "https://pre.webitel.com/engine"
 webitel.webRtcUri: "wss://pre.webitel.com:8082"
 webitel.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
