@@ -5,9 +5,19 @@
 define(function (require) {
     const _ = require('lodash');
 
+    var registry = require('ui/registry/settings_sections');
+    registry.register(function () {
+      return {
+        order: 1000,
+        name: 'cti',
+        display: 'CTI',
+        url: '#/settings/cti'
+      };
+    });
+
     require('ui/routes')
         .when('/settings/cti', {
-            template: require('plugins/kibana/settings/sections/cti/cti.html')
+            template: require('plugins/webitel/settings/cti/cti.html')
         });
 
     require('ui/modules').get('apps/cti')
@@ -21,11 +31,4 @@ define(function (require) {
                 localStorage.setItem('leftPosition', $scope.leftPosition || false);
             })
         });
-
-    return {
-        order: 1000,
-        name: 'cti',
-        display: 'CTI',
-        url: '#/settings/cti'
-    };
 });

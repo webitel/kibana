@@ -1,3 +1,5 @@
+import versionCheckMixin from './version_check';
+
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
   let fs = require('fs');
@@ -20,10 +22,7 @@ module.exports = function (kbnServer, server, config) {
       strictHeader: false
     },
     routes: {
-      cors: {
-        origin: ['*'],
-        additionalHeaders:  ['Content-type', 'Accept', 'X-Access-Token', 'X-Key', 'Server', 'X-Powered-By', 'Access-Control-Max-Age']
-      },
+      cors: config.get('server.cors'),
       payload: {
         maxBytes: config.get('server.maxPayloadBytes')
       }
@@ -187,6 +186,8 @@ module.exports = function (kbnServer, server, config) {
       }
     }
   });
+
+  kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(require('./xsrf'));
 };

@@ -3,7 +3,7 @@
 /*-----------------------------base------------------------------*/
 
 
-/* http://meyerweb.com/eric/tools/css/reset/ 
+/* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
@@ -1081,7 +1081,7 @@ td.t-pin-box {
     display:block;float:left;
     width:20px;height:20px;
     cursor: pointer;
-    background:url(../img/check_sprite.png) 0 0px no-repeat;
+    background:url("../img/check_sprite.png") 0 0px no-repeat;
     margin:0px 12px 0 0px;
     -moz-user-select: none;	-khtml-user-select: none;	-webkit-user-select: none;}
 .niceCheck.chkd{background-position:0 -20px;}
@@ -1093,7 +1093,7 @@ td.t-pin-box {
 #simplemodal-overlay {background-color:#000;}
 #simplemodal-container {}
 .simplemodal-wrap{position:relative;top:0;overflow:visible !important;}
-.simplemodal-container .modalClose {position: absolute;top:9px;right:10px;display: block;width:7px;height:7px;background:url(../img/sprite1.png) 0 0 no-repeat;cursor: pointer;z-index:110;}
+.simplemodal-container .modalClose {position: absolute;top:9px;right:10px;display: block;width:7px;height:7px;background:url("../img/sprite1.png") 0 0 no-repeat;cursor: pointer;z-index:110;}
 .t-window{display:none;position:relative;background:#0f0f0f;color:#fff;font-family: 'Ubuntu', sans-serif;
     font-size:14px;line-height:20px;}
 .t-window .window-wrap{position:relative;}
@@ -1132,22 +1132,22 @@ td.t-pin-box {
 
 #t-call_window_small{position:fixed;width:163px;right:25px;bottom:110px;}
 .t-sm_vid_wr{position:relative;overflow:hidden;}
-#t-call_window_small .t-fullscreen_btn{position:absolute;cursor:pointer;background:url(../img/full_screen_pic.png) 0 0 no-repeat;width:21px;height:16px;position:absolute;
+#t-call_window_small .t-fullscreen_btn{position:absolute;cursor:pointer;background:url("../img/full_screen_pic.png") 0 0 no-repeat;width:21px;height:16px;position:absolute;
     bottom:8px;right:8px;}
 #t-call_window_small img{display:block;}
-#t-call_window_small .t-mute_btn{background:url(../img/call_pics01.png) 47px -76px no-repeat #bfbfbf;width:163px;height:96px;cursor:pointer;display:block;}
+#t-call_window_small .t-mute_btn{background:url("../img/call_pics01.png") 47px -76px no-repeat #bfbfbf;width:163px;height:96px;cursor:pointer;display:block;}
 #t-call_window_small .t-mute_btn.active{background-position:47px 24px;}
 
 #t-window3{}
 #t-window3 img{display:block;height:100%;width:auto;}
 #simplemodal-overlay.t-big_video_overlay{opacity:1 !important;}
-.t-big_video_close{display:block;position:absolute;width:36px;height:26px;background:url(../img/big_video_pics.png) -139px -36px no-repeat;
+.t-big_video_close{display:block;position:absolute;width:36px;height:26px;background:url("../img/big_video_pics.png") -139px -36px no-repeat;
     bottom:25px;right:45px;z-index:110;cursor:pointer;}
 .t-big_video_menu{position:absolute;z-index:111;
     bottom:18px;right:117px;}
 .t-video_wr{position:relative;}
 .t-big_video_menu li{margin-left:34px;float:left;}
-.t-big_video_menu a{display:block;width:38px;height:35px;background:url(../img/big_video_pics.png);}
+.t-big_video_menu a{display:block;width:38px;height:35px;background:url("../img/big_video_pics.png");}
 .t-big_video_menu .video_source_btn{background-position:0 -34px;}
 .t-big_video_menu .sound_source_btn{background-position:-72px -34px;}
 .t-big_video_menu .video_source_btn.active{background-position:0 1px;}

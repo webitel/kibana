@@ -6,7 +6,6 @@ const toPath = require('lodash/internal/toPath');
 
 module.exports = (client) => {
   return (req, endpoint, params = {}) => {
-    console.log('call with request');
     if (req.headers.authorization) {
       _.set(params, 'headers.authorization', req.headers.authorization);
     }

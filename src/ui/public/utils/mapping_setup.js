@@ -32,6 +32,7 @@ define(function () {
         // limit the response to just the _source field for each index
         field: '_source'
       }).then(function (resp) {
+        /* WEBITEL */
         try {
           if (config.get('domainName')) {
             indexName += '-' + config.get('domainName');

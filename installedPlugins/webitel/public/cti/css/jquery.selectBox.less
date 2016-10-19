@@ -1,0 +1,143 @@
+// Color variables (appears count calculates by raw css)
+@color0: #888888; // Appears 3 times
+@color1: #ffffff; // Appears 3 times
+@color2: #949494; // Appears 2 times
+
+
+// Height variables (appears count calculates by raw css)
+@height1: 35px; // Appears 2 times
+
+.selectBox-dropdown {
+  -moz-box-sizing:border-box;
+  background:#5d5d5d;
+  box-sizing:border-box;
+  color: @color1 !important;
+  cursor: pointer;
+  display: block;
+  font-family: 'Ubuntu', sans-serif;
+  font-size:14px;
+  height:@height1;
+  line-height: @height1;
+  outline: none;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  vertical-align: middle;
+  &:focus {
+    border-color: #7f7f7f;
+  }
+  .selectBox-label {
+    display: inline-block;
+    overflow: hidden;
+    padding:0 20px 0 20px;
+    white-space: nowrap;
+  }
+  .selectBox-arrow {
+    background:url('../img/sprite1.png') 16px -14px no-repeat;
+    height:@height1;
+    position: absolute;
+    right:0;
+    top:0;
+    width: 45px;
+  }
+}
+.selectBox-dropdown.selectBox-menuShowing {
+  -moz-border-radius-bottomleft: 0;
+  -moz-border-radius-bottomright: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -webkit-border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.selectBox-dropdown-menu {
+  background: #828282;
+  border-top:1px solid #0f0f0f;
+  font-family: 'Ubuntu', sans-serif;
+  max-height: 200px;
+  min-height: 1em;
+  overflow: auto;
+  position: absolute;
+  z-index: 99999;
+}
+.selectBox-inline {
+  background: @color1;
+  border: solid 1px #bbbbbb;
+  display: inline-block;
+  min-width: 150px;
+  outline: none;
+  overflow: auto;
+  &:focus {
+    border-color: #ebebeb;
+  }
+}
+.selectBox-options {
+  cursor: default;
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  padding:3px 0;
+  LI {
+    cursor: default;
+    display: block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    A {
+      color:@color1;
+      cursor: default;
+      display: block;
+      line-height: 2;
+      list-style: none;
+      margin: 0;
+      margin:1px 0;
+      overflow: hidden;
+      padding: 0;
+      padding: 0 20px;
+      text-decoration:none;
+      white-space: nowrap;
+    }
+  }
+  LI.selectBox-hover {
+    A {
+      background-color: @color2;
+    }
+  }
+  LI.selectBox-disabled {
+    A {
+      background-color: transparent;
+      color: @color0;
+    }
+  }
+  LI.selectBox-selected {
+    A {
+      background-color: @color2;
+    }
+  }
+  .selectBox-optgroup {
+    background: #eeeeee;
+    color: #000000;
+    font-weight: bold;
+    line-height: 1.5;
+    padding: 0 .3em;
+    white-space: nowrap;
+  }
+}
+.selectBox.selectBox-disabled {
+  color: @color0 !important;
+}
+.selectBox-dropdown.selectBox-disabled {
+  .selectBox-arrow {
+    border-color: #666666;
+    filter: alpha(opacity=50);
+    opacity: .5;
+  }
+}
+.selectBox-inline.selectBox-disabled {
+  color: @color0 !important;
+  .selectBox-options {
+    A {
+      background-color: transparent !important;
+    }
+  }
+}

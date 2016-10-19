@@ -17,7 +17,9 @@ module.exports = function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
-          'spyModes'
+          'spyModes',
+          'navbarExtensions',
+          'settingsSections',
         ],
 
         autoload: kibana.autoload.require.concat(
@@ -25,9 +27,7 @@ module.exports = function (kibana) {
           'plugins/kibana/visualize',
           'plugins/kibana/dashboard',
           'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
           'plugins/kibana/doc',
-          'plugins/kibana/settings/sections',
           'ui/vislib',
           'ui/agg_response',
           'ui/agg_types',
@@ -38,10 +38,17 @@ module.exports = function (kibana) {
           let config = server.config();
 
           return {
-            kbnDefaultAppId: config.get('kibana.defaultAppId')
+            kbnDefaultAppId: config.get('kibana.defaultAppId'),
+            tilemap: config.get('tilemap')
           };
         }
-      }
+      },
+
+      injectDefaultVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     }
   });
 
