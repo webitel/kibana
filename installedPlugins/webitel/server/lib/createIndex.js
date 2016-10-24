@@ -9,13 +9,16 @@ export function validateIndex (server, domainName, cb) {
     const buildNum = config.get('pkg.buildNum');
     const id = config.get('pkg.version');
 
-    client.indices.exists({
-        index: index
+    client.get({
+        index: index,
+        type: "config",
+        id: id
     }, (err, exists) => {
-        if (err)
+        if (err && err.status !== '404')
             return console.error(err);
 
-        if (!exists) {
+        if (!exists || exists.found === false) {
+            console.log(`Try create index`);
             createIndex(client, index)
                 .then(createConfig(client, index, id, buildNum, domainName)
                     .catch(setupError)
@@ -44,6 +47,10 @@ function createIndex(client, index) {
                 config: {
                     properties: {
                         buildNum: {
+                            type: 'string',
+                            index: 'not_analyzed'
+                        },
+                        domainName: {
                             type: 'string',
                             index: 'not_analyzed'
                         }
