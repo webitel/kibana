@@ -27,6 +27,13 @@ function mapUri(server, prefix) {
   }
 
   return function (request, done) {
+
+    /*WEBITEL*/
+    const credentials = request.auth.credentials;
+    if (!credentials) {
+      return done(new Error('Session unauthorized'));
+    }
+    
     var _parseUrl = (0, _url.parse)(config.get('elasticsearch.url'), true);
 
     var esUrlProtocol = _parseUrl.protocol;
@@ -48,6 +55,30 @@ function mapUri(server, prefix) {
 
     // pathname
     var reqSubPath = request.path.replace('/elasticsearch', '');
+    /*WEBITEL*/
+    if (credentials.domain) {
+
+      if (/.\/_mget|_msearch|_mapping|_field_stats|index-pattern|\.kibana./.test(reqSubPath)) {
+        let _paths = reqSubPath.split('/');
+        if (_paths.length > 2) {
+          _paths[1] +=  '-' + credentials.domain
+        }
+
+        reqSubPath = _paths.join('/');
+      }
+
+     // console.log('\x1b[31m', `>>> ${reqSubPath}` ,'\x1b[0m');
+
+      let payload = request.payload ? request.payload.toString('utf8') : null;
+      if (payload) {
+        payload = payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
+          return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
+        });
+        request.payload = new Buffer(payload);
+       // console.log('\x1b[31m', `>>> ${payload}` ,'\x1b[0m');
+      }
+    }
+
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
     // querystring
@@ -61,36 +92,7 @@ function mapUri(server, prefix) {
     var mappedUrl = (0, _url.format)(mappedUrlComponents);
 
     console.log(mappedUrl, mappedHeaders);
-    /*WEBITEL*/
-    const credentials = request.auth.credentials;
-    if (!credentials) {
-      return done(new Error('Session unauthorized'));
-    }
 
-    if (credentials.domain) {
-      if (/.\/_mapping\/./i.test(mappedUrl)) {
-        mappedUrl = joinStringFromIndex(mappedUrl, credentials.domain, mappedUrl.indexOf('/_mapping'));
-      } else if (/.kibana\//.test(mappedUrl)) {
-        mappedUrl = joinStringFromIndex(mappedUrl, credentials.domain, mappedUrl.indexOf('.kibana') + 7);
-      } else if (/\/_field_stats/i.test(mappedUrl)) {
-        mappedUrl = joinStringFromIndex(mappedUrl, credentials.domain, mappedUrl.indexOf('/_field_stats') );
-      }
-      // else if (!new RegExp(`${esUrlHostname}[/\/]?_search`, 'i').test(mappedUrl)) {
-      //   mappedUrl = joinStringFromIndex(mappedUrl, credentials.domain, mappedUrl.indexOf('/_search'));
-      // }
-
-      let payload = request.payload ? request.payload.toString('utf8') : null;
-
-      if (payload) {
-        payload = payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
-          return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
-        });
-        request.payload = new Buffer(payload);
-        console.log(payload);
-      }
-    }
-
-    console.info(mappedUrl);
     done(null, mappedUrl, mappedHeaders);
   };
 }
