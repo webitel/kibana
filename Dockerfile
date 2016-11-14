@@ -24,6 +24,7 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 RUN apt-get update && apt-get install -y --force-yes git build-essential python python-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     cd /kibana && npm install && npm cache clear && \
+    ./bin/kibana-plugin install https://github.com/prelert/kibana-swimlane-vis/releases/download/v5.0.0/prelert_swimlane_vis-5.0.0.zip && \
     cd /kibana/plugins && git clone https://github.com/mstoyano/kbn_c3js_vis.git c3_charts && cd c3_charts && npm install && npm cache clear && \
     cd /kibana/plugins/webitel && npm install && npm cache clear
 
