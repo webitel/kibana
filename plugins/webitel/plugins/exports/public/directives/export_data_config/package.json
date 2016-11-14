@@ -1,0 +1,73 @@
+{
+  "size": 500,
+  "sort": [
+    {
+      "variables.outbound_caller_id_name": {
+        "order": "desc",
+        "unmapped_type": "boolean"
+      }
+    }
+  ],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "*",
+            "analyze_wildcard": true
+          }
+        },
+        {
+          "range": {
+            "variables.start_stamp": {
+              "gte": 1478728800000,
+              "lte": 1478815199999,
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ],
+      "must_not": []
+    }
+  },
+  "highlight": {
+    "pre_tags": [
+      "@kibana-highlighted-field@"
+    ],
+    "post_tags": [
+      "@/kibana-highlighted-field@"
+    ],
+    "fields": {
+      "*": {}
+    },
+    "require_field_match": false,
+    "fragment_size": 2147483647
+  },
+  "aggs": {
+    "2": {
+      "date_histogram": {
+        "field": "variables.start_stamp",
+        "interval": "30m",
+        "time_zone": "Europe/Helsinki",
+        "min_doc_count": 1
+      }
+    }
+  },
+  "stored_fields": [
+    "*"
+  ],
+  "_source": true,
+  "script_fields": {},
+  "docvalue_fields": [
+    "Bridge time",
+    "Call end time",
+    "variables.start_stamp",
+    "Queue answer time",
+    "Progress time",
+    "Queue stop time",
+    "Queue start time",
+    "Call answer time",
+    "Call start time",
+    "recordings.createdOn"
+  ]
+}

@@ -1,21 +1,22 @@
-define(function (require) {
-  return function YAxisFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let errors = require('ui/errors');
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import errors from 'ui/errors';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+export default function YAxisFactory(Private) {
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
-    /**
-     * Appends y axis to the visualization
-     *
-     * @class YAxis
-     * @constructor
-     * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
-     */
-    _.class(YAxis).inherits(ErrorHandler);
-    function YAxis(args) {
+  /**
+   * Appends y axis to the visualization
+   *
+   * @class YAxis
+   * @constructor
+   * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
+   */
+  class YAxis extends ErrorHandler {
+    constructor(args) {
+      super();
       this.el = args.el;
       this.scale = null;
       this.domain = [args.yMin, args.yMax];
@@ -29,24 +30,24 @@ define(function (require) {
      * @method render
      * @return {D3.UpdateSelection} Renders y axis to visualization
      */
-    YAxis.prototype.render = function () {
+    render() {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype._isPercentage = function () {
+    _isPercentage() {
       return (this._attr.mode === 'percentage');
     };
 
-    YAxis.prototype._isUserDefined = function () {
+    _isUserDefined() {
       return (this._attr.setYExtents);
     };
 
-    YAxis.prototype._isYExtents = function () {
+    _isYExtents() {
       return (this._attr.defaultYExtents);
     };
 
-    YAxis.prototype._validateUserExtents = function (domain) {
-      let self = this;
+    _validateUserExtents(domain) {
+      const self = this;
 
       return domain.map(function (val) {
         val = parseInt(val, 10);
@@ -57,9 +58,9 @@ define(function (require) {
       });
     };
 
-    YAxis.prototype._getExtents = function (domain) {
-      let min = domain[0];
-      let max = domain[1];
+    _getExtents(domain) {
+      const min = domain[0];
+      const max = domain[1];
 
       if (this._isUserDefined()) return this._validateUserExtents(domain);
       if (this._isYExtents()) return domain;
@@ -68,11 +69,11 @@ define(function (require) {
       return domain;
     };
 
-    YAxis.prototype._throwCustomError = function (message) {
+    _throwCustomError(message) {
       throw new Error(message);
     };
 
-    YAxis.prototype._throwLogScaleValuesError = function () {
+    _throwLogScaleValuesError() {
       throw new errors.InvalidLogScaleValues();
     };
 
@@ -82,7 +83,7 @@ define(function (require) {
      * @param fnName {String} D3 scale
      * @returns {*}
      */
-    YAxis.prototype._getScaleType = function (fnName) {
+    _getScaleType(fnName) {
       if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
 
@@ -95,12 +96,11 @@ define(function (require) {
      * Return the domain for log scale, i.e. the extent of the log scale.
      * Log scales must begin at 1 since the log(0) = -Infinity
      *
-     * @param scale
-     * @param yMin
-     * @param yMax
-     * @returns {*[]}
+     * @param {Number} min
+     * @param {Number} max
+     * @returns {Array}
      */
-    YAxis.prototype._logDomain = function (min, max) {
+    _logDomain(min, max) {
       if (min < 0 || max < 0) return this._throwLogScaleValuesError();
       return [1, max];
     };
@@ -112,9 +112,9 @@ define(function (require) {
      * @param height {Number} DOM Element height
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
-    YAxis.prototype.getYScale = function (height) {
-      let scale = this._getScaleType(this._attr.scale);
-      let domain = this._getExtents(this.domain);
+    getYScale(height) {
+      const scale = this._getScaleType(this._attr.scale);
+      const domain = this._getExtents(this.domain);
 
       this.yScale = scale
       .domain(domain)
@@ -126,18 +126,18 @@ define(function (require) {
       return this.yScale;
     };
 
-    YAxis.prototype.getScaleType = function () {
+    getScaleType() {
       return this._attr.scale;
     };
 
-    YAxis.prototype.tickFormat = function () {
-      let isPercentage = this._attr.mode === 'percentage';
+    tickFormat() {
+      const isPercentage = this._attr.mode === 'percentage';
       if (isPercentage) return d3.format('%');
       if (this.yAxisFormatter) return this.yAxisFormatter;
       return d3.format('n');
     };
 
-    YAxis.prototype._validateYScale = function (yScale) {
+    _validateYScale(yScale) {
       if (!yScale || _.isNaN(yScale)) throw new Error('yScale is ' + yScale);
     };
 
@@ -148,16 +148,16 @@ define(function (require) {
      * @param height {Number} DOM Element height
      * @returns {D3.Svg.Axis|*} D3 yAxis function
      */
-    YAxis.prototype.getYAxis = function (height) {
-      let yScale = this.getYScale(height);
+    getYAxis(height) {
+      const yScale = this.getYScale(height);
       this._validateYScale(yScale);
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
-        .scale(yScale)
-        .tickFormat(this.tickFormat(this.domain))
-        .ticks(this.tickScale(height))
-        .orient('left');
+      .scale(yScale)
+      .tickFormat(this.tickFormat(this.domain))
+      .ticks(this.tickScale(height))
+      .orient('left');
 
       return this.yAxis;
     };
@@ -172,8 +172,8 @@ define(function (require) {
      * @param height {Number} DOM element height
      * @returns {number} Number of y axis ticks
      */
-    YAxis.prototype.tickScale = function (height) {
-      let yTickScale = d3.scale.linear()
+    tickScale(height) {
+      const yTickScale = d3.scale.linear()
       .clamp(true)
       .domain([20, 40, 1000])
       .range([0, 3, 11]);
@@ -187,30 +187,30 @@ define(function (require) {
      * @method draw
      * @returns {Function} Renders y axis to visualization
      */
-    YAxis.prototype.draw = function () {
-      let self = this;
-      let margin = this._attr.margin;
-      let mode = this._attr.mode;
-      let isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
+    draw() {
+      const self = this;
+      const margin = this._attr.margin;
+      const mode = this._attr.mode;
+      const isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
 
       return function (selection) {
         selection.each(function () {
-          let el = this;
+          const el = this;
 
-          let div = d3.select(el);
-          let width = $(el).parent().width();
-          let height = $(el).height();
-          let adjustedHeight = height - margin.top - margin.bottom;
+          const div = d3.select(el);
+          const width = $(el).parent().width();
+          const height = $(el).height();
+          const adjustedHeight = height - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, adjustedHeight);
 
-          let yAxis = self.getYAxis(adjustedHeight);
+          const yAxis = self.getYAxis(adjustedHeight);
 
           // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
-            let svg = div.append('svg')
+            const svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
 
@@ -219,9 +219,9 @@ define(function (require) {
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
 
-            let container = svg.select('g.y.axis').node();
+            const container = svg.select('g.y.axis').node();
             if (container) {
-              let cWidth = Math.max(width, container.getBBox().width);
+              const cWidth = Math.max(width, container.getBBox().width);
               svg.attr('width', cWidth);
               svg.select('g')
               .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
@@ -230,7 +230,7 @@ define(function (require) {
         });
       };
     };
+  }
 
-    return YAxis;
-  };
-});
+  return YAxis;
+};

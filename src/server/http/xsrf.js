@@ -1,25 +1,31 @@
-import { badRequest } from 'boom';
+'use strict';
 
-export default function (kbnServer, server, config) {
-  const disabled = config.get('server.xsrf.disableProtection');
-  // COMPAT: We continue to check on the kbn-version header for backwards
-  // compatibility since all existing consumers have been required to use it.
-  const versionHeader = 'kbn-version';
-  const xsrfHeader = 'kbn-xsrf';
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _boom = require('boom');
+
+exports['default'] = function (kbnServer, server, config) {
+  var disabled = config.get('server.xsrf.disableProtection');
+  var versionHeader = 'kbn-version';
+  var xsrfHeader = 'kbn-xsrf';
 
   server.ext('onPostAuth', function (req, reply) {
     if (disabled) {
-      return reply.continue();
+      return reply['continue']();
     }
 
-    const isSafeMethod = req.method === 'get' || req.method === 'head';
-    const hasVersionHeader = versionHeader in req.headers;
-    const hasXsrfHeader = xsrfHeader in req.headers;
+    var isSafeMethod = req.method === 'get' || req.method === 'head';
+    var hasVersionHeader = (versionHeader in req.headers);
+    var hasXsrfHeader = (xsrfHeader in req.headers);
 
     if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-      return reply(badRequest(`Request must contain an ${xsrfHeader} header`));
+      return reply((0, _boom.badRequest)('Request must contain an ' + xsrfHeader + ' header'));
     }
 
-    return reply.continue();
+    return reply['continue']();
   });
-}
+};
+
+module.exports = exports['default'];

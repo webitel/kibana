@@ -1,46 +1,29 @@
-module.exports = async function (kbnServer, server, config) {
-  let { includes, keys } = require('lodash');
+'use strict';
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { var callNext = step.bind(null, 'next'); var callThrow = step.bind(null, 'throw'); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(callNext, callThrow); } } callNext(); }); }; }
+
+var _plugin_init = require('./plugin_init');
+
+var _plugin_init2 = _interopRequireDefault(_plugin_init);
+
+module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
 
   if (!config.get('plugins.initialize')) {
     server.log(['info'], 'Plugin initialization disabled.');
     return [];
   }
 
-  let { plugins } = kbnServer;
+  var plugins = kbnServer.plugins;
 
   // extend plugin apis with additional context
-  plugins.getPluginApis().forEach(api => {
+  plugins.getPluginApis().forEach(function (api) {
 
     Object.defineProperty(api, 'uiExports', {
       value: kbnServer.uiExports
     });
-
   });
 
-
-  let path = [];
-  const initialize = async function (id) {
-    let plugin = plugins.byId[id];
-
-    if (includes(path, id)) {
-      throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
-    }
-
-    path.push(id);
-
-    for (let reqId of plugin.requiredIds) {
-      if (!plugins.byId[reqId]) {
-        throw new Error(`Unmet requirement "${reqId}" for plugin "${id}"`);
-      }
-
-      await initialize(reqId);
-    }
-
-    await plugin.init();
-    path.pop();
-  };
-
-  for (let {id} of plugins) {
-    await initialize(id);
-  }
-};
+  yield (0, _plugin_init2['default'])(plugins);
+});

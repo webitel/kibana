@@ -1,72 +1,54 @@
-import versionCheckMixin from './version_check';
+'use strict';
 
-module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-  let getDefaultRoute = require('./getDefaultRoute');
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { var callNext = step.bind(null, 'next'); var callThrow = step.bind(null, 'throw'); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(callNext, callThrow); } } callNext(); }); }; }
 
-  server = kbnServer.server = new Hapi.Server();
+var _url = require('url');
 
-  const shortUrlLookup = require('./short_url_lookup')(server);
+var _lodash = require('lodash');
 
-  // Create a new connection
-  let connectionOptions = {
-    host: config.get('server.host'),
-    port: config.get('server.port'),
-    state: {
-      strictHeader: false
-    },
-    routes: {
-      cors: config.get('server.cors'),
-      payload: {
-        maxBytes: config.get('server.maxPayloadBytes')
-      }
-    }
-  };
+var _lodash2 = _interopRequireDefault(_lodash);
 
-  // enable tls if ssl key and cert are defined
-  if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
-    connectionOptions.tls = {
-      key: fs.readFileSync(config.get('server.ssl.key')),
-      cert: fs.readFileSync(config.get('server.ssl.cert')),
-      // The default ciphers in node 0.12.x include insecure ciphers, so until
-      // we enforce a more recent version of node, we craft our own list
-      // @see https://github.com/nodejs/node/blob/master/src/node_constants.h#L8-L28
-      ciphers: [
-        'ECDHE-RSA-AES128-GCM-SHA256',
-        'ECDHE-ECDSA-AES128-GCM-SHA256',
-        'ECDHE-RSA-AES256-GCM-SHA384',
-        'ECDHE-ECDSA-AES256-GCM-SHA384',
-        'DHE-RSA-AES128-GCM-SHA256',
-        'ECDHE-RSA-AES128-SHA256',
-        'DHE-RSA-AES128-SHA256',
-        'ECDHE-RSA-AES256-SHA384',
-        'DHE-RSA-AES256-SHA384',
-        'ECDHE-RSA-AES256-SHA256',
-        'DHE-RSA-AES256-SHA256',
-        'HIGH',
-        '!aNULL',
-        '!eNULL',
-        '!EXPORT',
-        '!DES',
-        '!RC4',
-        '!MD5',
-        '!PSK',
-        '!SRP',
-        '!CAMELLIA'
-      ].join(':'),
-      // We use the server's cipher order rather than the client's to prevent
-      // the BEAST attack
-      honorCipherOrder: true
-    };
-  }
+var _fs = require('fs');
 
-  server.connection(connectionOptions);
+var _fs2 = _interopRequireDefault(_fs);
+
+var _boom = require('boom');
+
+var _boom2 = _interopRequireDefault(_boom);
+
+var _hapi = require('hapi');
+
+var _hapi2 = _interopRequireDefault(_hapi);
+
+var _vision = require('vision');
+
+var _vision2 = _interopRequireDefault(_vision);
+
+var _inert = require('inert');
+
+var _inert2 = _interopRequireDefault(_inert);
+
+var _h2o2 = require('h2o2');
+
+var _h2o22 = _interopRequireDefault(_h2o2);
+
+var _get_default_route = require('./get_default_route');
+
+var _get_default_route2 = _interopRequireDefault(_get_default_route);
+
+var _version_check = require('./version_check');
+
+var _version_check2 = _interopRequireDefault(_version_check);
+
+module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
+
+  server = kbnServer.server = new _hapi2['default'].Server();
+
+  var shortUrlLookup = require('./short_url_lookup')(server);
+  yield kbnServer.mixin(require('./register_hapi_plugins'));
+  yield kbnServer.mixin(require('./setup_connection'));
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -76,11 +58,11 @@ module.exports = function (kbnServer, server, config) {
       handler: {
         directory: {
           path: dirPath,
-          listing: true,
+          listing: false,
           lookupCompressed: true
         }
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -92,7 +74,7 @@ module.exports = function (kbnServer, server, config) {
       handler: {
         file: filePath
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -101,7 +83,7 @@ module.exports = function (kbnServer, server, config) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
+      engines: _lodash2['default'].assign({ jade: require('jade') }, engines || {})
     });
   });
 
@@ -109,10 +91,10 @@ module.exports = function (kbnServer, server, config) {
     this.route({
       path: route,
       method: 'GET',
-      handler: function (req, reply) {
-        return reply.redirect(format({
+      handler: function handler(req, reply) {
+        return reply.redirect((0, _url.format)({
           search: req.url.search,
-          pathname: req.url.pathname + '/',
+          pathname: req.url.pathname + '/'
         }));
       }
     });
@@ -120,7 +102,7 @@ module.exports = function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    var response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -130,16 +112,16 @@ module.exports = function (kbnServer, server, config) {
       response.header('kbn-version', kbnServer.version);
     }
 
-    return reply.continue();
+    return reply['continue']();
   });
 
   server.route({
     path: '/',
     method: 'GET',
-    handler: function (req, reply) {
-      return reply.view('rootRedirect', {
-        hashRoute: `${config.get('server.basePath')}/app/kibana`,
-        defaultRoute: getDefaultRoute(kbnServer),
+    handler: function handler(req, reply) {
+      return reply.view('root_redirect', {
+        hashRoute: config.get('server.basePath') + '/app/kibana',
+        defaultRoute: (0, _get_default_route2['default'])(kbnServer)
       });
     }
   });
@@ -147,47 +129,46 @@ module.exports = function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function (req, reply) {
-      let path = req.path;
+    handler: function handler(req, reply) {
+      var path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
-        return reply(Boom.notFound());
+        return reply(_boom2['default'].notFound());
       }
 
-      return reply.redirect(format({
+      return reply.redirect((0, _url.format)({
         search: req.url.search,
-        pathname: path.slice(0, -1),
-      }))
-      .permanent(true);
+        pathname: path.slice(0, -1)
+      })).permanent(true);
     }
   });
 
   server.route({
     method: 'GET',
     path: '/goto/{urlId}',
-    handler: async function (request, reply) {
+    handler: _asyncToGenerator(function* (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
+        var url = yield shortUrlLookup.getUrl(request.params.urlId);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
         reply(err);
       }
-    }
+    })
   });
 
   server.route({
     method: 'POST',
     path: '/shorten',
-    handler: async function (request, reply) {
+    handler: _asyncToGenerator(function* (request, reply) {
       try {
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        var urlId = yield shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
         reply(err);
       }
-    }
+    })
   });
 
-  kbnServer.mixin(versionCheckMixin);
+  kbnServer.mixin(_version_check2['default']);
 
   return kbnServer.mixin(require('./xsrf'));
-};
+});

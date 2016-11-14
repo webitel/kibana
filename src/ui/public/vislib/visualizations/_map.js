@@ -1,43 +1,48 @@
-define(function (require) {
-  return function MapFactory(Private, tilemap, $sanitize) {
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let L = require('leaflet');
-    let marked = require('marked');
-    marked.setOptions({
-      gfm: true, // Github-flavored markdown
-      sanitize: true // Sanitize HTML tags
-    });
+import _ from 'lodash';
+import $ from 'jquery';
+import L from 'leaflet';
+import marked from 'marked';
+marked.setOptions({
+  gfm: true, // Github-flavored markdown
+  sanitize: true // Sanitize HTML tags
+});
 
-    let defaultMapZoom = 2;
-    let defaultMapCenter = [15, 5];
-    let defaultMarkerType = 'Scaled Circle Markers';
+import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
+import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
+import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
+import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
+export default function MapFactory(Private, tilemap, $sanitize) {
 
-    let tilemapOptions = tilemap.options;
-    let attribution = $sanitize(marked(tilemapOptions.attribution));
+  const defaultMapZoom = 2;
+  const defaultMapCenter = [15, 5];
+  const defaultMarkerType = 'Scaled Circle Markers';
 
-    let mapTiles = {
-      url: tilemap.url,
-      options: _.assign({}, tilemapOptions, { attribution })
-    };
+  const tilemapOptions = tilemap.options;
+  const attribution = $sanitize(marked(tilemapOptions.attribution));
 
-    let markerTypes = {
-      'Scaled Circle Markers': Private(require('ui/vislib/visualizations/marker_types/scaled_circles')),
-      'Shaded Circle Markers': Private(require('ui/vislib/visualizations/marker_types/shaded_circles')),
-      'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
-      'Heatmap': Private(require('ui/vislib/visualizations/marker_types/heatmap')),
-    };
+  const mapTiles = {
+    url: tilemap.url,
+    options: _.assign({}, tilemapOptions, { attribution })
+  };
 
-    /**
-     * Tile Map Maps
-     *
-     * @class Map
-     * @constructor
-     * @param container {HTML Element} Element to render map into
-     * @param chartData {Object} Elasticsearch query results for this map
-     * @param params {Object} Parameters used to build a map
-     */
-    function TileMapMap(container, chartData, params) {
+  const markerTypes = {
+    'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
+    'Shaded Circle Markers': Private(VislibVisualizationsMarkerTypesShadedCirclesProvider),
+    'Shaded Geohash Grid': Private(VislibVisualizationsMarkerTypesGeohashGridProvider),
+    'Heatmap': Private(VislibVisualizationsMarkerTypesHeatmapProvider),
+  };
+
+  /**
+   * Tile Map Maps
+   *
+   * @class Map
+   * @constructor
+   * @param container {HTML Element} Element to render map into
+   * @param chartData {Object} Elasticsearch query results for this map
+   * @param params {Object} Parameters used to build a map
+   */
+  class TileMapMap {
+    constructor(container, chartData, params) {
       this._container = $(container).get(0);
       this._chartData = chartData;
 
@@ -47,9 +52,11 @@ define(function (require) {
       this._valueFormatter = params.valueFormatter || _.identity;
       this._tooltipFormatter = params.tooltipFormatter || _.identity;
       this._geoJson = _.get(this._chartData, 'geoJson');
+      this._mapZoom = Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
+      this._mapCenter = params.center || defaultMapCenter;
       this._attr = params.attr || {};
 
-      let mapOptions = {
+      const mapOptions = {
         minZoom: tilemapOptions.minZoom,
         maxZoom: tilemapOptions.maxZoom,
         noWrap: true,
@@ -61,11 +68,11 @@ define(function (require) {
       this._createMap(mapOptions);
     }
 
-    TileMapMap.prototype.addBoundingControl = function () {
+    addBoundingControl() {
       if (this._boundingControl) return;
 
-      let self = this;
-      let drawOptions = { draw: {} };
+      const self = this;
+      const drawOptions = {draw: {}};
 
       _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
         if (self._events && !self._events.listenerCount(drawShape)) {
@@ -84,27 +91,27 @@ define(function (require) {
       this.map.addControl(this._boundingControl);
     };
 
-    TileMapMap.prototype.addFitControl = function () {
+    addFitControl() {
       if (this._fitControl) return;
 
-      let self = this;
-      let fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
+      const self = this;
+      const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
       // Add button to fit container to points
-      let FitControl = L.Control.extend({
+      const FitControl = L.Control.extend({
         options: {
           position: 'topleft'
         },
-        onAdd: function (map) {
+        onAdd: function () {
           $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
-          .on('click', function (e) {
-            e.preventDefault();
-            self._fitBounds();
-          });
+            .on('click', function (e) {
+              e.preventDefault();
+              self._fitBounds();
+            });
 
           return fitContainer;
         },
-        onRemove: function (map) {
+        onRemove: function () {
           $(fitContainer).off('click');
         }
       });
@@ -120,10 +127,10 @@ define(function (require) {
      * @param mapLabel {String}
      * @return {undefined}
      */
-    TileMapMap.prototype.addTitle = function (mapLabel) {
+    addTitle(mapLabel) {
       if (this._label) return;
 
-      let label = this._label = L.control();
+      const label = this._label = L.control();
 
       label.onAdd = function () {
         this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
@@ -144,19 +151,19 @@ define(function (require) {
      * @method saturateTiles
      * @return undefined
      */
-    TileMapMap.prototype.saturateTiles = function () {
+    saturateTiles() {
       if (!this._attr.isDesaturated) {
         $('img.leaflet-tile-loaded').addClass('filters-off');
       }
     };
 
-    TileMapMap.prototype.updateSize = function () {
+    updateSize() {
       this.map.invalidateSize({
         debounceMoveend: true
       });
     };
 
-    TileMapMap.prototype.destroy = function () {
+    destroy() {
       if (this._label) this._label.removeFrom(this.map);
       if (this._fitControl) this._fitControl.removeFrom(this.map);
       if (this._boundingControl) this._boundingControl.removeFrom(this.map);
@@ -171,7 +178,7 @@ define(function (require) {
      *
      * @method _addMarkers
      */
-    TileMapMap.prototype._addMarkers = function () {
+    _addMarkers() {
       if (!this._geoJson) return;
       if (this._markers) this._markers.destroy();
 
@@ -193,25 +200,37 @@ define(function (require) {
      * @param options {Object} options to give to marker class
      * @return {Object} marker layer
      */
-    TileMapMap.prototype._createMarkers = function (options) {
-      let MarkerType = markerTypes[this._markerType];
+    _createMarkers(options) {
+      const MarkerType = markerTypes[this._markerType];
       return new MarkerType(this.map, this._geoJson, options);
     };
 
-    TileMapMap.prototype._attachEvents = function () {
-      let self = this;
-      let saturateTiles = self.saturateTiles.bind(self);
+    _attachEvents() {
+      const self = this;
+      const saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
+
+      this._tileLayer.on('load', () => {
+        if (!self._events) return;
+
+        self._events.emit('rendered', {
+          chart: self._chartData,
+          map: self.map,
+          center: self._mapCenter,
+          zoom: self._mapZoom,
+        });
+      });
 
       this.map.on('unload', function () {
         self._tileLayer.off('tileload', saturateTiles);
       });
 
-      this.map.on('moveend', function setZoomCenter(ev) {
+      this.map.on('moveend', function setZoomCenter() {
         if (!self.map) return;
         // update internal center and zoom references
-        self._mapCenter = self.map.getCenter();
+        const uglyCenter = self.map.getCenter();
+        self._mapCenter = [uglyCenter.lat, uglyCenter.lng];
         self._mapZoom = self.map.getZoom();
         self._addMarkers();
 
@@ -226,23 +245,31 @@ define(function (require) {
       });
 
       this.map.on('draw:created', function (e) {
-        let drawType = e.layerType;
+        const drawType = e.layerType;
         if (!self._events || !self._events.listenerCount(drawType)) return;
 
         // TODO: Different drawTypes need differ info. Need a switch on the object creation
-        let bounds = e.layer.getBounds();
+        const bounds = e.layer.getBounds();
 
+        let SElng = bounds.getSouthEast().lng;
+        if (SElng > 180) {
+          SElng -= 360;
+        }
+        let NWlng = bounds.getNorthWest().lng;
+        if (NWlng < -180) {
+          NWlng += 360;
+        }
         self._events.emit(drawType, {
           e: e,
           chart: self._chartData,
           bounds: {
             top_left: {
               lat: bounds.getNorthWest().lat,
-              lon: bounds.getNorthWest().lng
+              lon: NWlng
             },
             bottom_right: {
               lat: bounds.getSouthEast().lat,
-              lon: bounds.getSouthEast().lng
+              lon: SElng
             }
           }
         });
@@ -261,24 +288,15 @@ define(function (require) {
       });
     };
 
-    TileMapMap.prototype._createMap = function (mapOptions) {
+    _createMap(mapOptions) {
       if (this.map) this.destroy();
 
+      // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
         _.assign(mapOptions, {
           minZoom: 1,
           maxZoom: 18
         });
-      }
-
-      const savedZoom = _.get(this._geoJson, 'properties.zoom');
-
-      // get center and zoom from mapdata, or use defaults
-      this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-      this._mapZoom = Math.max(Math.min(savedZoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
-
-      // add map tiles layer, using the mapTiles object settings
-      if (this._attr.wms && this._attr.wms.enabled) {
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
         this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
@@ -301,7 +319,7 @@ define(function (require) {
      * @param map {Leaflet Object}
      * @return {boolean}
      */
-    TileMapMap.prototype._fitBounds = function () {
+    _fitBounds() {
       this.map.fitBounds(this._getDataRectangles());
     };
 
@@ -310,11 +328,11 @@ define(function (require) {
      *
      * @return {LatLngRectangles[]}
      */
-    TileMapMap.prototype._getDataRectangles = function () {
+    _getDataRectangles() {
       if (!this._geoJson) return [];
       return _.pluck(this._geoJson.features, 'properties.rectangle');
     };
+  }
 
-    return TileMapMap;
-  };
-});
+  return TileMapMap;
+};

@@ -1,26 +1,25 @@
-define(function (require) {
-  return function HandlerBaseClass(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let errors = require('ui/errors');
-    let Binder = require('ui/Binder');
+import d3 from 'd3';
+import _ from 'lodash';
+import errors from 'ui/errors';
+import Binder from 'ui/binder';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
+export default function HandlerBaseClass(Private) {
 
-    let Data = Private(require('ui/vislib/lib/data'));
-    let Layout = Private(require('ui/vislib/lib/layout/layout'));
+  const Data = Private(VislibLibDataProvider);
+  const Layout = Private(VislibLibLayoutLayoutProvider);
 
-    /**
-     * Handles building all the components of the visualization
-     *
-     * @class Handler
-     * @constructor
-     * @param vis {Object} Reference to the Vis Class Constructor
-     * @param opts {Object} Reference to Visualization constructors needed to
-     * create the visualization
-     */
-    function Handler(vis, opts) {
-      if (!(this instanceof Handler)) {
-        return new Handler(vis, opts);
-      }
+  /**
+   * Handles building all the components of the visualization
+   *
+   * @class Handler
+   * @constructor
+   * @param vis {Object} Reference to the Vis Class Constructor
+   * @param opts {Object} Reference to Visualization constructors needed to
+   * create the visualization
+   */
+  class Handler {
+    constructor(vis, opts) {
 
       this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
       this.vis = vis;
@@ -29,7 +28,7 @@ define(function (require) {
       this.charts = [];
 
       this._attr = _.defaults(vis._attr || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
+        'margin': {top: 10, right: 3, bottom: 5, left: 3}
       });
 
       this.xAxis = opts.xAxis;
@@ -52,11 +51,32 @@ define(function (require) {
       // memoize so that the same function is returned every time,
       // allowing us to remove/re-add the same function
       this.getProxyHandler = _.memoize(function (event) {
-        let self = this;
+        const self = this;
         return function (e) {
           self.vis.emit(event, e);
         };
       });
+
+      /**
+       * Enables events, i.e. binds specific events to the chart
+       * object(s) `on` method. For example, `click` or `mousedown` events.
+       *
+       * @method enable
+       * @param event {String} Event type
+       * @param chart {Object} Chart
+       * @returns {*}
+       */
+      this.enable = this.chartEventProxyToggle('on');
+
+      /**
+       * Disables events for all charts
+       *
+       * @method disable
+       * @param event {String} Event type
+       * @param chart {Object} Chart
+       * @returns {*}
+       */
+      this.disable = this.chartEventProxyToggle('off');
     }
 
     /**
@@ -66,8 +86,8 @@ define(function (require) {
      *
      * @private
      */
-    Handler.prototype._validateData = function () {
-      let dataType = this.data.type;
+    _validateData() {
+      const dataType = this.data.type;
 
       if (!dataType) {
         throw new errors.NoResults();
@@ -81,10 +101,10 @@ define(function (require) {
      * @method render
      * @returns {HTMLElement} With the visualization child element
      */
-    Handler.prototype.render = function () {
-      let self = this;
-      let charts = this.charts = [];
-      let selection = d3.select(this.el);
+    render() {
+      const self = this;
+      const { binder, charts = [] } = this;
+      const selection = d3.select(this.el);
 
       selection.selectAll('*').remove();
 
@@ -96,12 +116,21 @@ define(function (require) {
       });
 
       // render the chart(s)
-      selection.selectAll('.chart')
-      .each(function (chartData) {
-        let chart = new self.ChartClass(self, this, chartData);
+      let loadedCount = 0;
+      const chartSelection = selection.selectAll('.chart');
+      chartSelection.each(function (chartData) {
+        const chart = new self.ChartClass(self, this, chartData);
 
         self.vis.activeEvents().forEach(function (event) {
           self.enable(event, chart);
+        });
+
+        binder.on(chart.events, 'rendered', () => {
+          loadedCount++;
+          if (loadedCount === chartSelection.length) {
+            // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
+            charts[0].events.emit('renderComplete');
+          }
         });
 
         charts.push(chart);
@@ -109,32 +138,9 @@ define(function (require) {
       });
     };
 
-
-    /**
-     * Enables events, i.e. binds specific events to the chart
-     * object(s) `on` method. For example, `click` or `mousedown` events.
-     *
-     * @method enable
-     * @param event {String} Event type
-     * @param chart {Object} Chart
-     * @returns {*}
-     */
-    Handler.prototype.enable = chartEventProxyToggle('on');
-
-    /**
-     * Disables events for all charts
-     *
-     * @method disable
-     * @param event {String} Event type
-     * @param chart {Object} Chart
-     * @returns {*}
-     */
-    Handler.prototype.disable = chartEventProxyToggle('off');
-
-
-    function chartEventProxyToggle(method) {
+    chartEventProxyToggle(method) {
       return function (event, chart) {
-        let proxyHandler = this.getProxyHandler(event);
+        const proxyHandler = this.getProxyHandler(event);
 
         _.each(chart ? [chart] : this.charts, function (chart) {
           chart.events[method](event, proxyHandler);
@@ -151,7 +157,7 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} With the chart
      * child element removed
      */
-    Handler.prototype.removeAll = function (el) {
+    removeAll(el) {
       return d3.select(el).selectAll('*').remove();
     };
 
@@ -162,10 +168,10 @@ define(function (require) {
      * @param message {String} Error message to display
      * @returns {HTMLElement} Displays the input message
      */
-    Handler.prototype.error = function (message) {
+    error(message) {
       this.removeAll(this.el);
 
-      let div = d3.select(this.el)
+      const div = d3.select(this.el)
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
@@ -191,7 +197,7 @@ define(function (require) {
      *
      * @method destroy
      */
-    Handler.prototype.destroy = function () {
+    destroy() {
       this.binder.destroy();
 
       this.renderArray.forEach(function (renderable) {
@@ -206,7 +212,7 @@ define(function (require) {
         }
       });
     };
+  }
 
-    return Handler;
-  };
-});
+  return Handler;
+};

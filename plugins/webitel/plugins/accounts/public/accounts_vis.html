@@ -1,0 +1,30 @@
+<div ng-controller="KbnWebitelPluginVisController" class="webitel-plugin-vis table-vis">
+	<div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
+		<h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+		<h4>No results found</h4>
+	</div>
+
+	<div ng-if="hasSomeRows" >
+        <table ng-table="tableParams" class="kbn-table table">
+            <tr ng-repeat="row in $data" style="text-align: center; " ng-class="{'w-account-onhook' : row.state == 'ONHOOK',
+                            'w-account-nonreg': row.state == 'NONREG', 'w-account-onbreak': row.status == 'ONBREAK', 'w-account-isbusy': row.state == 'ISBUSY'}">
+                <td data-title="vis.params.columns.id.title" sortable="'id'" ng-if="!!vis.params.columns.id.visible">{{row.id}}</td>
+                <td data-title="vis.params.columns.name.title" sortable="'name'" ng-if="!!vis.params.columns.name.visible">{{row.name}}</td>
+                <td data-title="vis.params.columns.domain.title" sortable="'domain'" ng-if="!!vis.params.columns.domain.visible">{{row.domain}}</td>
+                <td data-title="vis.params.columns.online.title" sortable="'online'" ng-if="!!vis.params.columns.online.visible">
+                    <span style='text-align: center;' class='fa fa-circle' ng-class="{'w-online': row.online == true, 'w-offline': row.online == false}"></span>
+                </td>
+                <td data-title="vis.params.columns.role.title" sortable="'role'" ng-if="!!vis.params.columns.role.visible">{{row.role}}</td>
+                <td data-title="vis.params.columns.agent.title" sortable="'agent'" ng-if="!!vis.params.columns.agent.visible">{{row.agent}}</td>
+                <!--<td data-title="vis.params.columns.scheme.title" sortable="'scheme'" ng-if="!!vis.params.columns.scheme.visible">{{row.scheme}}</td>-->
+                <td data-title="vis.params.columns.state.title" sortable="'state'" ng-if="!!vis.params.columns.state.visible">
+                    <span class="label label-state">{{row.state}}</span>
+                </td>
+                <td data-title="vis.params.columns.status.title" sortable="'status'" ng-if="!!vis.params.columns.status.visible">
+                    <span class="label label-state">{{row.status}}</span>
+                </td>
+                <td data-title="vis.params.columns.description.title" sortable="'description'" ng-if="!!vis.params.columns.description.visible">{{row.description}}</td>
+            </tr>
+        </table>
+	</div>
+</div>

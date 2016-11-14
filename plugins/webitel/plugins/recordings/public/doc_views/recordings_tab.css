@@ -1,0 +1,6 @@
+audio.vcenter, label.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+    margin-bottom: 5px;
+}

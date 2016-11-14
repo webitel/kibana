@@ -2,17 +2,17 @@ FROM node:slim
 MAINTAINER Vitaly Kovalyshyn "v.kovalyshyn@webitel.com"
 
 ENV VERSION
-ENV WEBITEL_MAJOR 3.4
+ENV WEBITEL_MAJOR 3.3
 ENV WEBITEL_REPO_BASE https://github.com/webitel
-ENV KIBANA_VERSION 4.5.2
+ENV KIBANA_VERSION 5.0.0
 
 RUN mkdir /kibana
 COPY bin /kibana/bin
 COPY config /kibana/config
-COPY installedPlugins /kibana/installedPlugins
+COPY data /kibana/data
 COPY optimize /kibana/optimize
+COPY plugins /kibana/plugins
 COPY src /kibana/src
-COPY tasks /kibana/tasks
 COPY webpackShims /kibana/webpackShims
 
 COPY package.json /kibana/
@@ -25,7 +25,7 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED 0
 RUN apt-get update && apt-get install -y --force-yes git build-essential python python-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     cd /kibana && npm install && npm cache clear && \
-    cd /kibana/installedPlugins/webitel && npm install && npm cache clear
+    cd /kibana/plugins/webitel && npm install && npm cache clear
 
 COPY ./entrypoint.sh /
 

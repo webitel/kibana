@@ -1,32 +1,26 @@
-define(function (require) {
-  return function GeohashGridMarkerFactory(Private) {
-    let _ = require('lodash');
-    let L = require('leaflet');
+import L from 'leaflet';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+export default function GeohashGridMarkerFactory(Private) {
 
-    let BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
+  const BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
-    /**
-     * Map overlay: rectangles that show the geohash grid bounds
-     *
-     * @param map {Leaflet Object}
-     * @param geoJson {geoJson Object}
-     * @param params {Object}
-     */
-    _.class(GeohashGridMarker).inherits(BaseMarker);
-    function GeohashGridMarker(map, geoJson, params) {
-      let self = this;
-      GeohashGridMarker.Super.apply(this, arguments);
-
-      // super min and max from all chart data
-      let min = this.geoJson.properties.allmin;
-      let max = this.geoJson.properties.allmax;
+  /**
+   * Map overlay: rectangles that show the geohash grid bounds
+   *
+   * @param map {Leaflet Object}
+   * @param geoJson {geoJson Object}
+   * @param params {Object}
+   */
+  class GeohashGridMarker extends BaseMarker {
+    constructor(map, geoJson, params) {
+      super(map, geoJson, params);
 
       this._createMarkerGroup({
         pointToLayer: function (feature, latlng) {
-          let geohashRect = feature.properties.rectangle;
+          const geohashRect = feature.properties.rectangle;
           // get bounds from northEast[3] and southWest[1]
           // corners in geohash rectangle
-          let corners = [
+          const corners = [
             [geohashRect[3][0], geohashRect[3][1]],
             [geohashRect[1][0], geohashRect[1][1]]
           ];
@@ -34,7 +28,7 @@ define(function (require) {
         }
       });
     }
+  }
 
-    return GeohashGridMarker;
-  };
-});
+  return GeohashGridMarker;
+};

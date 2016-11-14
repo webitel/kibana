@@ -1,0 +1,12 @@
+{
+  "name": "Webitel",
+  "version": "5.0.0",
+  "dependencies": {
+    "async": "^2.1.2",
+    "hapi-auth-cookie": "3.1.0",
+    "joi": "6.10.1",
+    "jszip": "^3.1.3",
+    "jszip-utils": "0.0.2",
+    "lodash": "3.10.1"
+  }
+}

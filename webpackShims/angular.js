@@ -1,3 +1,5 @@
+'use strict';
+
 require('jquery');
 require('node_modules/angular/angular');
 module.exports = window.angular;

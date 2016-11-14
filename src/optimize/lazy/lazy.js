@@ -1,9 +1,13 @@
-module.exports = async (kbnServer, server, config) => {
+'use strict';
 
-  let { isWorker } = require('cluster');
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { var callNext = step.bind(null, 'next'); var callThrow = step.bind(null, 'throw'); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(callNext, callThrow); } } callNext(); }); }; }
 
-  if (!isWorker) {
-    throw new Error(`lazy optimization is only available in "watch" mode`);
+var _cluster = require('cluster');
+
+module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
+
+  if (!_cluster.isWorker) {
+    throw new Error('lazy optimization is only available in "watch" mode');
   }
 
   /**
@@ -21,15 +25,14 @@ module.exports = async (kbnServer, server, config) => {
    */
   switch (process.env.kbnWorkerType) {
     case 'optmzr':
-      await kbnServer.mixin(require('./optmzrRole'));
+      yield kbnServer.mixin(require('./optmzr_role'));
       break;
 
     case 'server':
-      await kbnServer.mixin(require('./proxyRole'));
+      yield kbnServer.mixin(require('./proxy_role'));
       break;
 
     default:
-      throw new Error(`unknown kbnWorkerType "${process.env.kbnWorkerType}"`);
+      throw new Error('unknown kbnWorkerType "' + process.env.kbnWorkerType + '"');
   }
-
-};
+});

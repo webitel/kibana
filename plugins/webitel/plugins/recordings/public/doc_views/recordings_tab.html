@@ -1,0 +1,11 @@
+<div class="row">
+    <div ng-if="recordings.length > 0" class="col-sm-12" ng-repeat="(k, rec) in recordings">
+        <audio class="vcenter" controls ng-src="{{rec.__src}}" type="{{rec.__type}}">
+        </audio>
+        <label ng-click="download(rec)" class="vcenter">{{rec.name}}</label>
+    </div>
+
+    <div ng-if="!recordings || recordings.length === 0">
+        <label style="margin-left: 35px;">No recordings.</label>
+    </div>
+</div>

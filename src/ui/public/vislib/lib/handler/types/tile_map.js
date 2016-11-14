@@ -1,25 +1,24 @@
-define(function (require) {
-  return function MapHandlerProvider(Private) {
-    let _ = require('lodash');
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+export default function MapHandlerProvider(Private) {
 
-    let Handler = Private(require('ui/vislib/lib/handler/handler'));
-    let Data = Private(require('ui/vislib/lib/data'));
+  const Handler = Private(VislibLibHandlerHandlerProvider);
+  const Data = Private(VislibLibDataProvider);
 
-    return function (vis) {
-      let data = new Data(vis.data, vis._attr, vis.uiState);
+  return function (vis) {
+    const data = new Data(vis.data, vis._attr, vis.uiState);
 
-      let MapHandler = new Handler(vis, {
-        data: data
+    const MapHandler = new Handler(vis, {
+      data: data
+    });
+
+    MapHandler.resize = function () {
+      this.charts.forEach(function (chart) {
+        chart.resizeArea();
       });
-
-      MapHandler.resize = function () {
-        this.charts.forEach(function (chart) {
-          chart.resizeArea();
-        });
-      };
-
-      return MapHandler;
     };
+
+    return MapHandler;
   };
-});
+};
 

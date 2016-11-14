@@ -1,11 +1,12 @@
-let RouteManager = require('./RouteManager');
+import RouteManager from './route_manager';
+import 'angular-route/angular-route';
+import uiModules from 'ui/modules';
 let defaultRouteManager = new RouteManager();
 
 module.exports = {
   ...defaultRouteManager,
   enable() {
-    require('angular-route/angular-route');
-    require('ui/modules')
+    uiModules
     .get('kibana', ['ngRoute'])
     .config(defaultRouteManager.config);
   }

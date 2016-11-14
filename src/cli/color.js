@@ -1,7 +1,15 @@
+'use strict';
 
-let _ = require('lodash');
-let ansicolors = require('ansicolors');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-exports.green = _.flow(ansicolors.black, ansicolors.bgGreen);
-exports.red = _.flow(ansicolors.white, ansicolors.bgRed);
-exports.yellow = _.flow(ansicolors.black, ansicolors.bgYellow);
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _ansicolors = require('ansicolors');
+
+var _ansicolors2 = _interopRequireDefault(_ansicolors);
+
+exports.green = _lodash2['default'].flow(_ansicolors2['default'].black, _ansicolors2['default'].bgGreen);
+exports.red = _lodash2['default'].flow(_ansicolors2['default'].white, _ansicolors2['default'].bgRed);
+exports.yellow = _lodash2['default'].flow(_ansicolors2['default'].black, _ansicolors2['default'].bgYellow);

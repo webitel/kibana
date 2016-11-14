@@ -1,42 +1,43 @@
-define(function (require) {
-  return function DocRequestProvider(Private) {
-    let _ = require('lodash');
+import DocStrategyProvider from '../strategy/doc';
+import AbstractRequestProvider from './request';
 
-    let docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
-    let AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+export default function DocRequestProvider(Private) {
 
-    _.class(DocRequest).inherits(AbstractRequest);
-    function DocRequest(source, defer) {
-      DocRequest.Super.call(this, source, defer);
+  const docStrategy = Private(DocStrategyProvider);
+  const AbstractRequest = Private(AbstractRequestProvider);
+
+  class DocRequest extends AbstractRequest {
+    constructor(...args) {
+      super(...args);
 
       this.type = 'doc';
       this.strategy = docStrategy;
     }
 
-    DocRequest.prototype.canStart = function () {
-      let parent = DocRequest.Super.prototype.canStart.call(this);
+    canStart() {
+      const parent = super.canStart();
       if (!parent) return false;
 
-      let version = this.source._version;
-      let storedVersion = this.source._getStoredVersion();
+      const version = this.source._version;
+      const storedVersion = this.source._getStoredVersion();
 
       // conditions that equal "fetch This DOC!"
-      let unknown = !version && !storedVersion;
-      let mismatch = version !== storedVersion;
+      const unknown = !version && !storedVersion;
+      const mismatch = version !== storedVersion;
 
       return Boolean(mismatch || (unknown && !this.started));
-    };
+    }
 
-    DocRequest.prototype.handleResponse = function (resp) {
+    handleResponse(resp) {
       if (resp.found) {
         this.source._storeVersion(resp._version);
       } else {
         this.source._clearVersion();
       }
 
-      return DocRequest.Super.prototype.handleResponse.call(this, resp);
-    };
+      return super.handleResponse(resp);
+    }
+  }
 
-    return DocRequest;
-  };
-});
+  return DocRequest;
+};

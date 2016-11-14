@@ -1,26 +1,22 @@
-define(function (require) {
-  return function AxisTitleFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
+import d3 from 'd3';
+import $ from 'jquery';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+export default function AxisTitleFactory(Private) {
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
-    /**
-     * Appends axis title(s) to the visualization
-     *
-     * @class AxisTitle
-     * @constructor
-     * @param el {HTMLElement} DOM element
-     * @param xTitle {String} X-axis title
-     * @param yTitle {String} Y-axis title
-     */
-    _.class(AxisTitle).inherits(ErrorHandler);
-    function AxisTitle(el, xTitle, yTitle) {
-      if (!(this instanceof AxisTitle)) {
-        return new AxisTitle(el, xTitle, yTitle);
-      }
-
+  /**
+   * Appends axis title(s) to the visualization
+   *
+   * @class AxisTitle
+   * @constructor
+   * @param el {HTMLElement} DOM element
+   * @param xTitle {String} X-axis title
+   * @param yTitle {String} Y-axis title
+   */
+  class AxisTitle extends ErrorHandler {
+    constructor(el, xTitle, yTitle) {
+      super();
       this.el = el;
       this.xTitle = xTitle;
       this.yTitle = yTitle;
@@ -32,7 +28,7 @@ define(function (require) {
      * @method render
      * @returns {HTMLElement} DOM Element with axis titles
      */
-    AxisTitle.prototype.render = function () {
+    render() {
       d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
       d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
     };
@@ -44,15 +40,15 @@ define(function (require) {
      * @param title {String} Axis title
      * @returns {Function} Appends axis title to a D3 selection
      */
-    AxisTitle.prototype.draw = function (title) {
-      let self = this;
+    draw(title) {
+      const self = this;
 
       return function (selection) {
         selection.each(function () {
-          let el = this;
-          let div = d3.select(el);
-          let width = $(el).width();
-          let height = $(el).height();
+          const el = this;
+          const div = d3.select(el);
+          const width = $(el).width();
+          const height = $(el).height();
 
           self.validateWidthandHeight(width, height);
 
@@ -71,7 +67,7 @@ define(function (require) {
         });
       };
     };
+  }
 
-    return AxisTitle;
-  };
-});
+  return AxisTitle;
+};

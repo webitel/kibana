@@ -1,15 +1,18 @@
-let _ = require('lodash');
+import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
+import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
-const URL_LIMIT_WARN_WITHIN = 150;
+const URL_LIMIT_WARN_WITHIN = 1000;
 
 module.exports = function (chrome, internals) {
 
+  chrome.getFirstPathSegment = _.noop;
+  chrome.getBreadcrumbs = _.noop;
+
   chrome.setupAngular = function () {
-    let modules = require('ui/modules');
     let kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
@@ -20,7 +23,10 @@ module.exports = function (chrome, internals) {
     .value('kbnVersion', internals.version)
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
+    .value('serverName', internals.serverName)
+    .value('uiSettings', internals.uiSettings)
     .value('sessionId', Date.now())
+    .value('chrome', chrome)
     .value('esUrl', (function () {
       let a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');
@@ -28,6 +34,24 @@ module.exports = function (chrome, internals) {
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
     .run(($location, $rootScope, Private) => {
+      chrome.getFirstPathSegment = () => {
+        return $location.path().split('/')[1];
+      };
+
+      chrome.getBreadcrumbs = () => {
+        let path = $location.path();
+        let length = path.length - 1;
+
+        // trim trailing slash
+        if (path.charAt(length) === '/') {
+          length--;
+        }
+
+        return path.substr(1, length)
+          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
+          .split('/');
+      };
+
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
       const check = (event) => {
@@ -35,10 +59,20 @@ module.exports = function (chrome, internals) {
 
         try {
           if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-            notify.warning(`
-              The URL has gotten big and may cause Kibana
-              to stop working. Please simplify the data on screen.
-            `);
+            notify.directive({
+              template: `
+                <p>
+                  The URL has gotten big and may cause Kibana
+                  to stop working. Please either enable the
+                  <code>state:storeInSessionStorage</code>
+                  option in the <a href="#/management/kibana/settings">advanced
+                  settings</a> or simplify the onscreen visuals.
+                </p>
+              `
+            }, {
+              type: 'error',
+              actions: [{ text: 'close' }]
+            });
           }
         } catch (e) {
           const { host, path, search, protocol } = parseUrl(window.location.href);

@@ -1,43 +1,46 @@
-let _ = require('lodash');
+'use strict';
 
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
-let Command = require('./Command');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-let program = new Command('bin/kibana');
+var _lodash = require('lodash');
 
-program
-.version(pkg.version)
-.description(
-  'Kibana is an open source (Apache Licensed), browser ' +
-  'based analytics and search dashboard for Elasticsearch.'
-);
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _utilsPackage_json = require('../utils/package_json');
+
+var _utilsPackage_json2 = _interopRequireDefault(_utilsPackage_json);
+
+var _command = require('./command');
+
+var _command2 = _interopRequireDefault(_command);
+
+var _serveServe = require('./serve/serve');
+
+var _serveServe2 = _interopRequireDefault(_serveServe);
+
+var argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
+var program = new _command2['default']('bin/kibana');
+
+program.version(_utilsPackage_json2['default'].version).description('Kibana is an open source (Apache Licensed), browser ' + 'based analytics and search dashboard for Elasticsearch.');
 
 // attach commands
-require('./serve/serve')(program);
-require('./plugin/plugin')(program);
+(0, _serveServe2['default'])(program);
 
-program
-.command('help <command>')
-.description('Get the help for a specific command')
-.action(function (cmdName) {
-  let cmd = _.find(program.commands, { _name: cmdName });
-  if (!cmd) return this.error(`unknown command ${cmdName}`);
+program.command('help <command>').description('Get the help for a specific command').action(function (cmdName) {
+  var cmd = _lodash2['default'].find(program.commands, { _name: cmdName });
+  if (!cmd) return program.error('unknown command ' + cmdName);
   cmd.help();
 });
 
-program
-.command('*', null, { noHelp: true })
-.action(function (cmd, options) {
-  program.error(`unknown command ${cmd}`);
+program.command('*', null, { noHelp: true }).action(function (cmd, options) {
+  program.error('unknown command ' + cmd);
 });
 
 // check for no command name
-let subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 
 if (!subCommand) {
-  if (_.intersection(argv.slice(2), ['-h', '--help']).length) {
+  if (_lodash2['default'].intersection(argv.slice(2), ['-h', '--help']).length) {
     program.defaultHelp();
   } else {
     argv.splice(2, 0, ['serve']);

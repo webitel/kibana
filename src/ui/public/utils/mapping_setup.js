@@ -1,7 +1,7 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function () {
-  return function MappingSetupService(kbnIndex, es, config) {
-    let angular = require('angular');
-    let _ = require('lodash');
+  return function MappingSetupService(kbnIndex, es) {
     let mappingSetup = this;
 
     let json = {
@@ -23,24 +23,18 @@ define(function () {
      * @return {[type]} [description]
      */
     let getKnownKibanaTypes = _.once(function () {
-      let indexName = kbnIndex;
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
-        index: indexName,
+        index: kbnIndex,
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
-        field: '_source'
+        fields: '_source'
       }).then(function (resp) {
-        /* WEBITEL */
-        try {
-          if (config.get('domainName')) {
-            indexName += '-' + config.get('domainName');
-          }
-        } catch (e) {
-          console.error(e)
-        }
-        return _.keys(resp[indexName].mappings);
+        // kbnIndex is not sufficient here, if the kibana indexed is aliased we need to use
+        // the root index name as key
+        const index = _.keys(resp)[0];
+        return _.keys(resp[index].mappings);
       });
     });
 

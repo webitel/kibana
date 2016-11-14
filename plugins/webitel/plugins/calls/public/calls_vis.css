@@ -1,0 +1,24 @@
+table.table-calls tbody tr td {
+  text-align: center;
+}
+
+table.table-calls tbody tr.call-active td:first-child {
+  border-left: 15px solid rgb(87, 193, 123);
+}
+table.table-calls tbody tr.call-active td span.label.label-state {
+  background-color: rgb(87, 193, 123);
+}
+
+table.table-calls tbody tr.call-hold td:first-child {
+  border-left: 15px solid #f39c12;
+}
+table.table-calls tbody tr.call-hold td span.label.label-state {
+  background-color: #f39c12;
+}
+
+table.table-calls tbody tr.call-ring td:first-child {
+  border-left: 15px solid rgba(171, 171, 171, 0.36);
+}
+table.table-calls tbody tr.call-ring td span.label.label-state {
+  background-color: rgba(171, 171, 171, 0.36);
+}

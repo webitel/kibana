@@ -1,0 +1,87 @@
+.agents-count-plugin {
+}
+
+.agents-count-plugin .agents-header {
+    width: 100%;
+    height: 100px;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    padding-left: 15px;
+    padding-top: 7px;
+}
+
+.agents-count-plugin .agents-header-wrap {
+    position: relative;
+    height: 100px;
+    display: flex;
+}
+
+.agents-count-plugin .agents-data {
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
+
+.agents-count-plugin .agents-list {
+    margin-top: 80pt;
+    overflow: auto;
+    max-height: 100%;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    bottom: 0;
+}
+.agents-count-plugin .agents-data ul.agents-list li {
+    padding: 7px;
+    border-bottom: 1px solid #5c5c5c;
+    clear: both;
+}
+
+.agents-count-plugin .agents-data ul.agents-list li span.fa-phone {
+    width: 24px;
+    font-size: 24px;
+    padding-right: 7px;
+    padding-left: 3px;
+}
+
+.agents-count-plugin .agents-data ul.agents-list li.available span.fa-phone {
+    color: #31c471;
+}
+.agents-count-plugin .agents-data ul.agents-list li.busy span.fa-phone {
+    color: #e74c3c;
+}
+.agents-count-plugin .agents-data ul.agents-list li.onbreak span.fa-phone {
+    color: #f39c12;
+}
+
+.agents-header .agents-header-wrap .members-count{
+    margin-right: 10px;
+}
+.agents-header .agents-header-wrap .members-count .members-count-text,
+.agents-header .agents-header-wrap .agents-stats .agents-stats-cell h1 {
+    text-align: center;
+    margin: auto;
+}
+.agents-header .agents-header-wrap .agents-stats{
+    width: 100%;
+}
+
+.agents-header .agents-header-wrap .agents-stats .agents-stats-cell{
+    width: 100%;
+    text-align: center;
+}
+.agents-header .agents-header-wrap .agents-stats .agents-stats-cell h4{
+
+}
+
+
+.agents-header .agents-header-wrap .agents-stats .progress-group .progress {
+    margin-bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.26);
+}
+
+.agents-header .agents-header-wrap .agents-stats .progress-group .progress .progressbar-back-text {
+    position: absolute;
+    margin-left: 15px;
+}

@@ -1,82 +1,58 @@
-let _ = require('lodash');
-let fs = require('fs');
-let yaml = require('js-yaml');
+'use strict';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports.merge = merge;
 
-let legacySettingMap = {
-  // server
-  port: 'server.port',
-  host: 'server.host',
-  pid_file: 'pid.file',
-  ssl_cert_file: 'server.ssl.cert',
-  ssl_key_file: 'server.ssl.key',
+var _lodash = require('lodash');
 
-  // logging
-  log_file: 'logging.dest',
+var _fs = require('fs');
 
-  // kibana
-  kibana_index: 'kibana.index',
-  default_app_id: 'kibana.defaultAppId',
+var _jsYaml = require('js-yaml');
 
-  // es
-  ca: 'elasticsearch.ssl.ca',
-  elasticsearch_preserve_host: 'elasticsearch.preserveHost',
-  elasticsearch_url: 'elasticsearch.url',
-  kibana_elasticsearch_client_crt: 'elasticsearch.ssl.cert',
-  kibana_elasticsearch_client_key: 'elasticsearch.ssl.key',
-  kibana_elasticsearch_password: 'elasticsearch.password',
-  kibana_elasticsearch_username: 'elasticsearch.username',
-  ping_timeout: 'elasticsearch.pingTimeout',
-  request_timeout: 'elasticsearch.requestTimeout',
-  shard_timeout: 'elasticsearch.shardTimeout',
-  startup_timeout: 'elasticsearch.startupTimeout',
-  tilemap_url: 'tilemap.url',
-  tilemap_min_zoom: 'tilemap.options.minZoom',
-  tilemap_max_zoom: 'tilemap.options.maxZoom',
-  tilemap_attribution: 'tilemap.options.attribution',
-  tilemap_subdomains: 'tilemap.options.subdomains',
-  verify_ssl: 'elasticsearch.ssl.verify',
-};
+var _ansicolors = require('ansicolors');
 
-const deprecatedSettings = {
-  'server.xsrf.token': 'server.xsrf.token is deprecated. It is no longer used when providing xsrf protection.'
-};
+var _utils = require('../../utils');
 
-module.exports = function (path) {
-  if (!path) return {};
+var _legacy_config = require('./legacy_config');
 
-  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
+var _deprecated_config = require('./deprecated_config');
 
-  function apply(config, val, key) {
-    if (_.isPlainObject(val)) {
-      _.forOwn(val, function (subVal, subKey) {
-        apply(config, subVal, key + '.' + subKey);
-      });
-    }
-    else if (_.isArray(val)) {
-      config[key] = [];
-      val.forEach((subVal, i) => {
-        apply(config, subVal, key + '.' + i);
-      });
-    }
-    else {
-      _.set(config, key, val);
-    }
-  }
+var log = (0, _lodash.memoize)(function (message) {
+  console.log((0, _ansicolors.red)('WARNING:'), message);
+});
 
-  _.each(deprecatedSettings, function (message, setting) {
-    if (_.has(file, setting)) console.error(message);
-  });
+function merge(sources) {
+  return (0, _lodash.transform)(sources, function (merged, source) {
+    (0, _lodash.forOwn)(source, function apply(val, key) {
+      if ((0, _lodash.isPlainObject)(val)) {
+        (0, _lodash.forOwn)(val, function (subVal, subKey) {
+          apply(subVal, key + '.' + subKey);
+        });
+        return;
+      }
 
-  // transform legeacy options into new namespaced versions
-  return _.transform(file, function (config, val, key) {
-    if (legacySettingMap.hasOwnProperty(key)) {
-      key = legacySettingMap[key];
-    }
+      if ((0, _lodash.isArray)(val)) {
+        (0, _lodash.set)(merged, key, []);
+        val.forEach(function (subVal, i) {
+          return apply(subVal, key + '.' + i);
+        });
+        return;
+      }
 
-    apply(config, val, key);
+      (0, _lodash.set)(merged, key, val);
+    });
   }, {});
-};
+}
 
+exports['default'] = function (paths) {
+  var files = [].concat(paths || []);
+  var yamls = files.map(function (path) {
+    return (0, _jsYaml.safeLoad)((0, _fs.readFileSync)(path, 'utf8'));
+  });
+  var config = merge(yamls.map(function (file) {
+    return (0, _legacy_config.rewriteLegacyConfig)(file, log);
+  }));
+  return (0, _deprecated_config.checkForDeprecatedConfig)(config, log);
+};

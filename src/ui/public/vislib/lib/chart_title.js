@@ -1,25 +1,22 @@
-define(function (require) {
-  return function ChartTitleFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
+export default function ChartTitleFactory(Private) {
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
-    let Tooltip = Private(require('ui/vislib/components/Tooltip'));
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const Tooltip = Private(VislibComponentsTooltipProvider);
 
-    /**
-     * Appends chart titles to the visualization
-     *
-     * @class ChartTitle
-     * @constructor
-     * @param el {HTMLElement} Reference to DOM element
-     */
-    _.class(ChartTitle).inherits(ErrorHandler);
-    function ChartTitle(el) {
-      if (!(this instanceof ChartTitle)) {
-        return new ChartTitle(el);
-      }
-
+  /**
+   * Appends chart titles to the visualization
+   *
+   * @class ChartTitle
+   * @constructor
+   * @param el {HTMLElement} Reference to DOM element
+   */
+  class ChartTitle extends ErrorHandler {
+    constructor(el) {
+      super();
       this.el = el;
       this.tooltip = new Tooltip('chart-title', el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
@@ -32,10 +29,10 @@ define(function (require) {
      * @method render
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
-    ChartTitle.prototype.render = function () {
-      let el = d3.select(this.el).select('.chart-title').node();
-      let width = el ? el.clientWidth : 0;
-      let height = el ? el.clientHeight : 0;
+    render() {
+      const el = d3.select(this.el).select('.chart-title').node();
+      const width = el ? el.clientWidth : 0;
+      const height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
     };
@@ -47,15 +44,15 @@ define(function (require) {
      * @param size {Number} Height or width of the HTML Element
      * @returns {Function} Truncates text
      */
-    ChartTitle.prototype.truncate = function (size) {
-      let self = this;
+    truncate(size) {
+      const self = this;
 
       return function (selection) {
         selection.each(function () {
-          let text = d3.select(this);
-          let n = text[0].length;
-          let maxWidth = size / n * 0.9;
-          let length = this.getComputedTextLength();
+          const text = d3.select(this);
+          const n = text[0].length;
+          const maxWidth = size / n * 0.9;
+          const length = this.getComputedTextLength();
           let str;
           let avg;
           let end;
@@ -82,7 +79,7 @@ define(function (require) {
      * @param target {HTMLElement} DOM element to attach event listeners
      * @returns {*} DOM element with event listeners attached
      */
-    ChartTitle.prototype.addMouseEvents = function (target) {
+    addMouseEvents(target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
@@ -94,15 +91,15 @@ define(function (require) {
      * @method draw
      * @returns {Function} Appends chart titles to a D3 selection
      */
-    ChartTitle.prototype.draw = function (width, height) {
-      let self = this;
+    draw(width, height) {
+      const self = this;
 
       return function (selection) {
         selection.each(function () {
-          let div = d3.select(this);
-          let dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
-          let size = dataType === 'rows' ? height : width;
-          let txtHtOffset = 11;
+          const div = d3.select(this);
+          const dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+          const size = dataType === 'rows' ? height : width;
+          const txtHtOffset = 11;
 
           self.validateWidthandHeight(width, height);
 
@@ -117,15 +114,17 @@ define(function (require) {
             return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
           })
           .attr('text-anchor', 'middle')
-          .text(function (d) { return d.label; });
+          .text(function (d) {
+            return d.label;
+          });
 
           // truncate long chart titles
           div.selectAll('text')
-          .call(self.truncate(size));
+            .call(self.truncate(size));
         });
       };
     };
+  }
 
-    return ChartTitle;
-  };
-});
+  return ChartTitle;
+};

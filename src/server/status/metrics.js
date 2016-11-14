@@ -1,27 +1,36 @@
+'use strict';
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _samples = require('./samples');
+
+var _samples2 = _interopRequireDefault(_samples);
+
 module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let Samples = require('./Samples');
-  let lastReport = Date.now();
+  var lastReport = Date.now();
 
-  kbnServer.metrics = new Samples(12);
+  kbnServer.metrics = new _samples2['default'](12);
 
-  server.plugins.good.monitor.on('ops', function (event) {
-    let now = Date.now();
-    let secSinceLast = (now - lastReport) / 1000;
+  server.plugins['even-better'].monitor.on('ops', function (event) {
+    var now = Date.now();
+    var secSinceLast = (now - lastReport) / 1000;
     lastReport = now;
 
-    let port = config.get('server.port');
-    let requests = _.get(event, ['requests', port, 'total'], 0);
-    let requestsPerSecond = requests / secSinceLast;
+    var port = config.get('server.port');
+    var requests = _lodash2['default'].get(event, ['requests', port, 'total'], 0);
+    var requestsPerSecond = requests / secSinceLast;
 
     kbnServer.metrics.add({
-      heapTotal: _.get(event, 'psmem.heapTotal'),
-      heapUsed: _.get(event, 'psmem.heapUsed'),
+      heapTotal: _lodash2['default'].get(event, 'psmem.heapTotal'),
+      heapUsed: _lodash2['default'].get(event, 'psmem.heapUsed'),
       load: event.osload,
-      responseTimeAvg: _.get(event, ['responseTimes', port, 'avg']),
-      responseTimeMax: _.get(event, ['responseTimes', port, 'max']),
+      responseTimeAvg: _lodash2['default'].get(event, ['responseTimes', port, 'avg']),
+      responseTimeMax: _lodash2['default'].get(event, ['responseTimes', port, 'max']),
       requestsPerSecond: requestsPerSecond
     });
-
   });
 };

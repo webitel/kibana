@@ -1,31 +1,31 @@
-define(function (require) {
-  return function VisFactory(Private) {
-    let _ = require('lodash');
-    let d3 = require('d3');
+import _ from 'lodash';
+import d3 from 'd3';
+import Binder from 'ui/binder';
+import errors from 'ui/errors';
+import 'ui/vislib/styles/main.less';
+import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
+import EventsProvider from 'ui/events';
+import VislibLibHandlerHandlerTypesProvider from 'ui/vislib/lib/handler/handler_types';
+import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
+export default function VisFactory(Private) {
 
-    let Binder = require('ui/Binder');
 
-    let ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-    let Events = Private(require('ui/events'));
-    let handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
-    let chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    let errors = require('ui/errors');
-    require('ui/vislib/styles/main.less');
+  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  const Events = Private(EventsProvider);
+  const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
+  const chartTypes = Private(VislibVisualizationsVisTypesProvider);
 
-    /**
-     * Creates the visualizations.
-     *
-     * @class Vis
-     * @constructor
-     * @param $el {HTMLElement} jQuery selected HTML element
-     * @param config {Object} Parameters that define the chart type and chart options
-     */
-    _.class(Vis).inherits(Events);
-    function Vis($el, config) {
-      if (!(this instanceof Vis)) {
-        return new Vis($el, config);
-      }
-      Vis.Super.apply(this, arguments);
+  /**
+   * Creates the visualizations.
+   *
+   * @class Vis
+   * @constructor
+   * @param $el {HTMLElement} jQuery selected HTML element
+   * @param config {Object} Parameters that define the chart type and chart options
+   */
+  class Vis extends Events {
+    constructor($el, config) {
+      super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
       this.ChartClass = chartTypes[config.type];
@@ -45,8 +45,8 @@ define(function (require) {
      * @method render
      * @param data {Object} Elasticsearch query results
      */
-    Vis.prototype.render = function (data, uiState) {
-      let chartType = this._attr.type;
+    render(data, uiState) {
+      const chartType = this._attr.type;
 
       if (!data) {
         throw new Error('No valid data!');
@@ -65,7 +65,7 @@ define(function (require) {
       }
 
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
-      this._runOnHandler('render');
+      this._runWithoutResizeChecker('render');
     };
 
     /**
@@ -73,7 +73,7 @@ define(function (require) {
      *
      * @method resize
      */
-    Vis.prototype.resize = function () {
+    resize() {
       if (!this.data) {
         // TODO: need to come up with a solution for resizing when no data is available
         return;
@@ -86,23 +86,25 @@ define(function (require) {
       }
     };
 
-    Vis.prototype._runOnHandler = function (method) {
+    _runWithoutResizeChecker(method) {
+      this.resizeChecker.stopSchedule();
+      this._runOnHandler(method);
+      this.resizeChecker.saveSize();
+      this.resizeChecker.saveDirty(false);
+      this.resizeChecker.continueSchedule();
+    };
+
+    _runOnHandler(method) {
       try {
         this.handler[method]();
       } catch (error) {
-        // If involving height and width of the container, log error to screen.
-        // Because we have to wait for the DOM element to initialize, we do not
-        // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.InvalidWiggleSelection ||
-          error instanceof errors.InvalidLogScaleValues ||
-          error instanceof errors.PieContainsAllZeros ||
-          error instanceof errors.NotEnoughData ||
-          error instanceof errors.NoResults) {
-          this.handler.error(error.message);
+
+        if (error instanceof errors.KbnError) {
+          error.displayToScreen(this.handler);
         } else {
           throw error;
         }
+
       }
     };
 
@@ -114,8 +116,8 @@ define(function (require) {
      *
      * @method destroy
      */
-    Vis.prototype.destroy = function () {
-      let selection = d3.select(this.el).select('.vis-wrapper');
+    destroy() {
+      const selection = d3.select(this.el).select('.vis-wrapper');
 
       this.binder.destroy();
       this.resizeChecker.destroy();
@@ -123,7 +125,6 @@ define(function (require) {
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
-      selection = null;
     };
 
     /**
@@ -133,7 +134,7 @@ define(function (require) {
      * @param name {String} An attribute name
      * @param val {*} Value to which the attribute name is set
      */
-    Vis.prototype.set = function (name, val) {
+    set(name, val) {
       this._attr[name] = val;
       this.render(this.data, this.uiState);
     };
@@ -145,7 +146,7 @@ define(function (require) {
      * @param name {String} An attribute name
      * @returns {*} The value of the attribute name
      */
-    Vis.prototype.get = function (name) {
+    get(name) {
       return this._attr[name];
     };
 
@@ -156,10 +157,10 @@ define(function (require) {
      * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.on = function (event, listener) {
-      let first = this.listenerCount(event) === 0;
-      let ret = Events.prototype.on.call(this, event, listener);
-      let added = this.listenerCount(event) > 0;
+    on(event, listener) {
+      const first = this.listenerCount(event) === 0;
+      const ret = Events.prototype.on.call(this, event, listener);
+      const added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
       // enable the event in the handler
@@ -175,16 +176,16 @@ define(function (require) {
      * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.off = function (event, listener) {
-      let last = this.listenerCount(event) === 1;
-      let ret = Events.prototype.off.call(this, event, listener);
-      let removed = this.listenerCount(event) === 0;
+    off(event, listener) {
+      const last = this.listenerCount(event) === 1;
+      const ret = Events.prototype.off.call(this, event, listener);
+      const removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
     };
+  }
 
-    return Vis;
-  };
-});
+  return Vis;
+};

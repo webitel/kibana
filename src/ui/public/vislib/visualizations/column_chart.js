@@ -1,38 +1,37 @@
-define(function (require) {
-  return function ColumnChartFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let moment = require('moment');
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import moment from 'moment';
+import errors from 'ui/errors';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
+import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
+export default function ColumnChartFactory(Private) {
 
-    let DataClass = Private(require('ui/vislib/lib/data'));
+  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
-    let PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    let TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    let errors = require('ui/errors');
-
-    /**
-     * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
-     *
-     * @class ColumnChart
-     * @constructor
-     * @extends Chart
-     * @param handler {Object} Reference to the Handler Class Constructor
-     * @param el {HTMLElement} HTML element to which the chart will be appended
-     * @param chartData {Object} Elasticsearch query results for this specific chart
-     */
-    _.class(ColumnChart).inherits(PointSeriesChart);
-    function ColumnChart(handler, chartEl, chartData) {
-      if (!(this instanceof ColumnChart)) {
-        return new ColumnChart(handler, chartEl, chartData);
-      }
-
-      ColumnChart.Super.apply(this, arguments);
+  /**
+   * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
+   *
+   * @class ColumnChart
+   * @constructor
+   * @extends Chart
+   * @param handler {Object} Reference to the Handler Class Constructor
+   * @param el {HTMLElement} HTML element to which the chart will be appended
+   * @param chartData {Object} Elasticsearch query results for this specific chart
+   */
+  class ColumnChart extends PointSeriesChart {
+    constructor(handler, chartEl, chartData) {
+      super(handler, chartEl, chartData);
 
       // Column chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d) { return d.x; },
-        yValue: function (d) { return d.y; }
+        xValue: function (d) {
+          return d.x;
+        },
+        yValue: function (d) {
+          return d.y;
+        }
       });
     }
 
@@ -44,37 +43,35 @@ define(function (require) {
      * @param layers {Array} Chart data array
      * @returns {D3.UpdateSelection} SVG with rect added
      */
-    ColumnChart.prototype.addBars = function (svg, layers) {
-      let self = this;
-      let color = this.handler.data.getColorFunc();
-      let tooltip = this.tooltip;
-      let isTooltip = this._attr.addTooltip;
-      let layer;
-      let bars;
+    addBars(svg, layers) {
+      const self = this;
+      const color = this.handler.data.getColorFunc();
+      const tooltip = this.tooltip;
+      const isTooltip = this._attr.addTooltip;
 
-      layer = svg.selectAll('.layer')
-      .data(layers)
-      .enter().append('g')
-      .attr('class', function (d, i) {
-        return 'series ' + i;
-      });
+      const layer = svg.selectAll('.layer')
+        .data(layers)
+        .enter().append('g')
+        .attr('class', function (d, i) {
+          return 'series ' + i;
+        });
 
-      bars = layer.selectAll('rect')
-      .data(function (d) {
-        return d;
-      });
+      const bars = layer.selectAll('rect')
+        .data(function (d) {
+          return d;
+        });
 
       bars
-      .exit()
-      .remove();
+        .exit()
+        .remove();
 
       bars
-      .enter()
-      .append('rect')
-      .call(this._addIdentifier)
-      .attr('fill', function (d) {
-        return color(d.label);
-      });
+        .enter()
+        .append('rect')
+        .call(this._addIdentifier)
+        .attr('fill', function (d) {
+          return color(d.label);
+        });
 
       self.updateBars(bars);
 
@@ -94,8 +91,8 @@ define(function (require) {
      * @param bars {D3.UpdateSelection} SVG with rect added
      * @returns {D3.UpdateSelection}
      */
-    ColumnChart.prototype.updateBars = function (bars) {
-      let offset = this._attr.mode;
+    updateBars(bars) {
+      const offset = this._attr.mode;
 
       if (offset === 'grouped') {
         return this.addGroupedBars(bars);
@@ -110,18 +107,17 @@ define(function (require) {
      * @param bars {D3.UpdateSelection} SVG with rect added
      * @returns {D3.UpdateSelection}
      */
-    ColumnChart.prototype.addStackedBars = function (bars) {
-      let data = this.chartData;
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let height = yScale.range()[0];
-      let yMin = this.handler.yAxis.yScale.domain()[0];
-      let self = this;
+    addStackedBars(bars) {
+      const data = this.chartData;
+      const xScale = this.handler.xAxis.xScale;
+      const yScale = this.handler.yAxis.yScale;
+      const height = yScale.range()[0];
+      const yMin = this.handler.yAxis.yScale.domain()[0];
 
       let barWidth;
       if (data.ordered && data.ordered.date) {
-        let start = data.ordered.min;
-        let end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+        const start = data.ordered.min;
+        const end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
@@ -129,39 +125,39 @@ define(function (require) {
 
       // update
       bars
-      .attr('x', function (d) {
-        return xScale(d.x);
-      })
-      .attr('width', function () {
-        return barWidth || xScale.rangeBand();
-      })
-      .attr('y', function (d) {
-        if (d.y < 0) {
-          return yScale(d.y0);
-        }
+        .attr('x', function (d) {
+          return xScale(d.x);
+        })
+        .attr('width', function () {
+          return barWidth || xScale.rangeBand();
+        })
+        .attr('y', function (d) {
+          if (d.y < 0) {
+            return yScale(d.y0);
+          }
 
-        return yScale(d.y0 + d.y);
-      })
-      .attr('height', function (d) {
-        if (d.y < 0) {
-          return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
-        }
+          return yScale(d.y0 + d.y);
+        })
+        .attr('height', function (d) {
+          if (d.y < 0) {
+            return Math.abs(yScale(d.y0 + d.y) - yScale(d.y0));
+          }
 
-        // Due to an issue with D3 not returning zeros correctly when using
-        // an offset='expand', need to add conditional statement to handle zeros
-        // appropriately
-        if (d._input.y === 0) {
-          return 0;
-        }
+          // Due to an issue with D3 not returning zeros correctly when using
+          // an offset='expand', need to add conditional statement to handle zeros
+          // appropriately
+          if (d._input.y === 0) {
+            return 0;
+          }
 
-        // for split bars or for one series,
-        // last series will have d.y0 = 0
-        if (d.y0 === 0 && yMin > 0) {
-          return yScale(yMin) - yScale(d.y);
-        }
+          // for split bars or for one series,
+          // last series will have d.y0 = 0
+          if (d.y0 === 0 && yMin > 0) {
+            return yScale(yMin) - yScale(d.y);
+          }
 
-        return yScale(d.y0) - yScale(d.y0 + d.y);
-      });
+          return yScale(d.y0) - yScale(d.y0 + d.y);
+        });
 
       return bars;
     };
@@ -173,52 +169,51 @@ define(function (require) {
      * @param bars {D3.UpdateSelection} SVG with rect added
      * @returns {D3.UpdateSelection}
      */
-    ColumnChart.prototype.addGroupedBars = function (bars) {
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let yMin = this.handler.yAxis.yMin;
-      let data = this.chartData;
-      let n = data.series.length;
-      let height = yScale.range()[0];
-      let groupSpacingPercentage = 0.15;
-      let isTimeScale = (data.ordered && data.ordered.date);
-      let minWidth = 1;
+    addGroupedBars(bars) {
+      const xScale = this.handler.xAxis.xScale;
+      const yScale = this.handler.yAxis.yScale;
+      const data = this.chartData;
+      const n = data.series.length;
+      const height = yScale.range()[0];
+      const groupSpacingPercentage = 0.15;
+      const isTimeScale = (data.ordered && data.ordered.date);
+      const minWidth = 1;
       let barWidth;
 
       // update
       bars
-      .attr('x', function (d, i, j) {
-        if (isTimeScale) {
-          let groupWidth = xScale(data.ordered.min + data.ordered.interval) -
-            xScale(data.ordered.min);
-          let groupSpacing = groupWidth * groupSpacingPercentage;
+        .attr('x', function (d, i, j) {
+          if (isTimeScale) {
+            const groupWidth = xScale(data.ordered.min + data.ordered.interval) -
+              xScale(data.ordered.min);
+            const groupSpacing = groupWidth * groupSpacingPercentage;
 
-          barWidth = (groupWidth - groupSpacing) / n;
+            barWidth = (groupWidth - groupSpacing) / n;
 
-          return xScale(d.x) + barWidth * j;
-        }
-        return xScale(d.x) + xScale.rangeBand() / n * j;
-      })
-      .attr('width', function () {
-        if (barWidth < minWidth) {
-          throw new errors.ContainerTooSmall();
-        }
+            return xScale(d.x) + barWidth * j;
+          }
+          return xScale(d.x) + xScale.rangeBand() / n * j;
+        })
+        .attr('width', function () {
+          if (barWidth < minWidth) {
+            throw new errors.ContainerTooSmall();
+          }
 
-        if (isTimeScale) {
-          return barWidth;
-        }
-        return xScale.rangeBand() / n;
-      })
-      .attr('y', function (d) {
-        if (d.y < 0) {
-          return yScale(0);
-        }
+          if (isTimeScale) {
+            return barWidth;
+          }
+          return xScale.rangeBand() / n;
+        })
+        .attr('y', function (d) {
+          if (d.y < 0) {
+            return yScale(0);
+          }
 
-        return yScale(d.y);
-      })
-      .attr('height', function (d) {
-        return Math.abs(yScale(0) - yScale(d.y));
-      });
+          return yScale(d.y);
+        })
+        .attr('height', function (d) {
+          return Math.abs(yScale(0) - yScale(d.y));
+        });
 
       return bars;
     };
@@ -233,14 +228,14 @@ define(function (require) {
      * @param svg {D3.UpdateSelection} chart SVG
      * @returns {D3.Selection} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (element, svg) {
-      let events = this.events;
-      let isBrushable = events.isBrushable();
-      let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      let hover = events.addHoverEvent();
-      let mouseout = events.addMouseoutEvent();
-      let click = events.addClickEvent();
-      let attachedEvents = element.call(hover).call(mouseout).call(click);
+    addBarEvents(element, svg) {
+      const events = this.events;
+      const isBrushable = events.isBrushable();
+      const brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      const hover = events.addHoverEvent();
+      const mouseout = events.addMouseoutEvent();
+      const click = events.addClickEvent();
+      const attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -255,57 +250,59 @@ define(function (require) {
      * @method draw
      * @returns {Function} Creates the vertical bar chart
      */
-    ColumnChart.prototype.draw = function () {
-      let self = this;
-      let $elem = $(this.chartEl);
-      let margin = this._attr.margin;
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
-      let yMin = this.handler.yAxis.yMin;
-      let yScale = this.handler.yAxis.yScale;
-      let xScale = this.handler.xAxis.xScale;
-      let minWidth = 20;
-      let minHeight = 20;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+    draw() {
+      const self = this;
+      const $elem = $(this.chartEl);
+      const margin = this._attr.margin;
+      const elWidth = this._attr.width = $elem.width();
+      const elHeight = this._attr.height = $elem.height();
+      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.xAxis.xScale;
+      const minWidth = 20;
+      const minHeight = 20;
+      const addTimeMarker = this._attr.addTimeMarker;
+      const times = this._attr.times || [];
       let timeMarker;
-      let div;
-      let svg;
-      let width;
-      let height;
-      let layers;
-      let bars;
 
       return function (selection) {
         selection.each(function (data) {
-          layers = self.stackData(data);
+          const layers = self.stackData(data);
 
-          width = elWidth;
-          height = elHeight - margin.top - margin.bottom;
+          const width = elWidth;
+          const height = elHeight - margin.top - margin.bottom;
+          if (width < minWidth || height < minHeight) {
+            throw new errors.ContainerTooSmall();
+          }
+          self.validateDataCompliesWithScalingMethod(data);
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);
           }
 
-          if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
+          if (
+            data.series.length > 1 &&
+            (self._attr.scale === 'log' || self._attr.scale === 'square root') &&
+            (self._attr.mode === 'stacked' || self._attr.mode === 'percentage')
+          ) {
+            throw new errors.StackedBarChartConfig(`Cannot display ${self._attr.mode} bar charts for multiple data series \
+          with a ${self._attr.scale} scaling method. Try 'linear' scaling instead.`);
           }
 
-          div = d3.select(this);
+          const div = d3.select(this);
 
-          svg = div.append('svg')
+          const svg = div.append('svg')
           .attr('width', width)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          bars = self.addBars(svg, layers);
+          const bars = self.addBars(svg, layers);
           self.createEndZones(svg);
 
           // Adds event listeners
           self.addBarEvents(bars, svg);
 
-          let line = svg.append('line')
+          svg.append('line')
           .attr('class', 'base-line')
           .attr('x1', 0)
           .attr('y1', yScale(0))
@@ -318,11 +315,15 @@ define(function (require) {
             timeMarker.render(svg);
           }
 
+          self.events.emit('rendered', {
+            chart: data
+          });
+
           return svg;
         });
       };
     };
+  }
 
-    return ColumnChart;
-  };
-});
+  return ColumnChart;
+};

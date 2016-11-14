@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 let Scanner = function (client, {index, type} = {}) {
   if (!index) throw new Error('Expected index');
@@ -38,6 +38,10 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
 
   return new Promise((resolve, reject) => {
     const getMoreUntilDone = (error, response) => {
+      if (error) {
+        reject(error);
+        return;
+      }
       const scanAllResults = opts.docCount === Infinity;
       allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, opts.docCount);
       scrollId = response._scroll_id || scrollId;
@@ -63,8 +67,8 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       type: this.type,
       size: opts.pageSize,
       body,
-      searchType: 'scan',
-      scroll: '1m'
+      scroll: '1m',
+      sort: '_doc',
     }, getMoreUntilDone);
   });
 };

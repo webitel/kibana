@@ -1,2 +1,2 @@
-require('./directives/share');
-require('./directives/share_object_url');
+import './styles/index.less';
+import './directives/share';
