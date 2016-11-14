@@ -17,12 +17,12 @@ if [ "$1" = 'kibana' ]; then
 
 if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
 		: ${ENGINE_AUTH_URL:='http://engine:10022'}
-		sed -ri "s!^(webitel.engineUri:).*!\1 '$ENGINE_AUTH_URL'!" /kibana/config/kibana.yml
+		sed -ri "s!^(webitel.main.engineUri:).*!\1 '$ENGINE_AUTH_URL'!" /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_URL" -o "$ENGINE_PORT_10022_TCP" ]; then
 		: ${ENGINE_URL:='http://engine:10022'}
-		sed -ri "s!^(webitel.engineUri:).*!\1 '$ENGINE_URL'!" /kibana/config/kibana.yml
+		sed -ri "s!^(webitel.main.engineUri:).*!\1 '$ENGINE_URL'!" /kibana/config/kibana.yml
 	else
 		echo >&2 'warning: missing ENGINE_PORT_10022_TCP or ENGINE_URL'
 		echo >&2 '  Did you forget to --link engine:engine'
@@ -32,7 +32,7 @@ if [ "$ENGINE_URL" -o "$ENGINE_PORT_10022_TCP" ]; then
 
 if [ "$FS_URL" -o "$FS_PORT_8082_TCP" ]; then
 		: ${FS_URL:='wss://freeswitch:8082'}
-		sed -ri "s!^(webitel.webRtcUri:).*!\1 '$FS_URL'!" /kibana/config/kibana.yml
+		sed -ri "s!^(webitel.main.webRtcUri:).*!\1 '$FS_URL'!" /kibana/config/kibana.yml
 	else
 		echo >&2 'warning: missing FS_PORT_8082_TCP or FS_URL'
 		echo >&2 '  Did you forget to --link freeswitch:freeswitch'

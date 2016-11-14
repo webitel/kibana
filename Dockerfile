@@ -2,7 +2,7 @@ FROM node:slim
 MAINTAINER Vitaly Kovalyshyn "v.kovalyshyn@webitel.com"
 
 ENV VERSION
-ENV WEBITEL_MAJOR 3.3
+ENV WEBITEL_MAJOR 3.5
 ENV WEBITEL_REPO_BASE https://github.com/webitel
 ENV KIBANA_VERSION 5.0.0
 
@@ -16,7 +16,6 @@ COPY src /kibana/src
 COPY webpackShims /kibana/webpackShims
 
 COPY package.json /kibana/
-COPY Gruntfile.js /kibana/
 
 ENV PATH /kibana/bin:$PATH
 
