@@ -99,7 +99,3 @@ function mapUri(server, prefix) {
 
 ;
 module.exports = exports['default'];
-
-function joinStringFromIndex(x1, x2, i) {
-  return x1.slice(0, i) + '-' + x2 + x1.slice(i)
-}

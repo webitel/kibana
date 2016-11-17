@@ -15,10 +15,6 @@ var _es_bool = require('./es_bool');
 
 var _es_bool2 = _interopRequireDefault(_es_bool);
 
-var _semver = require('semver');
-
-var _semver2 = _interopRequireDefault(_semver);
-
 var _is_es_compatible_with_kibana = require('./is_es_compatible_with_kibana');
 
 var _is_es_compatible_with_kibana2 = _interopRequireDefault(_is_es_compatible_with_kibana);
@@ -26,6 +22,16 @@ var _is_es_compatible_with_kibana2 = _interopRequireDefault(_is_es_compatible_wi
 var _setup_error = require('./setup_error');
 
 var _setup_error2 = _interopRequireDefault(_setup_error);
+
+/**
+ *  tracks the node descriptions that get logged in warnings so
+ *  that we don't spam the log with the same message over and over.
+ *
+ *  There are situations, like in testing or multi-tenancy, where
+ *  the server argument changes, so we must track the previous
+ *  node warnings per server
+ */
+var lastWarnedNodesForServer = new WeakMap();
 
 module.exports = function checkEsVersion(server, kibanaVersion) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -45,9 +51,9 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         return incompatibleNodes.push(esNode);
       }
 
-      // It's acceptable if ES is ahead of Kibana, but we want to prompt users to upgrade Kibana
-      // to match it.
-      if (_semver2['default'].gt(esNode.version, kibanaVersion)) {
+      // It's acceptable if ES and Kibana versions are not the same so long as
+      // they are not incompatible, but we should warn about it
+      if (esNode.version !== kibanaVersion) {
         warningNodes.push(esNode);
       }
     });
@@ -69,12 +75,16 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         };
       });
 
-      server.log(['warning'], {
-        tmpl: 'You\'re running Kibana <%= kibanaVersion %> with some newer versions of ' + 'Elasticsearch. Update Kibana to the latest version to prevent compatibility issues: ' + '<%= getHumanizedNodeNames(nodes).join(", ") %>',
-        kibanaVersion: kibanaVersion,
-        getHumanizedNodeNames: getHumanizedNodeNames,
-        nodes: simplifiedNodes
-      });
+      // Don't show the same warning over and over again.
+      var warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
+      if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
+        lastWarnedNodesForServer.set(server, warningNodeNames);
+        server.log(['warning'], {
+          tmpl: 'You\'re running Kibana ' + kibanaVersion + ' with some different versions of ' + 'Elasticsearch. Update Kibana or Elasticsearch to the same ' + ('version to prevent compatibility issues: ' + warningNodeNames),
+          kibanaVersion: kibanaVersion,
+          nodes: simplifiedNodes
+        });
+      }
     }
 
     if (incompatibleNodes.length) {

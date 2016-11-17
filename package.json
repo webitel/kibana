@@ -10,10 +10,10 @@
     "dashboards",
     "dashboarding"
   ],
-  "version": "5.0.0",
+  "version": "5.0.1",
   "build": {
-    "number": 14438,
-    "sha": "c5af7a418333df6a934b8d1a5648c675641388bd"
+    "number": 14458,
+    "sha": "2ee15d7ceb10d52bef0e5ee58d3f9c5a238cb786"
   },
   "engines": {
     "node": "6.9.0"

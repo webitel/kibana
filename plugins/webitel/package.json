@@ -1,6 +1,6 @@
 {
   "name": "Webitel",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "dependencies": {
     "async": "^2.1.2",
     "hapi-auth-cookie": "3.1.0",

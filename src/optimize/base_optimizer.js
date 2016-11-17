@@ -145,11 +145,7 @@ var BaseOptimizer = (function () {
           loaders: [{
             test: /\.less$/,
             loader: _extractTextWebpackPlugin2['default'].extract('style', 'css' + mapQ + '!autoprefixer' + mapQPre + '{ "browsers": ["last 2 versions","> 5%"] }!less' + mapQPre + 'dumpLineNumbers=comments')
-          }, { test: /\.css$/, loader: _extractTextWebpackPlugin2['default'].extract('style', 'css' + mapQ) },
-            { test: /\.jade$/, loader: 'jade' }, { test: /\.json$/, loader: 'json' }, { test: /\.(html|tmpl)$/, loader: 'raw' },
-              /*WEBITEL*/
-            { test: /\.png$/, loader: 'file?name=[path][name].[ext]'  },
-            { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' }, { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: 'rjs-repack' + mapQ }, {
+          }, { test: /\.css$/, loader: _extractTextWebpackPlugin2['default'].extract('style', 'css' + mapQ) }, { test: /\.jade$/, loader: 'jade' }, { test: /\.json$/, loader: 'json' }, { test: /\.(html|tmpl)$/, loader: 'raw' }, { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' }, { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' }, { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: 'rjs-repack' + mapQ }, {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel',

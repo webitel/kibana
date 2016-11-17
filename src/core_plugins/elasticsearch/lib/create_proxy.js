@@ -22,10 +22,6 @@ function createProxy(server, method, route, config) {
     config: {
       timeout: {
         socket: server.config().get('elasticsearch.requestTimeout')
-      },
-      payload: {
-        output: 'data',   // These are default options
-        parse: false       // These are default options
       }
     },
     handler: {
@@ -50,10 +46,6 @@ function createProxy(server, method, route, config) {
       }
     }
   };
-
-  if (method === "GET" || method === 'HEAD') {
-    delete options.config.payload;
-  }
 
   (0, _lodash.assign)(options.config, config);
 

@@ -42,6 +42,8 @@ var _version_check = require('./version_check');
 
 var _version_check2 = _interopRequireDefault(_version_check);
 
+var _short_url_assert_valid = require('./short_url_assert_valid');
+
 module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
 
   server = kbnServer.server = new _hapi2['default'].Server();
@@ -134,10 +136,10 @@ module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(_boom2['default'].notFound());
       }
-
+      var pathPrefix = config.get('server.basePath') ? config.get('server.basePath') + '/' : '';
       return reply.redirect((0, _url.format)({
         search: req.url.search,
-        pathname: path.slice(0, -1)
+        pathname: pathPrefix + path.slice(0, -1)
       })).permanent(true);
     }
   });
@@ -148,6 +150,7 @@ module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
     handler: _asyncToGenerator(function* (request, reply) {
       try {
         var url = yield shortUrlLookup.getUrl(request.params.urlId);
+        (0, _short_url_assert_valid.shortUrlAssertValid)(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
         reply(err);
@@ -160,6 +163,7 @@ module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
     path: '/shorten',
     handler: _asyncToGenerator(function* (request, reply) {
       try {
+        (0, _short_url_assert_valid.shortUrlAssertValid)(request.payload.url);
         var urlId = yield shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {

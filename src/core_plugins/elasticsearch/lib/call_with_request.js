@@ -39,7 +39,6 @@ module.exports = function (server, client) {
       apiContext = client;
     }
     if (!api) throw new Error('callWithRequest called with an invalid endpoint: ' + endpoint);
-    
     return api.call(apiContext, params)['catch'](function (err) {
       if (err.status === 401) {
         // TODO: The err.message is temporary until we have support for getting headers in the client.

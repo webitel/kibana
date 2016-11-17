@@ -6,8 +6,8 @@ export function validateIndex (server, domainName, cb) {
     const client = server.plugins.elasticsearch.client;
     const config = server.config();
     const index = `${config.get('kibana.index') || '.kibana'}-${domainName}`;
-    const buildNum = config.get('pkg.buildNum') || '14438';
-    const id = config.get('pkg.version') || '5.0.0';
+    const buildNum = config.get('pkg.buildNum') || '14458';
+    const id = config.get('pkg.version') || '5.0.1';
     console.log(index, id);
     client.get({
         index: index,
