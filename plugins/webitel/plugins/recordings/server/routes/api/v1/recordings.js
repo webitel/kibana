@@ -16,7 +16,7 @@ module.exports = server => {
                         headers = {
                             authorization: `Base ${auth.baseAuth}`
                         };
-                    console.log(auth);
+                    //console.log(auth);
                     if (req.headers.hasOwnProperty('range'))
                         headers.range = req.headers.range;
 
