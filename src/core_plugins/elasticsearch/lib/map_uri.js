@@ -71,6 +71,7 @@ function mapUri(server, prefix) {
 
       let payload = request.payload ? request.payload.toString('utf8') : null;
       if (payload) {
+        // console.dir(payload);
         payload = payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
           return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
         });

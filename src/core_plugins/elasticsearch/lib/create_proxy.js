@@ -22,7 +22,13 @@ function createProxy(server, method, route, config) {
     config: {
       timeout: {
         socket: server.config().get('elasticsearch.requestTimeout')
+      },
+      /*WEBITEL*/
+      payload: (method === "GET" || method === 'HEAD') ? undefined :  {
+        output: 'data',   // These are default options
+        parse: false       // These are default options
       }
+
     },
     handler: {
       proxy: {
