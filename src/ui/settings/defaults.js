@@ -60,7 +60,8 @@ function defaultSettingsProvider() {
       options: weekdays
     },
     'defaultIndex': {
-      value: null,
+      /*WEBITEL*/
+      value: "cdr-*",
       description: 'The index to access if no index is set'
     },
     'defaultColumns': {

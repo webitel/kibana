@@ -12,6 +12,11 @@ export default function (kibana) {
         id: 'webitel_main',
         require: ['elasticsearch'],
         configPrefix: 'webitel.main',
+        uiExports: {
+            hacks: [
+                'plugins/webitel_main/logo'
+            ]
+        },
         publicDir: resolve(__dirname, 'public'),
         config(Joi) {
             return Joi.object({
