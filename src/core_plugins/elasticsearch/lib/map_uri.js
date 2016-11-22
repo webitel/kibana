@@ -57,10 +57,10 @@ function mapUri(server, prefix) {
     var reqSubPath = request.path.replace('/elasticsearch', '');
     /*WEBITEL*/
     if (credentials.domain) {
-
-      if (/.\/_mget|_msearch|_mapping|_field_stats|index-pattern|\.kibana./.test(reqSubPath)) {
+      var _r = /.\/_mget|_msearch|_search|_mapping|_field_stats|index-pattern|\.kibana./.exec(reqSubPath);
+      if (_r) {
         let _paths = reqSubPath.split('/');
-        if (_paths.length > 2) {
+        if (_paths.length > 2 && !~_r.indexOf(_paths[1])) {
           _paths[1] +=  '-' + credentials.domain
         }
 
