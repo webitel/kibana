@@ -14,8 +14,10 @@ define(function (require) {
         var onRemovedElement = new WebitelEvent();
 
         var addElement = function(key, element) {
+            if (!collection[key])
+                length++;
+
             collection[key] = element;
-            length++;
             onAddedElement.trigger(collection[key]);
             return collection[key];
         };

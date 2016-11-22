@@ -157,28 +157,59 @@ define(function (require) {
                 // var data = [{"uuid":"0323b214-abe3-4e54-9823-56baf8b5723c","direction":"inbound","created":"2016-06-23 13:04:48","created_epoch":"1466687088","name":"sofia/internal/102@10.10.10.144","state":"CS_EXECUTE","cid_name":"102","cid_num":"102","ip_addr":"10.10.10.25","dest":"00","application":"conference","application_data":"10.10.10.144@default","dialplan":"XML","context":"default","read_codec":"L16","read_rate":"48000","read_bit_rate":"768000","write_codec":"opus","write_rate":"48000","write_bit_rate":"0","secure":"","hostname":"webitel","presence_id":"102@10.10.10.144","presence_data":"","accountcode":"","callstate":"ACTIVE","callee_name":"","callee_num":"","callee_direction":"","call_uuid":"","sent_callee_name":"","sent_callee_num":"","initial_cid_name":"102","initial_cid_num":"102","initial_ip_addr":"10.10.10.25","initial_dest":"00","initial_dialplan":"XML","initial_context":"default"}];
                 var data = [];
 
+                function getChannelsData(cb) {
+                    webitel.httpApi('/api/v2/channels', function (err, res) {
+                        if (err) {
+                            // todo alert;
+                            return console.error(err);
+                        }
+                        return cb(null, res)
+                    })
+                }
+
                 $scope.$watch('vis.params.domain', function (val, oldVal) {
                     $scope.vis.params.domain = val;
                     $scope.tableParams.reload();
 
                     if (val) {
-                        webitel.httpApi('/api/v2/channels', function (err, res) {
-                            if (err) {
-                                // todo alert;
-                                return console.error(err);
-                            }
+
+                        getChannelsData(function (err, res) {
                             hashListChannels.removeAll();
                             if (res.row_count > 0) {
                                 angular.forEach(res.rows, function (item) {
                                     item.createdOn = item.created_epoch * 1000;
                                     try {
-                                        hashListChannels.add(item.uuid, item);
+                                        var id = item.call_uuid || item.uuid;
+                                        item.uuid = id;
+                                        if (!hashListChannels.get(id)) {
+                                            hashListChannels.add(id, item);
+                                        } else {
+                                            console.warn(item, hashListChannels);
+                                        }
+
                                     } catch (e) {
                                         console.warn(e)
                                     }
                                 });
+
+                                setTimeout(function () {
+                                    getChannelsData(function (err, res) {
+                                        if (res.row_count > 0) {
+                                            angular.forEach(hashListChannels.collection, function (item) {
+                                                for (var i = 0; i < res.row_count; i++) {
+                                                    var id = res.rows[i].call_uuid || res.rows[i].uuid;
+                                                    if (id == item.uuid)
+                                                        return;
+                                                }
+                                                hashListChannels.remove(item.uuid)
+                                            })
+                                        } else {
+                                            hashListChannels.removeAll();
+                                        }
+                                    })
+                                }, 2000)
                             }
-                        })
+                        });
                     }
                 });
 
