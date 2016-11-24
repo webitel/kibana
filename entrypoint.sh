@@ -1,7 +1,13 @@
 #!/bin/bash
 set -e
+ARCHIVE="off"
 
 echo 'Webitel Kibana '$VERSION
+
+if [ "$WEBITEL_ARCHIVE" == "$ARCHIVE"]; then
+    echo "Webitel Archive Storage"
+    cp -rf /kibana/config/kibana.yml.archive /kibana/config/kibana.yml
+fi
 
 # Add kibana as command if needed
 if [[ "$1" == -* ]]; then
@@ -13,6 +19,10 @@ if [ "$1" = 'kibana' ]; then
 	if [ "$ELASTICSEARCH_URL" -o "$ELASTICSEARCH_PORT_9200_TCP" ]; then
 		: ${ELASTICSEARCH_URL:='http://elasticsearch:9200'}
 		sed -ri "s!^(elasticsearch.url:).*!\1 '$ELASTICSEARCH_URL'!" /kibana/config/kibana.yml
+	fi
+
+	if [ "$WEBITEL_PASS" ]; then
+		sed -ri "s!^(webitel.password:).*!\1 '$WEBITEL_PASS'!" /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
