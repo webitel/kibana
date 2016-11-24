@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-ARCHIVE="off"
+ARCHIVE="on"
 
 echo 'Webitel Kibana '$VERSION
 
