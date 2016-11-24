@@ -100,7 +100,7 @@ elasticsearch.url: "http://elasticsearch:9200"
 
 # webitel one login
 webitel.security.userName: "webitel"
-webitel.password: "secret"
+webitel.security.password: "secret"
 webitel.main.cdrUri: "http://storage:10025/"
 server.xsrf.disableProtection: true
 
