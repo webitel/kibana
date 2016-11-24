@@ -99,16 +99,19 @@ elasticsearch.url: "http://elasticsearch:9200"
 #ops.interval: 5000
 
 # webitel one login
-#webitel.userName: "igor"
-#webitel.password: "yo"
-#webitel.cdrUri: "http://10.10.10.25:10023/"
+#webitel.security.userName: "webitel"
+#webitel.security.password: "secret"
+
+webitel.security.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
+webitel.security.sessionTimeout: 604800000
+
+
 server.xsrf.disableProtection: true
 # other weitel
+
+#webitel.main.cdrUri: "http://10.10.10.25:10023/"
 webitel.main.engineUri: "http://10.10.10.25:10022"
 webitel.main.webRtcUri: "wss://pre.webitel.com:8082"
-
-webitel.encryptionKey: "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla"
-webitel.sessionTimeout: 604800000
 
 console.enabled: false
 timelion.enabled: false
