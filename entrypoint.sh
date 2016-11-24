@@ -4,7 +4,7 @@ ARCHIVE="on"
 
 echo 'Webitel Kibana '$VERSION
 
-if [ "$WEBITEL_ARCHIVE" == "$ARCHIVE"]; then
+if [ "$WEBITEL_ARCHIVE" == "$ARCHIVE" ]; then
     echo "Webitel Archive Storage"
     cp -rf /kibana/config/kibana.yml.archive /kibana/config/kibana.yml
 fi
