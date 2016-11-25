@@ -22,7 +22,7 @@ if [ "$1" = 'kibana' ]; then
 	fi
 
 	if [ "$WEBITEL_PASS" ]; then
-		sed -ri "s!^(webitel.password:).*!\1 '$WEBITEL_PASS'!" /kibana/config/kibana.yml
+		sed -ri "s!^(webitel.security.password:).*!\1 '$WEBITEL_PASS'!" /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
