@@ -109,3 +109,9 @@ webitel.sessionTimeout: 604800000
 
 console.enabled: false
 timelion.enabled: false
+
+webitel.accounts.enabled: false
+webitel.agents.enabled: false
+webitel.calls.enabled: false
+webitel.cti.enabled: false
+webitel.members.enabled: false

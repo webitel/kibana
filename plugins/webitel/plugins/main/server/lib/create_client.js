@@ -7,7 +7,7 @@
 import request from 'request';
 
 export function Client (config) {
-    const baseUrl = config.get('webitel.main.engineUri');
+    const baseUrl = config.get('webitel.main.engineAuthUri') || config.get('webitel.main.engineUri');
 
     return {
         api: function (method = "GET", path = "/", data, cb = ()=>{}) {

@@ -110,8 +110,15 @@ server.xsrf.disableProtection: true
 # other weitel
 
 #webitel.main.cdrUri: "http://10.10.10.25:10023/"
-webitel.main.engineUri: "http://10.10.10.25:10022"
+webitel.main.engineUri: "https://pre.webitel.com/engine"
+#webitel.main.engineAuthUri: "http://10.10.10.25:10022"
 webitel.main.webRtcUri: "wss://pre.webitel.com:8082"
+
+webitel.accounts.enabled: true
+webitel.agents.enabled: true
+webitel.calls.enabled: true
+webitel.cti.enabled: true
+webitel.members.enabled: true
 
 console.enabled: false
 timelion.enabled: false

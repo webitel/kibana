@@ -22,6 +22,7 @@ export default function (kibana) {
             return Joi.object({
                 enabled: Joi.boolean().default(true),
                 engineUri: Joi.string().default('http://localhost'),
+                engineAuthUri: Joi.string(),
                 cdrUri: Joi.string().default('http://localhost/cdr'),
                 webRtcUri: Joi.string().default('http://localhost:8082')
             }).default()
