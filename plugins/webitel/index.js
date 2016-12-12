@@ -13,6 +13,7 @@ import members from './plugins/members';
 import exports from './plugins/exports';
 import recordings from './plugins/recordings';
 import cti from './plugins/cti';
+import reporting from './plugins/reporting';
 
 module.exports = kibana => [
     main(kibana),
@@ -23,5 +24,6 @@ module.exports = kibana => [
     members(kibana),
     exports(kibana),
     recordings(kibana),
-    cti(kibana)
+    cti(kibana),
+    reporting(kibana)
 ];

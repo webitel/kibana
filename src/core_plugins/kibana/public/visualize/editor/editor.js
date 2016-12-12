@@ -300,6 +300,9 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
+        /*WEBITEL*/
+        $scope.$emit('application.saved');
+        
         if (savedVis.id === $route.current.params.id) return;
         kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
       }

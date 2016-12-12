@@ -1,0 +1,43 @@
+<kbn-management-app section="kibana">
+    <div class="container-fluid">
+        <h1>Generated Reports</h1>
+        <div class="controls">
+            <a href="#/management/kibana/reporting/new" tooltip="Add new" class="btn btn-success">
+                <span class="sr-only">Add new</span>
+                <i aria-hidden="true" class="fa fa-plus"></i>
+             </a>
+        </div>
+
+        <table class="table table-striped job-list">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Cron</th>
+                <th>dateInterval</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="job in jobs">
+                    <td>{{job.name}}</td>
+                    <td>{{job.cron}}</td>
+                    <td>{{job.dateInterval.display}}</td>
+                    <td class="actions">
+                        <a
+                                class="btn btn-default"
+                                href="#/management/kibana/reporting/{{job.name}}/edit"
+                        >
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <a
+                                class="btn btn-danger"
+                                ng-click=removeJob(job.name)
+                        >
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</kbn-management-app>

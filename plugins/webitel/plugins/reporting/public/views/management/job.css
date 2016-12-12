@@ -1,0 +1,10 @@
+.job-management-objects .list-unstyled li {
+    border-bottom: 1px solid;
+    border-bottom-color: #ecf0f1;
+    padding: 8px;
+    height: 45px;
+}
+
+.job-management-objects .list-unstyled li input[type="checkbox"] {
+    margin-right: 15px;
+}

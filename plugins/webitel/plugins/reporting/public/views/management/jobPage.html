@@ -1,0 +1,68 @@
+<kbn-management-app section="kibana">
+    <div class="container-fluid">
+        <h1>Page Reports</h1>
+        <form role="form" name="objectForm" ng-submit="submit()">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <textarea rows="1" required ng-model="field.name" ng-disabled="!isNew" class="form-control span12" style="overflow: hidden; word-wrap: break-word; resize: none; height: 34px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cron time</label>
+                        <textarea rows="1" required ng-model="field.cron" class="form-control span12" style="overflow: hidden; word-wrap: break-word; resize: none; height: 34px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date interval</label>
+                        <select name="interval" class="form-control" ng-model="field.dateInterval" required
+                                ng-options="interval.display for interval in intervalOptions  track by interval.display"></select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Email(s)</label>
+                        <textarea rows="1" required ng-model="field.emails" class="form-control span12" style="overflow: hidden; word-wrap: break-word; resize: none; height: 34px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <textarea rows="1" required ng-model="field.subject" class="form-control span12" style="overflow: hidden; word-wrap: break-word; resize: none; height: 34px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Text</label>
+                        <textarea rows="2" required ng-model="field.text" class="form-control span12" style="overflow: auto; word-wrap: break-word; resize: none; height: 68px;"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-management-objects">
+                        <ul class="list-unstyled" >
+                            <li class="item" ng-repeat="item in field.vis">
+                                <div class="actions pull-right">
+                                    <button ng-click="removeVis(item, $event)" class="btn btn-danger" aria-label="Remove">
+                                        <span class="sr-only">Edit</span>
+                                        <i aria-hidden="true" class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <div class="item-title">
+                                    <span>{{item.name}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+        <div class="form-group">
+            <button aria-label="Close" class="btn btn-primary" ng-click="close()">Close</button>
+            <button aria-label="Save" class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
+        </div>
+    </div>
+</kbn-management-app>
