@@ -111,7 +111,7 @@ server.xsrf.disableProtection: true
 
 #webitel.main.cdrUri: "http://10.10.10.25:10023/"
 webitel.main.engineUri: "https://pre.webitel.com/engine"
-#webitel.main.engineAuthUri: "http://10.10.10.25:10022"
+webitel.main.engineAuthUri: "http://engine:10022"
 webitel.main.webRtcUri: "wss://pre.webitel.com:8082"
 
 webitel.accounts.enabled: true

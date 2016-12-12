@@ -27,7 +27,7 @@ if [ "$1" = 'kibana' ]; then
 
 if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
 		: ${ENGINE_AUTH_URL:='http://engine:10022'}
-		sed -ri "s!^(webitel.main.engineUri:).*!\1 '$ENGINE_AUTH_URL'!" /kibana/config/kibana.yml
+		sed -ri "s!^(webitel.main.engineAuthUri:).*!\1 '$ENGINE_AUTH_URL'!" /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_URL" -o "$ENGINE_PORT_10022_TCP" ]; then
