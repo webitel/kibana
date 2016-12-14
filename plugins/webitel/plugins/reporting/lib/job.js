@@ -32,9 +32,12 @@ export class Job {
 
   getNextIntervalMs () {
     let n = -1;
+    let nextJob;
     do {
-      n = this.interval.next().getTime() - Date.now()
+      nextJob = this.interval.next();
+      n = nextJob.getTime() - Date.now()
     } while (n < 0);
+    console.log(`Job ${this.id} execute time ${nextJob.toString()} (interval ${n})`);
     return n;
   }
 
