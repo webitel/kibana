@@ -67,6 +67,7 @@ export class Job {
       });
 
     }, intervalMs);
+    console.log(`Set timer ${intervalMs}`);
   }
 
   loadEmailConfig (done) {
@@ -117,6 +118,7 @@ export class Job {
         (err, data) => {
           if (err)
             return done(err);
+          console.log(`Send mail.`);
           sendMail(emailConfig, this, data, done);
         }
       )
