@@ -25,8 +25,12 @@ function VisSpyReportProvider(Notifier, $filter, $rootScope, config, Private, jo
           refreshJobsAll()
         }
       });
-      $scope.$parent.$parent.$parent.$on('application.saved', e => {
-        saveJobs();
+
+      const onSaveJobs =  $rootScope.$on('application.saved', (e, vis) => {
+        saveJobs(vis);
+      });
+      $scope.$on('$destroy', function () {
+        onSaveJobs();
       });
 
       $scope.$watchMulti([
@@ -50,8 +54,8 @@ function VisSpyReportProvider(Notifier, $filter, $rootScope, config, Private, jo
       };
 
       function saveJobs() {
-        if (updatedJobs.length === 0)
-          return;
+        // if (updatedJobs.length === 0)
+        //   return;
         const req = $scope.req;
         let body = angular.copy(req.fetchParams.body);
         delete body.highlight;
@@ -73,6 +77,10 @@ function VisSpyReportProvider(Notifier, $filter, $rootScope, config, Private, jo
         };
 
         for (let job of $scope.jobs) {
+          if (updatedJobs.length === 0 && !job._selected) {
+            continue;
+          }
+
           let vis = job._source.vis || [];
           let _vis = excludeVis(vis, $scope.vis.title);
 

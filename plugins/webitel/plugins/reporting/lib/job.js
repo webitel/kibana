@@ -15,7 +15,7 @@ export class Job {
   constructor (options = {}, client) {
     this.id = options._id; // TODO add domain
     this.domain = options._source.domain;
-
+    this.timeZone = options._source.timezone;
     this.settingsIndex = this.domain ? `.kibana-${this.domain}` : '.kibana';
     this.data = options._source;
     this.client = client;
@@ -47,6 +47,7 @@ export class Job {
 
   next () {
     const intervalMs = this.getNextIntervalMs();
+
     clearTimeout(this.timerId);
     this.timerId = setTimeout( () => {
       console.log(`Execute job ${this.id}`);
@@ -70,7 +71,6 @@ export class Job {
       });
 
     }, intervalMs);
-    console.log(`Set timer ${intervalMs}`);
   }
 
   loadEmailConfig (done) {
@@ -89,7 +89,9 @@ export class Job {
         this.data.vis,
         (vis, cb) => {
           let b = _.clone(vis.body, true);
-
+          if (this.timeZone)
+            replaceTimeZone(vis.body.aggs, '', this.timeZone);
+          
           b.query.bool.must.push({
             "range": {
               "variables.start_stamp": {
@@ -121,13 +123,25 @@ export class Job {
         (err, data) => {
           if (err)
             return done(err);
-          console.log(`Send mail.`);
           sendMail(emailConfig, this, data, done);
         }
       )
 
     } else {
       done(new Error(`No selected visualization`));
+    }
+  }
+}
+
+function replaceTimeZone(obj, stack, timeZone) {
+  for (var property in obj) {
+    if (obj.hasOwnProperty(property)) {
+      if (typeof obj[property] == "object") {
+        replaceTimeZone(obj[property], stack + '.' + property, timeZone);
+      } else if (property === 'time_zone') {
+        console.log(`Set timezone ${timeZone}`);
+        obj[property] = timeZone;
+      }
     }
   }
 }

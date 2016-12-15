@@ -89,7 +89,7 @@ export default (server) => {
         method: 'POST',
         path: '/api/reporting/v1/jobs',
         handler(request, reply) {
-            const {name, cron, dateInterval, emails, vis, subject, text} = request.payload;
+            const {name, cron, dateInterval, emails, vis, subject, text, timezone} = request.payload;
 
             elasticsearch.index({
                 index: getIndexName(request),
@@ -100,6 +100,7 @@ export default (server) => {
                     domain: request.auth.credentials.domain,
                     cron,
                     dateInterval,
+                    timezone,
                     emails,
                     vis,
                     subject,
