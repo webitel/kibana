@@ -13,12 +13,12 @@ var _crypto = require('crypto');
 var _crypto2 = _interopRequireDefault(_crypto);
 
 exports['default'] = function (server) {
-  var updateMetadata = _asyncToGenerator(function* (urlId, urlDoc) {
-    var client = server.plugins.elasticsearch.client;
+  var updateMetadata = _asyncToGenerator(function* (urlId, urlDoc, req) {
+    var callWithRequest = server.plugins.elasticsearch.callWithRequest;
     var kibanaIndex = server.config().get('kibana.index');
 
     try {
-      yield client.update({
+      yield callWithRequest(req, 'update', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -35,12 +35,12 @@ exports['default'] = function (server) {
     }
   });
 
-  var getUrlDoc = _asyncToGenerator(function* (urlId) {
+  var getUrlDoc = _asyncToGenerator(function* (urlId, req) {
     var urlDoc = yield new Promise(function (resolve, reject) {
-      var client = server.plugins.elasticsearch.client;
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
       var kibanaIndex = server.config().get('kibana.index');
 
-      client.get({
+      callWithRequest(req, 'get', {
         index: kibanaIndex,
         type: 'url',
         id: urlId
@@ -54,12 +54,12 @@ exports['default'] = function (server) {
     return urlDoc;
   });
 
-  var createUrlDoc = _asyncToGenerator(function* (url, urlId) {
+  var createUrlDoc = _asyncToGenerator(function* (url, urlId, req) {
     var newUrlId = yield new Promise(function (resolve, reject) {
-      var client = server.plugins.elasticsearch.client;
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
       var kibanaIndex = server.config().get('kibana.index');
 
-      client.index({
+      callWithRequest(req, 'index', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -86,19 +86,19 @@ exports['default'] = function (server) {
   }
 
   return {
-    generateUrlId: _asyncToGenerator(function* (url) {
+    generateUrlId: _asyncToGenerator(function* (url, req) {
       var urlId = createUrlId(url);
-      var urlDoc = yield getUrlDoc(urlId);
+      var urlDoc = yield getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
-      return createUrlDoc(url, urlId);
+      return createUrlDoc(url, urlId, req);
     }),
-    getUrl: _asyncToGenerator(function* (urlId) {
+    getUrl: _asyncToGenerator(function* (urlId, req) {
       try {
-        var urlDoc = yield getUrlDoc(urlId);
+        var urlDoc = yield getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
 
-        updateMetadata(urlId, urlDoc);
+        updateMetadata(urlId, urlDoc, req);
 
         return urlDoc._source.url;
       } catch (err) {

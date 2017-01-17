@@ -78,11 +78,15 @@ function defaultSettingsProvider() {
     },
     'doc_table:highlight': {
       value: true,
-      description: 'Highlight results in Discover and Saved Searches Dashboard.' + 'Highlighing makes request slow when working on big documents.'
+      description: 'Highlight results in Discover and Saved Searches Dashboard.' + 'Highlighting makes requests slow when working on big documents.'
     },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' + 'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' + 'cause requests to take much longer to process'
+    },
+    'courier:ignoreFilterIfFieldNotInIndex': {
+      value: false,
+      description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' + 'When set to false, all filters are applied to all visualizations. ' + 'When set to true, filter(s) will be ignored for a visualization ' + 'when the visualization\'s index does not contain the filtering field.'
     },
     'fields:popularLimit': {
       value: 10,
@@ -90,11 +94,11 @@ function defaultSettingsProvider() {
     },
     'histogram:barTarget': {
       value: 50,
-      description: 'Attempt to generate around this many bar when using "auto" interval in date histograms'
+      description: 'Attempt to generate around this many bars when using "auto" interval in date histograms'
     },
     'histogram:maxBars': {
       value: 100,
-      description: 'Never show more than this many bar in date histograms, scale values if needed'
+      description: 'Never show more than this many bars in date histograms, scale values if needed'
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,
@@ -126,6 +130,11 @@ function defaultSettingsProvider() {
     'visualization:loadingDelay': {
       value: '2s',
       description: 'Time to wait before dimming visualizations during query'
+    },
+    'visualization:dimmingOpacity': {
+      type: 'number',
+      value: 0.5,
+      description: 'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' + 'The lower this number, the more the highlighted element will stand out.' + 'This must be a number between 0 and 1.'
     },
     'csv:separator': {
       value: ',',

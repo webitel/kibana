@@ -16,10 +16,10 @@ function registerGet(server) {
     path: '/api/kibana/settings',
     method: 'GET',
     handler: function handler(req, reply) {
-      server.uiSettings().getUserProvided().then(function (settings) {
+      server.uiSettings().getUserProvided(req).then(function (settings) {
         return reply({ settings: settings }).type('application/json');
-      })['catch'](function (reason) {
-        return reply(_boom2['default'].wrap(reason));
+      })['catch'](function (err) {
+        return reply(_boom2['default'].wrap(err, err.statusCode));
       });
     }
   });

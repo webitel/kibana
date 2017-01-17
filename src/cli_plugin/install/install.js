@@ -18,9 +18,9 @@ var _cleanup = require('./cleanup');
 
 var _pack = require('./pack');
 
-var _rimraf = require('rimraf');
+var _rename = require('./rename');
 
-var _fs = require('fs');
+var _rimraf = require('rimraf');
 
 var _kibana = require('./kibana');
 
@@ -48,7 +48,7 @@ exports['default'] = _asyncToGenerator(function* (settings, logger) {
 
     (0, _kibana.assertVersion)(settings);
 
-    (0, _fs.renameSync)(settings.workingPath, settings.plugins[0].path);
+    yield (0, _rename.renamePlugin)(settings.workingPath, settings.plugins[0].path);
 
     yield (0, _kibana.rebuildCache)(settings, logger);
 

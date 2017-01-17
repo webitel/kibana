@@ -20,8 +20,6 @@ var _fs = require('fs');
 
 var _lodash = require('lodash');
 
-var _path = require('path');
-
 var _bluebird = require('bluebird');
 
 var _minimatch = require('minimatch');

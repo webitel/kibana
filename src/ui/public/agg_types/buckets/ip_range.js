@@ -20,7 +20,7 @@ export default function RangeAggDefinition(Private) {
       return `${from} to ${to}`;
     },
     makeLabel: function (aggConfig) {
-      return aggConfig.params.field.displayName + ' IP ranges';
+      return aggConfig.getFieldDisplayName() + ' IP ranges';
     },
     params: [
       {

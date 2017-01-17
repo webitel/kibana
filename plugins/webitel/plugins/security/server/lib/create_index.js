@@ -6,8 +6,8 @@ export function validateIndex (server, domainName, cb) {
     const client = server.plugins.elasticsearch.client;
     const config = server.config();
     const index = `${config.get('kibana.index') || '.kibana'}-${domainName}`;
-    const buildNum = config.get('pkg.buildNum') || '14458';
-    const id = config.get('pkg.version') || '5.0.1';
+    const buildNum = config.get('pkg.buildNum') || '14588';
+    const id = config.get('pkg.version') || '5.1.2';
     console.log(index, id);
     client.get({
         index: index,
@@ -22,6 +22,7 @@ export function validateIndex (server, domainName, cb) {
             createIndex(client, index)
                 .then(createConfig(client, index, id, buildNum, domainName)
                     .catch(setupError)
+                    .then(cb)
                     .then(createIndexPattern(client, index)
                         .then(cb))
                         .catch(setupError)
@@ -69,7 +70,7 @@ function createConfig(client, index, id, buildNum, domainName) {
         id: id,
         body: {
             "buildNum": buildNum,
-            "defaultIndex": "cdr-*",
+            // "defaultIndex": "cdr-*",
             "domainName": domainName || null
         }
     });

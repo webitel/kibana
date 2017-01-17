@@ -109,14 +109,19 @@ module.exports = function (plugin, server) {
     });
   }
 
+  function waitForEsVersion() {
+    return (0, _check_es_version2['default'])(server, _kibana_version2['default'].get())['catch'](function (err) {
+      plugin.status.red(err);
+      return _bluebird2['default'].delay(REQUEST_DELAY).then(waitForEsVersion);
+    });
+  }
+
   function setGreenStatus() {
     return plugin.status.green('Kibana index ready');
   }
 
   function check() {
-    return waitForPong().then(function () {
-      return (0, _check_es_version2['default'])(server, _kibana_version2['default'].get());
-    }).then(waitForShards).then(setGreenStatus).then(_lodash2['default'].partial(_migrate_config2['default'], server))['catch'](function (err) {
+    return waitForPong().then(waitForEsVersion).then(waitForShards).then(setGreenStatus).then(_lodash2['default'].partial(_migrate_config2['default'], server))['catch'](function (err) {
       return plugin.status.red(err);
     });
   }

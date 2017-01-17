@@ -1,6 +1,6 @@
 {
   "name": "Webitel",
-  "version": "5.0.1",
+  "version": "5.1.2",
   "dependencies": {
     "async": "^2.1.2",
     "cron-parser": "^2.3.0",

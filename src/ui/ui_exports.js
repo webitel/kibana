@@ -40,6 +40,7 @@ var UiExports = (function () {
     this.consumers = [];
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
+    this.injectedVarsReplacers = [];
   }
 
   _createClass(UiExports, [{
@@ -230,6 +231,11 @@ var UiExports = (function () {
             plugin.extendInit(_asyncToGenerator(function* (server, options) {
               _lodash2['default'].merge(_this2.defaultInjectedVars, (yield injector.call(plugin, server, options)));
             }));
+          };
+
+        case 'replaceInjectedVars':
+          return function (plugin, replacer) {
+            _this2.injectedVarsReplacers.push(replacer);
           };
       }
     }

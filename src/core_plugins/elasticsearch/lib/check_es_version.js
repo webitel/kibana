@@ -11,10 +11,6 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _es_bool = require('./es_bool');
-
-var _es_bool2 = _interopRequireDefault(_es_bool);
-
 var _is_es_compatible_with_kibana = require('./is_es_compatible_with_kibana');
 
 var _is_es_compatible_with_kibana2 = _interopRequireDefault(_is_es_compatible_with_kibana);
@@ -60,7 +56,8 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
 
     function getHumanizedNodeNames(nodes) {
       return nodes.map(function (node) {
-        return 'v' + node.version + ' @ ' + node.http.publish_address + ' (' + node.ip + ')';
+        var publishAddress = _lodash2['default'].get(node, 'http.publish_address') ? _lodash2['default'].get(node, 'http.publish_address') + ' ' : '';
+        return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
       });
     }
 
@@ -69,7 +66,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
         return {
           version: node.version,
           http: {
-            publish_address: node.http.publish_address
+            publish_address: _lodash2['default'].get(node, 'http.publish_address')
           },
           ip: node.ip
         };
@@ -90,7 +87,7 @@ module.exports = function checkEsVersion(server, kibanaVersion) {
     if (incompatibleNodes.length) {
       var incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
 
-      var errorMessage = 'This version of Kibana requires Elasticsearch v' + (kibanaVersion + ' on all nodes. I found ') + ('the following incompatible nodes in your cluster: ' + incompatibleNodeNames.join(','));
+      var errorMessage = 'This version of Kibana requires Elasticsearch v' + (kibanaVersion + ' on all nodes. I found ') + ('the following incompatible nodes in your cluster: ' + incompatibleNodeNames.join(', '));
 
       throw new _setup_error2['default'](server, errorMessage);
     }

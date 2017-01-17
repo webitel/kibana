@@ -12,6 +12,7 @@ module.exports = _joi2['default'].object({
   time_field_name: _joi2['default'].string(),
   interval_name: _joi2['default'].string(),
   not_expandable: _joi2['default'].boolean(),
+  source_filters: _joi2['default'].array(),
   fields: _joi2['default'].array().items(_joi2['default'].object({
     name: _joi2['default'].string().required(),
     type: _joi2['default'].string().required(),

@@ -3,3 +3,4 @@ optimize/bundles
 optimize/.babelcache.json
 node_modules
 node
+plugins/network_vis

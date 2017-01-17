@@ -35,7 +35,7 @@ exports.all = [{
   title: 'Disabled',
   severity: -1,
   icon: 'toggle-off',
-  nicknames: ['I\'m I even a thing?']
+  nicknames: ['Am I even a thing?']
 }];
 
 exports.allById = _lodash2['default'].indexBy(exports.all, 'id');

@@ -10,10 +10,10 @@
     "dashboards",
     "dashboarding"
   ],
-  "version": "5.0.1",
+  "version": "5.1.2",
   "build": {
-    "number": 14458,
-    "sha": "2ee15d7ceb10d52bef0e5ee58d3f9c5a238cb786"
+    "number": 14588,
+    "sha": "ed55995668f95ce28fe5dad55ab4a0da67d2a7b6"
   },
   "engines": {
     "node": "6.9.0"
@@ -51,6 +51,7 @@
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
+    "d3-cloud": "1.2.1",
     "dragula": "3.7.0",
     "elasticsearch": "12.0.0-rc5",
     "elasticsearch-browser": "12.0.0-rc5",
@@ -66,6 +67,7 @@
     "glob-all": "3.0.1",
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
+    "no-ui-slider": "1.2.0",
     "h2o2": "5.1.1",
     "hapi": "14.2.0",
     "httpolyglot": "0.1.1",

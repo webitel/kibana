@@ -14,13 +14,113 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { var callNext = step.bind(null, 'next'); var callThrow = step.bind(null, 'throw'); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(callNext, callThrow); } } callNext(); }); }; }
+
 var _lodash = require('lodash');
 
 var _defaults = require('./defaults');
 
 var _defaults2 = _interopRequireDefault(_defaults);
 
+var _bluebird = require('bluebird');
+
+var _bluebird2 = _interopRequireDefault(_bluebird);
+
 function setupSettings(kbnServer, server, config) {
+  var get = _asyncToGenerator(function* (req, key) {
+    assertRequest(req);
+    return getAll(req).then(function (all) {
+      return all[key];
+    });
+  });
+
+  var getAll = _asyncToGenerator(function* (req) {
+    assertRequest(req);
+    return getRaw(req).then(function (raw) {
+      return Object.keys(raw).reduce(function (all, key) {
+        var item = raw[key];
+        var hasUserValue = ('userValue' in item);
+        all[key] = hasUserValue ? item.userValue : item.value;
+        return all;
+      }, {});
+    });
+  });
+
+  var getRaw = _asyncToGenerator(function* (req) {
+    assertRequest(req);
+    return Promise.all([getDefaults(), getUserProvided(req)]).then(function (_ref) {
+      var _ref2 = _slicedToArray(_ref, 2);
+
+      var defaults = _ref2[0];
+      var user = _ref2[1];
+      return (0, _lodash.defaultsDeep)(user, defaults);
+    });
+  });
+
+  var getUserProvided = _asyncToGenerator(function* (req) {
+    var _Bluebird$resolve;
+
+    var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var _ref3$ignore401Errors = _ref3.ignore401Errors;
+    var ignore401Errors = _ref3$ignore401Errors === undefined ? false : _ref3$ignore401Errors;
+
+    assertRequest(req);
+    var _server$plugins$elasticsearch = server.plugins.elasticsearch;
+    var callWithRequest = _server$plugins$elasticsearch.callWithRequest;
+    var errors = _server$plugins$elasticsearch.errors;
+
+    // If the ui settings status isn't green, we shouldn't be attempting to get
+    // user settings, since we can't be sure that all the necessary conditions
+    // (e.g. elasticsearch being available) are met.
+    if (status.state !== 'green') {
+      return hydrateUserSettings({});
+    }
+
+    var params = getClientSettings(config);
+    var allowedErrors = [errors[404], errors[403], errors.NoConnections];
+    if (ignore401Errors) allowedErrors.push(errors[401]);
+
+    return (_Bluebird$resolve = _bluebird2['default'].resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors })))['catch'].apply(_Bluebird$resolve, allowedErrors.concat([function (err) {
+      return {};
+    }])).then(function (resp) {
+      return resp._source || {};
+    }).then(function (source) {
+      return hydrateUserSettings(source);
+    });
+  });
+
+  var setMany = _asyncToGenerator(function* (req, changes) {
+    assertRequest(req);
+    var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+
+    var clientParams = _extends({}, getClientSettings(config), {
+      body: { doc: changes }
+    });
+    return callWithRequest(req, 'update', clientParams).then(function () {
+      return {};
+    });
+  });
+
+  var set = _asyncToGenerator(function* (req, key, value) {
+    assertRequest(req);
+    return setMany(req, _defineProperty({}, key, value));
+  });
+
+  var remove = _asyncToGenerator(function* (req, key) {
+    assertRequest(req);
+    return set(req, key, null);
+  });
+
+  var removeMany = _asyncToGenerator(function* (req, keys) {
+    assertRequest(req);
+    var changes = {};
+    keys.forEach(function (key) {
+      changes[key] = null;
+    });
+    return setMany(req, changes);
+  });
+
   var status = kbnServer.status.create('ui settings');
 
   if (!config.get('uiSettings.enabled')) {
@@ -55,78 +155,8 @@ function setupSettings(kbnServer, server, config) {
   });
   kbnServer.ready().then(mirrorEsStatus);
 
-  function get(key) {
-    return getAll().then(function (all) {
-      return all[key];
-    });
-  }
-
-  function getAll() {
-    return getRaw().then(function (raw) {
-      return Object.keys(raw).reduce(function (all, key) {
-        var item = raw[key];
-        var hasUserValue = ('userValue' in item);
-        all[key] = hasUserValue ? item.userValue : item.value;
-        return all;
-      }, {});
-    });
-  }
-
-  function getRaw() {
-    return Promise.all([getDefaults(), getUserProvided()]).then(function (_ref) {
-      var _ref2 = _slicedToArray(_ref, 2);
-
-      var defaults = _ref2[0];
-      var user = _ref2[1];
-      return (0, _lodash.defaultsDeep)(user, defaults);
-    });
-  }
-
   function getDefaults() {
     return Promise.resolve((0, _defaults2['default'])());
-  }
-
-  function userSettingsNotFound(kibanaVersion) {
-    status.red('Could not find user-provided settings for Kibana ' + kibanaVersion);
-    return {};
-  }
-
-  function getUserProvided() {
-    var client = server.plugins.elasticsearch.client;
-
-    var clientSettings = getClientSettings(config);
-    return client.get(_extends({}, clientSettings)).then(function (res) {
-      return res._source;
-    })['catch']((0, _lodash.partial)(userSettingsNotFound, clientSettings.id)).then(function (user) {
-      return hydrateUserSettings(user);
-    });
-  }
-
-  function setMany(changes) {
-    var client = server.plugins.elasticsearch.client;
-
-    var clientSettings = getClientSettings(config);
-    return client.update(_extends({}, clientSettings, {
-      body: { doc: changes }
-    })).then(function () {
-      return {};
-    });
-  }
-
-  function set(key, value) {
-    return setMany(_defineProperty({}, key, value));
-  }
-
-  function remove(key) {
-    return set(key, null);
-  }
-
-  function removeMany(keys) {
-    var changes = {};
-    keys.forEach(function (key) {
-      changes[key] = null;
-    });
-    return setMany(changes);
   }
 
   function mirrorEsStatus() {
@@ -165,5 +195,11 @@ function getClientSettings(config) {
   var id = config.get('pkg.version');
   var type = 'config';
   return { index: index, type: type, id: id };
+}
+
+function assertRequest(req) {
+  if (typeof req === 'object' && typeof req.path === 'string' && typeof req.headers === 'object') return;
+
+  throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
 }
 module.exports = exports['default'];

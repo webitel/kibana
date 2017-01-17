@@ -14,6 +14,8 @@ var _fs = require('fs');
 
 var _lodash = require('lodash');
 
+var _bluebird = require('bluebird');
+
 var _boom = require('boom');
 
 var _boom2 = _interopRequireDefault(_boom);
@@ -41,7 +43,13 @@ var _ui_bundler_env = require('./ui_bundler_env');
 var _ui_bundler_env2 = _interopRequireDefault(_ui_bundler_env);
 
 exports['default'] = _asyncToGenerator(function* (kbnServer, server, config) {
-  var getPayload = _asyncToGenerator(function* (app) {
+  var getKibanaPayload = _asyncToGenerator(function* (_ref) {
+    var app = _ref.app;
+    var request = _ref.request;
+    var includeUserProvidedConfig = _ref.includeUserProvidedConfig;
+
+    var uiSettings = server.uiSettings();
+
     return {
       app: app,
       nav: uiExports.navLinks.inOrder,
@@ -50,29 +58,37 @@ exports['default'] = _asyncToGenerator(function* (kbnServer, server, config) {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
-      uiSettings: {
-        defaults: yield server.uiSettings().getDefaults(),
-        user: {}
-      },
-      vars: (0, _lodash.defaults)(app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
+      devMode: config.get('env.dev'),
+      uiSettings: yield (0, _bluebird.props)({
+        defaults: uiSettings.getDefaults(),
+        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+      }),
+      vars: yield (0, _bluebird.reduce)(uiExports.injectedVarsReplacers, _asyncToGenerator(function* (acc, replacer) {
+        return yield replacer(acc, request, server);
+      }), (0, _lodash.defaults)((yield app.getInjectedVars()) || {}, uiExports.defaultInjectedVars))
     };
   });
 
-  var renderApp = _asyncToGenerator(function* (app) {
-    var isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
-    var payload = yield getPayload(app);
-    if (!isElasticsearchPluginRed) {
-      payload.uiSettings.user = yield server.uiSettings().getUserProvided();
+  var renderApp = _asyncToGenerator(function* (_ref2) {
+    var app = _ref2.app;
+    var reply = _ref2.reply;
+    var _ref2$includeUserProvidedConfig = _ref2.includeUserProvidedConfig;
+    var includeUserProvidedConfig = _ref2$includeUserProvidedConfig === undefined ? true : _ref2$includeUserProvidedConfig;
+
+    try {
+      return reply.view(app.templateName, {
+        app: app,
+        kibanaPayload: yield getKibanaPayload({
+          app: app,
+          request: reply.request,
+          includeUserProvidedConfig: includeUserProvidedConfig
+        }),
+        bundlePath: config.get('server.basePath') + '/bundles'
+      });
+    } catch (err) {
+      reply(err);
     }
-    return viewAppWithPayload.call(this, app, payload);
   });
-
-  var renderAppWithDefaultConfig = _asyncToGenerator(function* (app) {
-    var payload = yield getPayload(app);
-    return viewAppWithPayload.call(this, app, payload);
-  });
-
-  var loadingGif = (0, _fs.readFileSync)((0, _utilsFrom_root2['default'])('src/ui/public/loading.gif'), { encoding: 'base64' });
 
   var uiExports = kbnServer.uiExports = new _ui_exports2['default']({
     urlBasePath: config.get('server.basePath')
@@ -167,34 +183,41 @@ exports['default'] = _asyncToGenerator(function* (kbnServer, server, config) {
   }
 
   server.setupViews((0, _path.resolve)(__dirname, 'views'));
-  server.exposeStaticFile('/loading.gif', (0, _path.resolve)(__dirname, 'public/loading.gif'));
 
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    handler: function handler(req, reply) {
+    handler: _asyncToGenerator(function* (req, reply) {
       var id = req.params.id;
       var app = uiExports.apps.byId[id];
       if (!app) return reply(_boom2['default'].notFound('Unknown app ' + id));
 
-      if (kbnServer.status.isGreen()) {
-        return reply.renderApp(app);
-      } else {
-        return reply.renderStatusPage();
+      try {
+        if (kbnServer.status.isGreen()) {
+          yield reply.renderApp(app);
+        } else {
+          yield reply.renderStatusPage();
+        }
+      } catch (err) {
+        reply(_boom2['default'].wrap(err));
       }
-    }
+    })
   });
 
-  function viewAppWithPayload(app, payload) {
-    return this.view(app.templateName, {
+  server.decorate('reply', 'renderApp', function (app) {
+    return renderApp({
       app: app,
-      loadingGif: loadingGif,
-      kibanaPayload: payload,
-      bundlePath: config.get('server.basePath') + '/bundles'
+      reply: this,
+      includeUserProvidedConfig: true
     });
-  }
+  });
 
-  server.decorate('reply', 'renderApp', renderApp);
-  server.decorate('reply', 'renderAppWithDefaultConfig', renderAppWithDefaultConfig);
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+    return renderApp({
+      app: app,
+      reply: this,
+      includeUserProvidedConfig: false
+    });
+  });
 });
 module.exports = exports['default'];

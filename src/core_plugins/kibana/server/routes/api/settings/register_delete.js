@@ -19,12 +19,12 @@ function registerDelete(server) {
       var key = req.params.key;
 
       var uiSettings = server.uiSettings();
-      uiSettings.remove(key).then(function () {
-        return uiSettings.getUserProvided().then(function (settings) {
+      uiSettings.remove(req, key).then(function () {
+        return uiSettings.getUserProvided(req).then(function (settings) {
           return reply({ settings: settings }).type('application/json');
         });
-      })['catch'](function (reason) {
-        return reply(_boom2['default'].wrap(reason));
+      })['catch'](function (err) {
+        return reply(_boom2['default'].wrap(err, err.statusCode));
       });
     }
   });

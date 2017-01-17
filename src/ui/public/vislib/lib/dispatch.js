@@ -2,8 +2,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import SimpleEmitter from 'ui/utils/simple_emitter';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
-export default function DispatchClass(Private) {
+
+export default function DispatchClass(Private, config) {
+
   /**
    * Handles event responses
    *
@@ -161,10 +162,9 @@ export default function DispatchClass(Private) {
      */
     allowBrushing() {
       const xAxis = this.handler.xAxis;
-      // Don't allow brushing for time based charts from non-time-based indices
-      const hasTimeField = this.handler.vis._attr.hasTimeField;
 
-      return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
+      //Allow brushing for ordered axis - date histogram and histogram
+      return Boolean(xAxis.ordered);
     };
 
     /**
@@ -185,62 +185,66 @@ export default function DispatchClass(Private) {
     addBrushEvent(svg) {
       if (!this.isBrushable()) return;
 
+      const self = this;
       const xScale = this.handler.xAxis.xScale;
       const brush = this.createBrush(xScale, svg);
 
-      function brushEnd() {
+      function simulateClickWithBrushEnabled(d, i) {
         if (!validBrushClick(d3.event)) return;
 
-        const bar = d3.select(this);
-        const startX = d3.mouse(svg.node());
-        const startXInv = xScale.invert(startX[0]);
+        if (isQuantitativeScale(xScale)) {
+          const bar = d3.select(this);
+          const startX = d3.mouse(svg.node());
+          const startXInv = xScale.invert(startX[0]);
 
-        // Reset the brush value
-        brush.extent([startXInv, startXInv]);
+          // Reset the brush value
+          brush.extent([startXInv, startXInv]);
 
-        // Magic!
-        // Need to call brush on svg to see brush when brushing
-        // while on top of bars.
-        // Need to call brush on bar to allow the click event to be registered
-        svg.call(brush);
-        bar.call(brush);
+          // Magic!
+          // Need to call brush on svg to see brush when brushing
+          // while on top of bars.
+          // Need to call brush on bar to allow the click event to be registered
+          svg.call(brush);
+          bar.call(brush);
+        } else {
+          self.emit('click', self.eventResponse(d, i));
+        }
       }
 
-      return this.addEvent('mousedown', brushEnd);
+      return this.addEvent('mousedown', simulateClickWithBrushEnabled);
     };
-
 
     /**
      * Mouseover Behavior
      *
      * @method addMousePointer
-     * @returns {D3.Selection}
+     * @returns {d3.Selection}
      */
     addMousePointer() {
       return d3.select(this).style('cursor', 'pointer');
     };
 
     /**
-     * Mouseover Behavior
-     *
-     * @param element {D3.Selection}
+     * Highlight the element that is under the cursor
+     * by reducing the opacity of all the elements on the graph.
+     * @param element {d3.Selection}
      * @method highlight
      */
     highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      //Opacity 1 is needed to avoid the css application
-      $('[data-label]', element.parentNode).css('opacity', 1).not(
-        function (els, el) {
-          return `${$(el).data('label')}` === label;
-        }
-      ).css('opacity', 0.5);
-    };
+
+      const dimming = config.get('visualization:dimmingOpacity');
+      $(element).parent().find('[data-label]')
+        .css('opacity', 1)//Opacity 1 is needed to avoid the css application
+        .not((els, el) => $(el).data('label') === label)
+        .css('opacity', justifyOpacity(dimming));
+    }
 
     /**
      * Mouseout Behavior
      *
-     * @param element {D3.Selection}
+     * @param element {d3.Selection}
      * @method unHighlight
      */
     unHighlight(element) {
@@ -305,10 +309,32 @@ export default function DispatchClass(Private) {
     };
   }
 
+  /**
+   * Determine if d3.Scale is quantitative
+   *
+   * @param element {d3.Scale}
+   * @method isQuantitativeScale
+   * @returns {boolean}
+   */
+  function isQuantitativeScale(scale) {
+    //Invert is a method that only exists on quantitative scales
+    if (scale.invert) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function validBrushClick(event) {
     return event.button === 0;
   }
 
+
+  function justifyOpacity(opacity) {
+    const decimalNumber = parseFloat(opacity, 10);
+    const fallbackOpacity = 0.5;
+    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
+  }
 
   return Dispatch;
 };

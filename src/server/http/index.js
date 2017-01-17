@@ -6,6 +6,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var _url = require('url');
 
+var _path = require('path');
+
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -22,18 +24,6 @@ var _hapi = require('hapi');
 
 var _hapi2 = _interopRequireDefault(_hapi);
 
-var _vision = require('vision');
-
-var _vision2 = _interopRequireDefault(_vision);
-
-var _inert = require('inert');
-
-var _inert2 = _interopRequireDefault(_inert);
-
-var _h2o2 = require('h2o2');
-
-var _h2o22 = _interopRequireDefault(_h2o2);
-
 var _get_default_route = require('./get_default_route');
 
 var _get_default_route2 = _interopRequireDefault(_get_default_route);
@@ -41,6 +31,8 @@ var _get_default_route2 = _interopRequireDefault(_get_default_route);
 var _version_check = require('./version_check');
 
 var _version_check2 = _interopRequireDefault(_version_check);
+
+var _short_url_error = require('./short_url_error');
 
 var _short_url_assert_valid = require('./short_url_assert_valid');
 
@@ -149,11 +141,11 @@ module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: _asyncToGenerator(function* (request, reply) {
       try {
-        var url = yield shortUrlLookup.getUrl(request.params.urlId);
+        var url = yield shortUrlLookup.getUrl(request.params.urlId, request);
         (0, _short_url_assert_valid.shortUrlAssertValid)(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
-        reply(err);
+        reply((0, _short_url_error.handleShortUrlError)(err));
       }
     })
   });
@@ -164,13 +156,17 @@ module.exports = _asyncToGenerator(function* (kbnServer, server, config) {
     handler: _asyncToGenerator(function* (request, reply) {
       try {
         (0, _short_url_assert_valid.shortUrlAssertValid)(request.payload.url);
-        var urlId = yield shortUrlLookup.generateUrlId(request.payload.url);
+        var urlId = yield shortUrlLookup.generateUrlId(request.payload.url, request);
         reply(urlId);
       } catch (err) {
-        reply(err);
+        reply((0, _short_url_error.handleShortUrlError)(err));
       }
     })
   });
+
+  // Expose static assets (fonts, favicons).
+  server.exposeStaticDir('/ui/fonts/{path*}', (0, _path.resolve)(__dirname, '../../ui/public/assets/fonts'));
+  server.exposeStaticDir('/ui/favicons/{path*}', (0, _path.resolve)(__dirname, '../../ui/public/assets/favicons'));
 
   kbnServer.mixin(_version_check2['default']);
 

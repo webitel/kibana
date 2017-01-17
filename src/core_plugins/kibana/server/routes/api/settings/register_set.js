@@ -20,12 +20,12 @@ function registerSet(server) {
       var value = req.payload.value;
 
       var uiSettings = server.uiSettings();
-      uiSettings.set(key, value).then(function () {
-        return uiSettings.getUserProvided().then(function (settings) {
+      uiSettings.set(req, key, value).then(function () {
+        return uiSettings.getUserProvided(req).then(function (settings) {
           return reply({ settings: settings }).type('application/json');
         });
-      })['catch'](function (reason) {
-        return reply(_boom2['default'].wrap(reason));
+      })['catch'](function (err) {
+        return reply(_boom2['default'].wrap(err, err.statusCode));
       });
     }
   });

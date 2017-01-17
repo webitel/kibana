@@ -46,6 +46,7 @@ uiModules
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
       self.formatParams = self.field.format.params();
+      self.conflictDescriptionsLength = (self.field.conflictDescriptions) ? Object.keys(self.field.conflictDescriptions).length : 0;
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];
@@ -161,7 +162,8 @@ uiModules
         return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
         .then((res) => res.data)
         .catch(() => {
-          return notify.error('Error getting available scripting languages from Elasticsearch');
+          notify.error('Error getting available scripting languages from Elasticsearch');
+          return [];
         });
       }
 
