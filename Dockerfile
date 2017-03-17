@@ -13,6 +13,7 @@ COPY data /kibana/data
 COPY optimize /kibana/optimize
 COPY plugins /kibana/plugins
 COPY src /kibana/src
+COPY ui_framework /kibana/ui_framework
 COPY webpackShims /kibana/webpackShims
 
 COPY package.json /kibana/
