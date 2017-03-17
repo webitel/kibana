@@ -148,7 +148,7 @@ export default function ColumnHandler(Private) {
 
     heatmap: (cfg, data) => {
       const defaults = create()(cfg, data);
-      const seriesLimit = 25;
+      const seriesLimit = 250;
       const hasCharts = defaults.charts.length;
       const tooManySeries = defaults.charts[0].series.length > seriesLimit;
       if (hasCharts && tooManySeries) {

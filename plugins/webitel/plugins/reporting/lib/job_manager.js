@@ -14,7 +14,7 @@ export class JobManager {
   constructor (server) {
     this.jobs = {};
     this.client = server.plugins.elasticsearch.getCluster('admin').getClient();
-    console.dir(this.client, {depth: 10});
+   // console.dir(this.client, {depth: 10});
     this._init();
   }
 
