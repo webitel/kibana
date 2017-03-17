@@ -37,6 +37,9 @@ exports['default'] = function (kbnServer, server, config) {
     handler: function handler(request, reply) {
       return reply({
         name: config.get('server.name'),
+        version: config.get('pkg.version'),
+        buildNum: config.get('pkg.buildNum'),
+        buildSha: config.get('pkg.buildSha'),
         uuid: config.get('server.uuid'),
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics

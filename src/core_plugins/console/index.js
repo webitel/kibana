@@ -1,33 +1,40 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _joi = require('joi');
+
+var _joi2 = _interopRequireDefault(_joi);
+
+var _boom = require('boom');
+
+var _boom2 = _interopRequireDefault(_boom);
+
+var _api_serverServer = require('./api_server/server');
+
+var _api_serverServer2 = _interopRequireDefault(_api_serverServer);
+
+var _fs = require('fs');
+
+var _path = require('path');
+
+var _lodash = require('lodash');
 
 var _serverProxy_config_collection = require('./server/proxy_config_collection');
 
-module.exports = function (kibana) {
-  var _require = require('path');
-
-  var resolve = _require.resolve;
-  var join = _require.join;
-  var sep = _require.sep;
-
-  var Joi = require('joi');
-  var Boom = require('boom');
-  var modules = resolve(__dirname, 'public/webpackShims/');
-  var src = resolve(__dirname, 'public/src/');
-
-  var _require2 = require('fs');
-
-  var existsSync = _require2.existsSync;
-
-  var _require3 = require('lodash');
-
-  var startsWith = _require3.startsWith;
-  var endsWith = _require3.endsWith;
+exports['default'] = function (kibana) {
+  var modules = (0, _path.resolve)(__dirname, 'public/webpackShims/');
+  var src = (0, _path.resolve)(__dirname, 'public/src/');
 
   var apps = [];
 
-  if (existsSync(resolve(__dirname, 'public/tests'))) {
+  if ((0, _fs.existsSync)((0, _path.resolve)(__dirname, 'public/tests'))) {
     apps.push({
       title: 'Console Tests',
       id: 'sense-tests',
@@ -91,8 +98,8 @@ module.exports = function (kibana) {
       var proxyConfigCollection = new _serverProxy_config_collection.ProxyConfigCollection(options.proxyConfig);
       var proxyRouteConfig = {
         validate: {
-          query: Joi.object().keys({
-            uri: Joi.string()
+          query: _joi2['default'].object().keys({
+            uri: _joi2['default'].string()
           }).unknown(true)
         },
 
@@ -102,8 +109,8 @@ module.exports = function (kibana) {
           if (!filters.some(function (re) {
             return re.test(uri);
           })) {
-            var err = Boom.forbidden();
-            err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+            var err = _boom2['default'].forbidden();
+            err.output.payload = 'Error connecting to \'' + uri + '\':\n\nUnable to send requests to that url.';
             err.output.headers['content-type'] = 'text/plain';
             reply(err);
           } else {
@@ -128,7 +135,7 @@ module.exports = function (kibana) {
             xforward: true,
             onResponse: function onResponse(err, res, request, reply, settings, ttl) {
               if (err != null) {
-                reply("Error connecting to '" + uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                reply('Error connecting to \'' + uri + '\':\n\n' + err.message).type('text/plain').statusCode = 502;
               } else {
                 reply(null, res);
               }
@@ -160,17 +167,16 @@ module.exports = function (kibana) {
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
         handler: function handler(req, reply) {
-          var server = require('./api_server/server');
           var _req$query = req.query;
           var sense_version = _req$query.sense_version;
           var apis = _req$query.apis;
 
           if (!apis) {
-            reply(Boom.badRequest('"apis" is a required param.'));
+            reply(_boom2['default'].badRequest('"apis" is a required param.'));
             return;
           }
 
-          return server.resolveApi(sense_version, apis.split(","), reply);
+          return _api_serverServer2['default'].resolveApi(sense_version, apis.split(','), reply);
         }
       });
 
@@ -188,7 +194,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       apps: apps,
-
+      hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
 
       injectDefaultVars: function injectDefaultVars(server, options) {
@@ -197,7 +203,9 @@ module.exports = function (kibana) {
         return varsToInject;
       },
 
-      noParse: [join(modules, 'ace' + sep), join(modules, 'moment_src/moment' + sep), join(src, 'sense_editor/mode/worker.js')]
+      noParse: [(0, _path.join)(modules, 'ace' + _path.sep), (0, _path.join)(modules, 'moment_src/moment' + _path.sep), (0, _path.join)(src, 'sense_editor/mode/worker.js')]
     }
   });
 };
+
+module.exports = exports['default'];

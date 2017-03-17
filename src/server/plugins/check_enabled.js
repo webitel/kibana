@@ -15,6 +15,12 @@ var _lodashInternalToPath = require('lodash/internal/toPath');
 var _lodashInternalToPath2 = _interopRequireDefault(_lodashInternalToPath);
 
 exports['default'] = _asyncToGenerator(function* (kbnServer, server, config) {
+  var forcedOverride = {
+    console: function console(enabledInConfig) {
+      return !config.get('elasticsearch.tribe.url') && enabledInConfig;
+    }
+  };
+
   var plugins = kbnServer.plugins;
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
@@ -26,8 +32,12 @@ exports['default'] = _asyncToGenerator(function* (kbnServer, server, config) {
       var plugin = _step.value;
 
       var enabledInConfig = config.get([].concat(_toConsumableArray((0, _lodashInternalToPath2['default'])(plugin.configPrefix)), ['enabled']));
-
-      if (!enabledInConfig) {
+      var hasOveride = forcedOverride.hasOwnProperty(plugin.id);
+      if (hasOveride) {
+        if (!forcedOverride[plugin.id](enabledInConfig)) {
+          plugins.disable(plugin);
+        }
+      } else if (!enabledInConfig) {
         plugins.disable(plugin);
       }
     }

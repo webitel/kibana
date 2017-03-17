@@ -10,6 +10,10 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
+var _path = require('path');
+
+var _fs = require('fs');
+
 var _webpack = require('webpack');
 
 var _webpack2 = _interopRequireDefault(_webpack);
@@ -18,9 +22,9 @@ var _boom = require('boom');
 
 var _boom2 = _interopRequireDefault(_boom);
 
-var _webpackDirectoryNameAsMain = require('webpack-directory-name-as-main');
+var _elasticWebpackDirectoryNameAsMain = require('@elastic/webpack-directory-name-as-main');
 
-var _webpackDirectoryNameAsMain2 = _interopRequireDefault(_webpackDirectoryNameAsMain);
+var _elasticWebpackDirectoryNameAsMain2 = _interopRequireDefault(_elasticWebpackDirectoryNameAsMain);
 
 var _extractTextWebpackPlugin = require('extract-text-webpack-plugin');
 
@@ -38,6 +42,8 @@ var _webpackLibOptimizeUglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPl
 
 var _webpackLibOptimizeUglifyJsPlugin2 = _interopRequireDefault(_webpackLibOptimizeUglifyJsPlugin);
 
+var _lodash = require('lodash');
+
 var _utilsFrom_root = require('../utils/from_root');
 
 var _utilsFrom_root2 = _interopRequireDefault(_utilsFrom_root);
@@ -46,17 +52,11 @@ var _babel_options = require('./babel_options');
 
 var _babel_options2 = _interopRequireDefault(_babel_options);
 
-var _util = require('util');
-
-var _lodash = require('lodash');
-
-var _path = require('path');
-
-var _fs = require('fs');
-
 var _packageJson = require('../../package.json');
 
 var _packageJson2 = _interopRequireDefault(_packageJson);
+
+var _loaders = require('./loaders');
 
 var babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
@@ -114,8 +114,26 @@ var BaseOptimizer = (function () {
   }, {
     key: 'getConfig',
     value: function getConfig() {
-      var mapQ = this.sourceMaps ? '?sourceMap' : '';
-      var mapQPre = mapQ ? mapQ + '&' : '?';
+      var _this2 = this;
+
+      var loaderWithSourceMaps = function loaderWithSourceMaps(loader) {
+        return (0, _loaders.setLoaderQueryParam)(loader, 'sourceMap', !!_this2.sourceMaps);
+      };
+
+      var makeStyleLoader = function makeStyleLoader(preprocessor) {
+        var loaders = [loaderWithSourceMaps('css-loader?autoprefixer=false'), {
+          name: 'postcss-loader',
+          query: {
+            config: require.resolve('./postcss.config')
+          }
+        }];
+
+        if (preprocessor) {
+          loaders = [].concat(_toConsumableArray(loaders), [loaderWithSourceMaps(preprocessor)]);
+        }
+
+        return _extractTextWebpackPlugin2['default'].extract((0, _loaders.makeLoaderString)(loaders));
+      };
 
       return {
         context: (0, _utilsFrom_root2['default'])('.'),
@@ -134,7 +152,7 @@ var BaseOptimizer = (function () {
 
         recordsPath: (0, _path.resolve)(this.env.workingDir, 'webpack.records'),
 
-        plugins: [new _webpack2['default'].ResolverPlugin([new _webpackDirectoryNameAsMain2['default']()]), new _webpack2['default'].NoErrorsPlugin(), new _extractTextWebpackPlugin2['default']('[name].style.css', {
+        plugins: [new _webpack2['default'].ResolverPlugin([new _elasticWebpackDirectoryNameAsMain2['default']()]), new _webpack2['default'].NoErrorsPlugin(), new _extractTextWebpackPlugin2['default']('[name].style.css', {
           allChunks: true
         }), new _webpackLibOptimizeCommonsChunkPlugin2['default']({
           name: 'commons',
@@ -142,22 +160,14 @@ var BaseOptimizer = (function () {
         })].concat(_toConsumableArray(this.pluginsForEnv(this.env.context.env))),
 
         module: {
-          loaders: [{
-            test: /\.less$/,
-            loader: _extractTextWebpackPlugin2['default'].extract('style', 'css' + mapQ + '!autoprefixer' + mapQPre + '{ "browsers": ["last 2 versions","> 5%"] }!less' + mapQPre + 'dumpLineNumbers=comments')
-          }, { test: /\.css$/, loader: _extractTextWebpackPlugin2['default'].extract('style', 'css' + mapQ) }, { test: /\.jade$/, loader: 'jade' }, { test: /\.json$/, loader: 'json' }, { test: /\.(html|tmpl)$/, loader: 'raw' }, { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' }, { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' }, { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: 'rjs-repack' + mapQ }, {
-            test: /\.js$/,
+          loaders: [{ test: /\.less$/, loader: makeStyleLoader('less-loader') }, { test: /\.css$/, loader: makeStyleLoader() }, { test: /\.jade$/, loader: 'jade-loader' }, { test: /\.json$/, loader: 'json-loader' }, { test: /\.(html|tmpl)$/, loader: 'raw-loader' }, { test: /\.png$/, loader: 'url-loader' }, { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' }, { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') }, {
+            test: /\.jsx?$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: _babel_options2['default'].webpack
-          }, {
-            test: /\.jsx$/,
-            exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: (0, _lodash.defaults)({
-              nonStandard: true
-            }, _babel_options2['default'].webpack)
-          }].concat(this.env.loaders),
+            loader: (0, _loaders.makeLoaderString)([{
+              name: 'babel-loader',
+              query: _babel_options2['default'].webpack
+            }])
+          }],
           postLoaders: this.env.postLoaders || [],
           noParse: this.env.noParse
         },
@@ -176,7 +186,7 @@ var BaseOptimizer = (function () {
         resolveLoader: {
           alias: (0, _lodash.transform)(_packageJson2['default'].dependencies, function (aliases, version, name) {
             if (name.endsWith('-loader')) {
-              aliases[name.replace(/-loader$/, '')] = require.resolve(name);
+              aliases[name] = require.resolve(name);
             }
           }, {})
         }

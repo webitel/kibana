@@ -5,9 +5,10 @@ module.exports = function (server) {
     method: 'GET',
     path: '/api/timelion/validate/es',
     handler: function handler(request, reply) {
-
       return server.uiSettings().getAll(request).then(function (uiSettings) {
-        var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+        var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('data');
+
+        var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
 
         var timefield = uiSettings['timelion:es.timefield'];
 

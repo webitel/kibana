@@ -14,12 +14,10 @@ export default function HistogramVisType(Private) {
       'Be careful with sparse sets as the connection between points can be misleading.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
         showCircles: true,
-        smoothLines: false,
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,
@@ -27,8 +25,7 @@ export default function HistogramVisType(Private) {
         times: [],
         addTimeMarker: false,
         defaultYExtents: false,
-        setYExtents: false,
-        yAxis: {}
+        setYExtents: false
       },
       legendPositions: [{
         value: 'left',
@@ -42,6 +39,16 @@ export default function HistogramVisType(Private) {
       }, {
         value: 'bottom',
         text: 'bottom',
+      }],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
       }],
       scales: ['linear', 'log', 'square root'],
       editor: lineTemplate

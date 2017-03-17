@@ -10,9 +10,17 @@ var _libHealth_check = require('./lib/health_check');
 
 var _libHealth_check2 = _interopRequireDefault(_libHealth_check);
 
-var _libExpose_client = require('./lib/expose_client');
+var _libCreate_data_cluster = require('./lib/create_data_cluster');
 
-var _libExpose_client2 = _interopRequireDefault(_libExpose_client);
+var _libCreate_admin_cluster = require('./lib/create_admin_cluster');
+
+var _libClient_logger = require('./lib/client_logger');
+
+var _libCreate_clusters = require('./lib/create_clusters');
+
+var _libFilter_headers = require('./lib/filter_headers');
+
+var _libFilter_headers2 = _interopRequireDefault(_libFilter_headers);
 
 var _libCreate_proxy = require('./lib/create_proxy');
 
@@ -46,13 +54,37 @@ module.exports = function (_ref) {
         customHeaders: object()['default']({}),
         pingTimeout: number()['default'](ref('requestTimeout')),
         startupTimeout: number()['default'](5000),
+        logQueries: boolean()['default'](false),
         ssl: object({
           verify: boolean()['default'](true),
           ca: array().single().items(string()),
           cert: string(),
           key: string()
         })['default'](),
-        apiVersion: Joi.string()['default']('master')
+        apiVersion: Joi.string()['default']('master'),
+        healthCheck: object({
+          delay: number()['default'](2500)
+        })['default'](),
+        tribe: object({
+          url: string().uri({ scheme: ['http', 'https'] }),
+          preserveHost: boolean()['default'](true),
+          username: string(),
+          password: string(),
+          shardTimeout: number()['default'](0),
+          requestTimeout: number()['default'](30000),
+          requestHeadersWhitelist: array().items().single()['default'](DEFAULT_REQUEST_HEADERS),
+          customHeaders: object()['default']({}),
+          pingTimeout: number()['default'](ref('requestTimeout')),
+          startupTimeout: number()['default'](5000),
+          logQueries: boolean()['default'](false),
+          ssl: object({
+            verify: boolean()['default'](true),
+            ca: array().single().items(string()),
+            cert: string(),
+            key: string()
+          })['default'](),
+          apiVersion: Joi.string()['default']('master')
+        })['default']()
       })['default']();
     },
 
@@ -61,16 +93,25 @@ module.exports = function (_ref) {
         return {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
-          esApiVersion: options.apiVersion
+          esApiVersion: options.apiVersion,
+          esDataIsTribe: (0, _lodash.get)(options, 'tribe.url') ? true : false
         };
       }
     },
 
     init: function init(server, options) {
       var kibanaIndex = server.config().get('kibana.index');
+      var clusters = (0, _libCreate_clusters.createClusters)(server);
 
-      // Expose the client to the server
-      (0, _libExpose_client2['default'])(server);
+      server.expose('getCluster', clusters.get);
+      server.expose('createCluster', clusters.create);
+
+      server.expose('filterHeaders', _libFilter_headers2['default']);
+      server.expose('ElasticsearchClientLogging', (0, _libClient_logger.clientLogger)(server));
+
+      (0, _libCreate_data_cluster.createDataCluster)(server);
+      (0, _libCreate_admin_cluster.createAdminCluster)(server);
+
       (0, _libCreate_proxy2['default'])(server, 'GET', '/{paths*}');
       (0, _libCreate_proxy2['default'])(server, 'POST', '/_mget');
       (0, _libCreate_proxy2['default'])(server, 'POST', '/{index}/_search');
@@ -93,7 +134,7 @@ module.exports = function (_ref) {
         var path = _ref3.path;
 
         var requestPath = (0, _lodash.trimRight)((0, _lodash.trim)(path), '/');
-        var matchPath = (0, _libCreate_proxy.createPath)(kibanaIndex);
+        var matchPath = (0, _libCreate_proxy.createPath)('/elasticsearch', kibanaIndex);
 
         if (requestPath === matchPath) {
           return reply((0, _boom.methodNotAllowed)('You cannot modify the primary kibana index through this interface.'));

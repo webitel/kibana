@@ -4,7 +4,7 @@ import initApi from './server/routes/api/v1/jobs';
 export default function (kibana) {
     return new kibana.Plugin({
         id: 'reporting',
-        require: ['webitel_main'],
+        require: ['webitel_main', 'elasticsearch'],
         configPrefix: 'webitel.reporting',
         publicDir: resolve(__dirname, 'public'),
         uiExports: {

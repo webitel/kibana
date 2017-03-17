@@ -3,17 +3,20 @@
  */
 
 export function validateIndex (server, domainName, cb) {
-    const client = server.plugins.elasticsearch.client;
+    const client = server.plugins.elasticsearch.getCluster('admin').getClient();
+
     const config = server.config();
     const index = `${config.get('kibana.index') || '.kibana'}-${domainName}`;
     const buildNum = config.get('pkg.buildNum') || '14588';
-    const id = config.get('pkg.version') || '5.1.2';
+    const id = config.get('pkg.version') || '5.2.2';
     console.log(index, id);
     client.get({
         index: index,
         type: "config",
         id: id
     }, (err, exists) => {
+        console.dir(err, {depth: 5});
+
         if (err && err.status !== 404)
             return console.error(err);
         

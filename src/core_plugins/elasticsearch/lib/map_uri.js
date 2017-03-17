@@ -19,22 +19,20 @@ var _set_headers = require('./set_headers');
 
 var _set_headers2 = _interopRequireDefault(_set_headers);
 
-function mapUri(server, prefix) {
-  var config = server.config();
-
+function mapUri(cluster, proxyPrefix) {
   function joinPaths(pathA, pathB) {
     return (0, _lodash.trimRight)(pathA, '/') + '/' + (0, _lodash.trimLeft)(pathB, '/');
   }
 
   return function (request, done) {
-
     /*WEBITEL*/
     const credentials = request.auth.credentials;
     if (!credentials) {
       return done(new Error('Session unauthorized'));
     }
-    
-    var _parseUrl = (0, _url.parse)(config.get('elasticsearch.url'), true);
+
+
+    var _parseUrl = (0, _url.parse)(cluster.getUrl(), true);
 
     var esUrlProtocol = _parseUrl.protocol;
     var esUrlHasSlashes = _parseUrl.slashes;
@@ -54,8 +52,11 @@ function mapUri(server, prefix) {
     };
 
     // pathname
-    var reqSubPath = request.path.replace('/elasticsearch', '');
+    var reqSubPath = request.path.replace(proxyPrefix, '');
     /*WEBITEL*/
+    // console.log(reqSubPath);
+    // console.log(request.payload ? request.payload.toString('utf8') : null);
+
     if (credentials.domain) {
       var _r = /.\/_mget|_msearch|_search|_mapping|_field_stats|index-pattern|\.kibana./.exec(reqSubPath);
       if (_r) {
@@ -67,7 +68,7 @@ function mapUri(server, prefix) {
         reqSubPath = _paths.join('/');
       }
 
-     // console.log('\x1b[31m', `>>> ${reqSubPath}` ,'\x1b[0m');
+      console.log('\x1b[31m', `>>> ${reqSubPath}` ,'\x1b[0m');
 
       let payload = request.payload ? request.payload.toString('utf8') : null;
       if (payload) {
@@ -76,24 +77,21 @@ function mapUri(server, prefix) {
           return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
         });
         request.payload = new Buffer(payload);
-       // console.log('\x1b[31m', `>>> ${payload}` ,'\x1b[0m');
+        // console.log('\x1b[31m', `>>> ${payload}` ,'\x1b[0m');
       }
     }
 
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
     // querystring
-    var mappedQuery = (0, _lodash.defaults)((0, _lodash.omit)(request.query, '_'), esUrlQuery || {});
+    var mappedQuery = (0, _lodash.defaults)((0, _lodash.omit)(request.query, '_'), esUrlQuery);
     if (Object.keys(mappedQuery).length) {
       mappedUrlComponents.query = mappedQuery;
     }
 
-    var filteredHeaders = (0, _filter_headers2['default'])(request.headers, config.get('elasticsearch.requestHeadersWhitelist'));
-    var mappedHeaders = (0, _set_headers2['default'])(filteredHeaders, config.get('elasticsearch.customHeaders'));
+    var filteredHeaders = (0, _filter_headers2['default'])(request.headers, cluster.getRequestHeadersWhitelist());
+    var mappedHeaders = (0, _set_headers2['default'])(filteredHeaders, cluster.getCustomHeaders());
     var mappedUrl = (0, _url.format)(mappedUrlComponents);
-
-    console.log(mappedUrl, mappedHeaders);
-
     done(null, mappedUrl, mappedHeaders);
   };
 }

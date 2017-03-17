@@ -12,9 +12,9 @@ var _fs = require('fs');
 
 var _url = require('url');
 
-var _httpolyglot = require('httpolyglot');
+var _elasticHttpolyglot = require('@elastic/httpolyglot');
 
-var _httpolyglot2 = _interopRequireDefault(_httpolyglot);
+var _elasticHttpolyglot2 = _interopRequireDefault(_elasticHttpolyglot);
 
 var _tls_ciphers = require('./tls_ciphers');
 
@@ -52,7 +52,7 @@ exports['default'] = function (kbnServer, server, config) {
 
   server.connection(_extends({}, connectionOptions, {
     tls: true,
-    listener: _httpolyglot2['default'].createServer({
+    listener: _elasticHttpolyglot2['default'].createServer({
       key: (0, _fs.readFileSync)(config.get('server.ssl.key')),
       cert: (0, _fs.readFileSync)(config.get('server.ssl.cert')),
 
@@ -63,7 +63,9 @@ exports['default'] = function (kbnServer, server, config) {
   }));
 
   server.ext('onRequest', function (req, reply) {
-    if (req.raw.req.socket.encrypted) {
+    // A request sent through a HapiJS .inject() doesn't have a socket associated with the request
+    // which causes a failure.
+    if (!req.raw.req.socket || req.raw.req.socket.encrypted) {
       reply['continue']();
     } else {
       reply.redirect((0, _url.format)({

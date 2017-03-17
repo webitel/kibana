@@ -214,6 +214,12 @@ var UiExports = (function () {
             _this2.aliases[type] = _lodash2['default'].union(_this2.aliases[type] || [], spec);
           };
 
+        case 'visTypeEnhancers':
+          return function (plugin, spec) {
+            //used for plugins that augment capabilities of an existing visualization
+            _this2.aliases.visTypes = _lodash2['default'].union(_this2.aliases.visTypes || [], spec);
+          };
+
         case 'bundle':
           return function (plugin, spec) {
             _this2.bundleProviders.push(spec);

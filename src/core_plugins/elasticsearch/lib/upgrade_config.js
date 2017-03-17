@@ -19,11 +19,14 @@ var _util = require('util');
 module.exports = function (server) {
   var MAX_INTEGER = Math.pow(2, 53) - 1;
 
-  var client = server.plugins.elasticsearch.client;
+  var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('admin');
+
+  var callWithInternalUser = _server$plugins$elasticsearch$getCluster.callWithInternalUser;
+
   var config = server.config();
 
   function createNewConfig() {
-    return client.create({
+    return callWithInternalUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: { buildNum: config.get('pkg.buildNum') },
@@ -44,7 +47,9 @@ module.exports = function (server) {
       return hit._id !== '@@version' && hit._id === config.get('pkg.version');
     });
 
-    if (devConfig) return _bluebird2['default'].resolve();
+    if (devConfig) {
+      return _bluebird2['default'].resolve();
+    }
 
     // Look for upgradeable configs. If none of them are upgradeable
     // then create a new one.
@@ -63,7 +68,7 @@ module.exports = function (server) {
       newVersion: config.get('pkg.version')
     });
 
-    return client.create({
+    return callWithInternalUser('create', {
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,

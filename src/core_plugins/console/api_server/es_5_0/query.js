@@ -579,7 +579,15 @@ module.exports = function (api) {
       score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"] },
       max_boost: 10,
       min_score: 1.0
-    }, SCORING_FUNCS)
+    }, SCORING_FUNCS),
+    script: {
+      __template: {
+        "script": "_score * doc['f'].value"
+      },
+      script: {
+        //populated by a global rule
+      }
+    }
 
   });
 };

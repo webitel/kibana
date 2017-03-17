@@ -14,7 +14,10 @@ var _crypto2 = _interopRequireDefault(_crypto);
 
 exports['default'] = function (server) {
   var updateMetadata = _asyncToGenerator(function* (urlId, urlDoc, req) {
-    var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+    var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('admin');
+
+    var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
+
     var kibanaIndex = server.config().get('kibana.index');
 
     try {
@@ -37,7 +40,10 @@ exports['default'] = function (server) {
 
   var getUrlDoc = _asyncToGenerator(function* (urlId, req) {
     var urlDoc = yield new Promise(function (resolve, reject) {
-      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      var _server$plugins$elasticsearch$getCluster2 = server.plugins.elasticsearch.getCluster('admin');
+
+      var callWithRequest = _server$plugins$elasticsearch$getCluster2.callWithRequest;
+
       var kibanaIndex = server.config().get('kibana.index');
 
       callWithRequest(req, 'get', {
@@ -56,7 +62,10 @@ exports['default'] = function (server) {
 
   var createUrlDoc = _asyncToGenerator(function* (url, urlId, req) {
     var newUrlId = yield new Promise(function (resolve, reject) {
-      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      var _server$plugins$elasticsearch$getCluster3 = server.plugins.elasticsearch.getCluster('admin');
+
+      var callWithRequest = _server$plugins$elasticsearch$getCluster3.callWithRequest;
+
       var kibanaIndex = server.config().get('kibana.index');
 
       callWithRequest(req, 'index', {

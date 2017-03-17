@@ -14,10 +14,6 @@ var _elasticsearch = require('elasticsearch');
 
 var _elasticsearch2 = _interopRequireDefault(_elasticsearch);
 
-var _expose_client = require('./expose_client');
-
-var _expose_client2 = _interopRequireDefault(_expose_client);
-
 var _migrate_config = require('./migrate_config');
 
 var _migrate_config2 = _interopRequireDefault(_migrate_config);
@@ -26,13 +22,13 @@ var _create_kibana_index = require('./create_kibana_index');
 
 var _create_kibana_index2 = _interopRequireDefault(_create_kibana_index);
 
-var _check_es_version = require('./check_es_version');
-
-var _check_es_version2 = _interopRequireDefault(_check_es_version);
-
 var _kibana_version = require('./kibana_version');
 
 var _kibana_version2 = _interopRequireDefault(_kibana_version);
+
+var _ensure_es_version = require('./ensure_es_version');
+
+var _ensure_not_tribe = require('./ensure_not_tribe');
 
 var _util = require('util');
 
@@ -46,27 +42,25 @@ var NO_INDEX = 'no_index';
 var INITIALIZING = 'initializing';
 var READY = 'ready';
 
-var REQUEST_DELAY = 2500;
-
 module.exports = function (plugin, server) {
   var config = server.config();
-  var client = server.plugins.elasticsearch.client;
+  var callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  var callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+  var REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-
-  function waitForPong() {
-    return client.ping()['catch'](function (err) {
+  function waitForPong(callWithInternalUser, url) {
+    return callWithInternalUser('ping')['catch'](function (err) {
       if (!(err instanceof NoConnections)) throw err;
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
-
-      return _bluebird2['default'].delay(REQUEST_DELAY).then(waitForPong);
+      return _bluebird2['default'].delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
     });
   }
 
   // just figure out the current "health" of the es setup
   function getHealth() {
-    return client.cluster.health({
+    return callAdminAsKibanaUser('cluster.health', {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
@@ -110,7 +104,7 @@ module.exports = function (plugin, server) {
   }
 
   function waitForEsVersion() {
-    return (0, _check_es_version2['default'])(server, _kibana_version2['default'].get())['catch'](function (err) {
+    return (0, _ensure_es_version.ensureEsVersion)(server, _kibana_version2['default'].get())['catch'](function (err) {
       plugin.status.red(err);
       return _bluebird2['default'].delay(REQUEST_DELAY).then(waitForEsVersion);
     });
@@ -121,7 +115,16 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    return waitForPong().then(waitForEsVersion).then(waitForShards).then(setGreenStatus).then(_lodash2['default'].partial(_migrate_config2['default'], server))['catch'](function (err) {
+    var healthCheck = waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url')).then(waitForEsVersion).then(_ensure_not_tribe.ensureNotTribe.bind(this, callAdminAsKibanaUser)).then(waitForShards).then(_lodash2['default'].partial(_migrate_config2['default'], server)).then(function () {
+      var tribeUrl = config.get('elasticsearch.tribe.url');
+      if (tribeUrl) {
+        return waitForPong(callDataAsKibanaUser, tribeUrl).then(function () {
+          return (0, _ensure_es_version.ensureEsVersion)(server, _kibana_version2['default'].get(), callDataAsKibanaUser);
+        });
+      }
+    });
+
+    return healthCheck.then(setGreenStatus)['catch'](function (err) {
       return plugin.status.red(err);
     });
   }

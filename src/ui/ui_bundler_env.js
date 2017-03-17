@@ -58,8 +58,10 @@ module.exports = (function () {
     // map of which plugins created which aliases
     this.aliasOwners = {};
 
-    // webpack loaders map loader configuration to regexps
-    this.loaders = [];
+    // loaders that are applied to webpack modules after all other processing
+    // NOTE: this is intentionally not exposed as a uiExport because it leaks
+    // too much of the webpack implementation to plugins, but is used by test_bundle
+    // core plugin to inject the instrumentation loader
     this.postLoaders = [];
   }
 
@@ -81,7 +83,7 @@ module.exports = (function () {
       var _this = this;
 
       switch (type) {
-        case 'loaders':
+        case 'noParse':
           return function (plugin, spec) {
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
@@ -89,8 +91,8 @@ module.exports = (function () {
 
             try {
               for (var _iterator = arr(spec)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var loader = _step.value;
-                _this.addLoader(loader);
+                var re = _step.value;
+                _this.addNoParse(re);
               }
             } catch (err) {
               _didIteratorError = true;
@@ -108,16 +110,17 @@ module.exports = (function () {
             }
           };
 
-        case 'postLoaders':
+        case '__globalImportAliases__':
           return function (plugin, spec) {
             var _iteratorNormalCompletion2 = true;
             var _didIteratorError2 = false;
             var _iteratorError2 = undefined;
 
             try {
-              for (var _iterator2 = arr(spec)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var loader = _step2.value;
-                _this.addPostLoader(loader);
+              for (var _iterator2 = Object.keys(spec)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var key = _step2.value;
+
+                _this.aliases[key] = spec[key];
               }
             } catch (err) {
               _didIteratorError2 = true;
@@ -134,71 +137,12 @@ module.exports = (function () {
               }
             }
           };
-
-        case 'noParse':
-          return function (plugin, spec) {
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-              for (var _iterator3 = arr(spec)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var re = _step3.value;
-                _this.addNoParse(re);
-              }
-            } catch (err) {
-              _didIteratorError3 = true;
-              _iteratorError3 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-                  _iterator3['return']();
-                }
-              } finally {
-                if (_didIteratorError3) {
-                  throw _iteratorError3;
-                }
-              }
-            }
-          };
-
-        case 'modules':
-          return function (plugin, spec) {
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
-
-            try {
-              for (var _iterator4 = (0, _lodash.keys)(spec)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                var id = _step4.value;
-                _this.addModule(id, spec[id], plugin.id);
-              }
-            } catch (err) {
-              _didIteratorError4 = true;
-              _iteratorError4 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion4 && _iterator4['return']) {
-                  _iterator4['return']();
-                }
-              } finally {
-                if (_didIteratorError4) {
-                  throw _iteratorError4;
-                }
-              }
-            }
-          };
       }
     }
   }, {
     key: 'addContext',
     value: function addContext(key, val) {
       this.context[key] = val;
-    }
-  }, {
-    key: 'addLoader',
-    value: function addLoader(loader) {
-      this.loaders.push(loader);
     }
   }, {
     key: 'addPostLoader',
@@ -209,65 +153,6 @@ module.exports = (function () {
     key: 'addNoParse',
     value: function addNoParse(regExp) {
       this.noParse.push(regExp);
-    }
-  }, {
-    key: 'addModule',
-    value: function addModule(id, spec, pluginId) {
-      this.claim(id, pluginId);
-
-      // configurable via spec
-      var path = undefined;
-      var parse = true;
-      var imports = null;
-      var exports = null;
-      var expose = null;
-
-      // basic style, just a path
-      if ((0, _lodash.isString)(spec)) path = spec;
-
-      if ((0, _lodash.isArray)(spec)) {
-        path = spec[0];
-        imports = spec[1];
-        exports = spec[2];
-      }
-
-      if ((0, _lodash.isPlainObject)(spec)) {
-        path = spec.path;
-        parse = (0, _lodash.get)(spec, 'parse', parse);
-        imports = (0, _lodash.get)(spec, 'imports', imports);
-        exports = (0, _lodash.get)(spec, 'exports', exports);
-        expose = (0, _lodash.get)(spec, 'expose', expose);
-      }
-
-      if (!path) {
-        throw new TypeError('Invalid spec definition, unable to identify path');
-      }
-
-      this.aliases[id] = path;
-
-      var loader = [];
-      if (imports) {
-        loader.push('imports?' + imports);
-      }
-
-      if (exports) loader.push('exports?' + exports);
-      if (expose) loader.push('expose?' + expose);
-      if (loader.length) this.loaders.push({ test: asRegExp(path), loader: loader.join('!') });
-      if (!parse) this.addNoParse(path);
-    }
-  }, {
-    key: 'claim',
-    value: function claim(id, pluginId) {
-      var owner = pluginId ? 'Plugin ' + pluginId : 'Kibana Server';
-
-      // TODO(spalger): we could do a lot more to detect colliding module defs
-      var existingOwner = this.aliasOwners[id] || this.aliasOwners[id + '$'];
-
-      if (existingOwner) {
-        throw new TypeError(owner + ' attempted to override export "' + id + '" from ' + existingOwner);
-      }
-
-      this.aliasOwners[id] = owner;
     }
   }]);
 

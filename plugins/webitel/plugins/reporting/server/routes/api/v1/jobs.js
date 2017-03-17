@@ -12,7 +12,7 @@ const typeNameVis = 'vis';
 import { JobManager } from '../../../../lib/job_manager'
 
 export default (server) => {
-    const elasticsearch = server.plugins.elasticsearch.client;
+    const elasticsearch = server.plugins.elasticsearch.getCluster('admin').getClient();
     const jobManager = new JobManager(server);
 
     server.route({

@@ -20,7 +20,11 @@ function registerCount(server) {
     path: '/api/kibana/{id}/_count',
     method: ['POST', 'GET'],
     handler: function handler(req, reply) {
-      var boundCallWithRequest = _lodash2['default'].partial(server.plugins.elasticsearch.callWithRequest, req);
+      var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('data');
+
+      var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
+
+      var boundCallWithRequest = _lodash2['default'].partial(callWithRequest, req);
 
       boundCallWithRequest('count', {
         allowNoIndices: false,

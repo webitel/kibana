@@ -20,7 +20,10 @@ function registerFieldCapabilities(server) {
     path: '/api/kibana/{indices}/field_capabilities',
     method: ['GET'],
     handler: function handler(req, reply) {
-      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('data');
+
+      var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
+
       var indices = req.params.indices || '';
 
       return callWithRequest(req, 'fieldStats', {

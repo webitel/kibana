@@ -16,19 +16,16 @@ export default function HistogramVisType(Private) {
       'effect on the series above it.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        smoothLines: false,
         scale: 'linear',
         interpolate: 'linear',
         mode: 'stacked',
         times: [],
         addTimeMarker: false,
         defaultYExtents: false,
-        setYExtents: false,
-        yAxis: {}
+        setYExtents: false
       },
       legendPositions: [{
         value: 'left',
@@ -42,6 +39,16 @@ export default function HistogramVisType(Private) {
       }, {
         value: 'bottom',
         text: 'bottom',
+      }],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
       }],
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],

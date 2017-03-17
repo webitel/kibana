@@ -129,11 +129,11 @@ module.exports = function () {
     status: _joi2['default'].object({
       allowAnonymous: _joi2['default'].boolean()['default'](false)
     })['default'](),
-
     tilemap: _joi2['default'].object({
-      url: _joi2['default'].string()['default']('https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=' + _srcUtilsPackage_json2['default'].version + '&elastic_tile_service_tos=agree'),
+      manifestServiceUrl: _joi2['default'].string()['default']('https://tiles.elastic.co/v2/manifest'),
+      url: _joi2['default'].string(),
       options: _joi2['default'].object({
-        attribution: _joi2['default'].string()['default']('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
+        attribution: _joi2['default'].string(),
         minZoom: _joi2['default'].number().min(1, 'Must not be less than 1')['default'](1),
         maxZoom: _joi2['default'].number()['default'](10),
         tileSize: _joi2['default'].number(),
@@ -144,7 +144,6 @@ module.exports = function () {
         bounds: _joi2['default'].array().items(_joi2['default'].array().items(_joi2['default'].number()).min(2).required()).min(2)
       })['default']()
     })['default'](),
-
     uiSettings: _joi2['default'].object({
       // this is used to prevent the uiSettings from initializing. Since they
       // require the elasticsearch plugin in order to function we need to turn

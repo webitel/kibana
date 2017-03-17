@@ -10,7 +10,11 @@ var _kibana_index_mappings = require('./kibana_index_mappings');
 
 module.exports = function (server) {
   var config = server.config();
-  var client = server.plugins.elasticsearch.client;
+
+  var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('admin');
+
+  var callWithInternalUser = _server$plugins$elasticsearch$getCluster.callWithInternalUser;
+
   var options = {
     index: config.get('kibana.index'),
     type: 'config',
@@ -25,5 +29,5 @@ module.exports = function (server) {
     }
   };
 
-  return client.search(options).then((0, _upgrade_config2['default'])(server));
+  return callWithInternalUser('search', options).then((0, _upgrade_config2['default'])(server));
 };

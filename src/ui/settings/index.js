@@ -66,9 +66,11 @@ function setupSettings(kbnServer, server, config) {
     var ignore401Errors = _ref3$ignore401Errors === undefined ? false : _ref3$ignore401Errors;
 
     assertRequest(req);
-    var _server$plugins$elasticsearch = server.plugins.elasticsearch;
-    var callWithRequest = _server$plugins$elasticsearch.callWithRequest;
-    var errors = _server$plugins$elasticsearch.errors;
+
+    var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('admin');
+
+    var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
+    var errors = _server$plugins$elasticsearch$getCluster.errors;
 
     // If the ui settings status isn't green, we shouldn't be attempting to get
     // user settings, since we can't be sure that all the necessary conditions
@@ -92,7 +94,10 @@ function setupSettings(kbnServer, server, config) {
 
   var setMany = _asyncToGenerator(function* (req, changes) {
     assertRequest(req);
-    var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+
+    var _server$plugins$elasticsearch$getCluster2 = server.plugins.elasticsearch.getCluster('admin');
+
+    var callWithRequest = _server$plugins$elasticsearch$getCluster2.callWithRequest;
 
     var clientParams = _extends({}, getClientSettings(config), {
       body: { doc: changes }

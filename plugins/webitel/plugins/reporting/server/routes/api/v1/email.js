@@ -5,5 +5,5 @@
 "use strict";
 
 export default (server) => {
-  const elasticsearch = server.plugins.elasticsearch.client;
+  const elasticsearch = server.plugins.elasticsearch.getCluster('admin').getClient();
 }

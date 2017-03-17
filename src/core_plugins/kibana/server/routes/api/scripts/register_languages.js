@@ -20,7 +20,9 @@ function registerLanguages(server) {
     path: '/api/kibana/scripts/languages',
     method: 'GET',
     handler: function handler(request, reply) {
-      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      var _server$plugins$elasticsearch$getCluster = server.plugins.elasticsearch.getCluster('data');
+
+      var callWithRequest = _server$plugins$elasticsearch$getCluster.callWithRequest;
 
       return callWithRequest(request, 'cluster.getSettings', {
         include_defaults: true,

@@ -51,6 +51,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
+      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -59,11 +60,24 @@ module.exports = function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: ['visTypes', 'spyModes', 'fieldFormats', 'navbarExtensions', 'managementSections', 'devTools', 'docViews'],
 
-        injectVars: function injectVars(server, options) {
-          var config = server.config();
+        injectVars: function injectVars(server) {
+          var serverConfig = server.config();
+
+          //DEPRECATED SETTINGS
+          //if the url is set, the old settings must be used.
+          //keeping this logic for backward compatibilty.
+          var configuredUrl = server.config().get('tilemap.url');
+          var isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
+          var tilemapConfig = serverConfig.get('tilemap');
           return {
-            kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            tilemap: config.get('tilemap')
+            kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            tilemapsConfig: {
+              deprecated: {
+                isOverridden: isOverridden,
+                config: tilemapConfig
+              },
+              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+            }
           };
         }
       },
@@ -89,24 +103,25 @@ module.exports = function (kibana) {
         url: kbnBaseUrl + '#/dashboard',
         description: 'compose visualizations for much win',
         icon: 'plugins/kibana/assets/dashboard.svg'
-      }, {
+      },
+        /*WEBITEL*/
+      {
+        id: 'kibana:dev_tools',
+        title: 'Dev Tools',
+        order: 9001,
+        url: '/app/kibana#/dev_tools',
+        description: 'development tools',
+        icon: 'plugins/kibana/assets/wrench.svg'
+      },
+      {
         id: 'kibana:management',
         title: 'Management',
-        order: 1000,
+        order: 9003,
         url: kbnBaseUrl + '#/management',
         description: 'define index patterns, change config, and more',
         icon: 'plugins/kibana/assets/settings.svg',
         linkToLastSubUrl: false
-      }
-          /*WEBITEL*/
-        // {
-        // title: 'Dev Tools',
-        // order: 1010,
-        // url: '/app/kibana#/dev_tools',
-        // description: 'development tools',
-        // icon: 'plugins/kibana/assets/wrench.svg'
-      // }
-      ],
+      }],
       injectDefaultVars: function injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
