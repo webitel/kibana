@@ -3,6 +3,8 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+exports._getFilePath = _getFilePath;
+exports._checkFilePathDeprecation = _checkFilePathDeprecation;
 exports._downloadSingle = _downloadSingle;
 exports.download = download;
 
@@ -20,12 +22,35 @@ var _libErrors = require('../lib/errors');
 
 var _url = require('url');
 
+function _isWindows() {
+  return (/^win/.test(process.platform)
+  );
+}
+
+function _getFilePath(filePath, sourceUrl) {
+  var decodedPath = decodeURI(filePath);
+  var prefixedDrive = /^\/[a-zA-Z]:/.test(decodedPath);
+  if (_isWindows() && prefixedDrive) {
+    return decodedPath.slice(1);
+  }
+
+  return decodedPath;
+}
+
+function _checkFilePathDeprecation(sourceUrl, logger) {
+  var twoSlashes = /^file:\/\/(?!\/)/.test(sourceUrl);
+  if (_isWindows() && twoSlashes) {
+    logger.log('Install paths with file:// are deprecated, use file:/// instead');
+  }
+}
+
 function _downloadSingle(settings, logger, sourceUrl) {
   var urlInfo = (0, _url.parse)(sourceUrl);
   var downloadPromise = undefined;
 
   if (/^file/.test(urlInfo.protocol)) {
-    downloadPromise = (0, _downloadersFile2['default'])(logger, decodeURI(urlInfo.path), settings.tempArchiveFile);
+    _checkFilePathDeprecation(sourceUrl, logger);
+    downloadPromise = (0, _downloadersFile2['default'])(logger, _getFilePath(urlInfo.path, sourceUrl), settings.tempArchiveFile);
   } else if (/^https?/.test(urlInfo.protocol)) {
     downloadPromise = (0, _downloadersHttp2['default'])(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
   } else {
@@ -60,5 +85,3 @@ function download(settings, logger) {
 
   return tryNext();
 }
-
-;

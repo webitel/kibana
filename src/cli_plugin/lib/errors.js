@@ -23,4 +23,3 @@ var UnsupportedProtocolError = (function (_Error) {
 })(Error);
 
 exports.UnsupportedProtocolError = UnsupportedProtocolError;
-;

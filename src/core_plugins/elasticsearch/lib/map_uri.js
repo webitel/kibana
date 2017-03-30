@@ -96,5 +96,4 @@ function mapUri(cluster, proxyPrefix) {
   };
 }
 
-;
 module.exports = exports['default'];

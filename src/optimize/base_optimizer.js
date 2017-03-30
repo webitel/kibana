@@ -136,6 +136,7 @@ var BaseOptimizer = (function () {
       };
 
       return {
+        node: { fs: 'empty' },
         context: (0, _utilsFrom_root2['default'])('.'),
         entry: this.bundles.toWebpackEntries(),
 

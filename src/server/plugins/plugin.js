@@ -28,6 +28,8 @@ var _path = require('path');
 
 var _util = require('util');
 
+var _deprecation = require('../../deprecation');
+
 var extendInitFns = Symbol('extend plugin initialization');
 
 var defaultConfigSchema = _joi2['default'].object({
@@ -94,6 +96,7 @@ module.exports = (function () {
     this.externalInit = opts.init || _lodash2['default'].noop;
     this.configPrefix = opts.configPrefix || this.id;
     this.getExternalConfigSchema = opts.config || _lodash2['default'].noop;
+    this.getExternalDeprecations = opts.deprecations || _lodash2['default'].noop;
     this.preInit = _lodash2['default'].once(this.preInit);
     this.init = _lodash2['default'].once(this.init);
     this[extendInitFns] = [];
@@ -116,6 +119,12 @@ module.exports = (function () {
       var schema = yield this.getExternalConfigSchema(_joi2['default']);
       return schema || defaultConfigSchema;
     })
+  }, {
+    key: 'getDeprecations',
+    value: function getDeprecations() {
+      var rules = this.getExternalDeprecations(_deprecation.Deprecations);
+      return rules || [];
+    }
   }, {
     key: 'preInit',
     value: _asyncToGenerator(function* () {

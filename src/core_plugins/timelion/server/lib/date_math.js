@@ -17,10 +17,10 @@ function parse(text, roundUp) {
     return moment(text);
   }
 
-  var time;
+  var time = undefined;
   var mathString = '';
-  var index;
-  var parseString;
+  var index = undefined;
+  var parseString = undefined;
 
   if (text.substring(0, 3) === 'now') {
     time = moment();
@@ -50,9 +50,8 @@ function parseDateMath(mathString, time, roundUp) {
 
   for (var i = 0; i < mathString.length;) {
     var c = mathString.charAt(i++);
-    var type;
-    var num;
-    var unit;
+    var type = undefined;
+    var num = undefined;
 
     if (c === '/') {
       type = 0;
@@ -85,7 +84,7 @@ function parseDateMath(mathString, time, roundUp) {
         return undefined;
       }
     }
-    unit = mathString.charAt(i++);
+    var unit = mathString.charAt(i++);
 
     if (!_.contains(units, unit)) {
       return undefined;

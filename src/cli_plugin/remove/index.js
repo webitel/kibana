@@ -44,5 +44,4 @@ function pluginRemove(program) {
   program.command('remove <plugin>').option('-q, --quiet', 'disable all process messaging except errors').option('-s, --silent', 'disable all process messaging').option('-c, --config <path>', 'path to the config file', (0, _serverPath.getConfig)()).option('-d, --plugin-dir <path>', 'path to the directory where plugins are stored', (0, _utils.fromRoot)('plugins')).description('remove a plugin', 'common examples:\n  remove x-pack').action(processCommand);
 }
 
-;
 module.exports = exports['default'];

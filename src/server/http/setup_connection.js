@@ -16,9 +16,11 @@ var _elasticHttpolyglot = require('@elastic/httpolyglot');
 
 var _elasticHttpolyglot2 = _interopRequireDefault(_elasticHttpolyglot);
 
-var _tls_ciphers = require('./tls_ciphers');
+var _lodash = require('lodash');
 
-var _tls_ciphers2 = _interopRequireDefault(_tls_ciphers);
+var _secure_options = require('./secure_options');
+
+var _secure_options2 = _interopRequireDefault(_secure_options);
 
 exports['default'] = function (kbnServer, server, config) {
   // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
@@ -41,8 +43,7 @@ exports['default'] = function (kbnServer, server, config) {
     }
   };
 
-  // enable tlsOpts if ssl key and cert are defined
-  var useSsl = config.get('server.ssl.key') && config.get('server.ssl.cert');
+  var useSsl = config.get('server.ssl.enabled');
 
   // not using https? well that's easy!
   if (!useSsl) {
@@ -54,11 +55,14 @@ exports['default'] = function (kbnServer, server, config) {
     tls: true,
     listener: _elasticHttpolyglot2['default'].createServer({
       key: (0, _fs.readFileSync)(config.get('server.ssl.key')),
-      cert: (0, _fs.readFileSync)(config.get('server.ssl.cert')),
+      cert: (0, _fs.readFileSync)(config.get('server.ssl.certificate')),
+      ca: (0, _lodash.map)(config.get('server.ssl.certificateAuthorities'), _fs.readFileSync),
+      passphrase: config.get('server.ssl.keyPassphrase'),
 
-      ciphers: _tls_ciphers2['default'],
+      ciphers: config.get('server.ssl.cipherSuites').join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
-      honorCipherOrder: true
+      honorCipherOrder: true,
+      secureOptions: (0, _secure_options2['default'])(config.get('server.ssl.supportedProtocols'))
     })
   }));
 

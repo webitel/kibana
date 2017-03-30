@@ -6,6 +6,7 @@ import AggTypesMetricsSumProvider from 'ui/agg_types/metrics/sum';
 import AggTypesMetricsMedianProvider from 'ui/agg_types/metrics/median';
 import AggTypesMetricsMinProvider from 'ui/agg_types/metrics/min';
 import AggTypesMetricsMaxProvider from 'ui/agg_types/metrics/max';
+import AggTypesMetricsTopHitProvider from 'ui/agg_types/metrics/top_hit';
 import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/std_deviation';
 import AggTypesMetricsCardinalityProvider from 'ui/agg_types/metrics/cardinality';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
@@ -21,7 +22,7 @@ import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/signif
 import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
 export default function AggTypeService(Private) {
 
-  let aggs = {
+  const aggs = {
     metrics: [
       Private(AggTypesMetricsCountProvider),
       Private(AggTypesMetricsAvgProvider),
@@ -32,7 +33,8 @@ export default function AggTypeService(Private) {
       Private(AggTypesMetricsStdDeviationProvider),
       Private(AggTypesMetricsCardinalityProvider),
       Private(AggTypesMetricsPercentilesProvider),
-      Private(AggTypesMetricsPercentileRanksProvider)
+      Private(AggTypesMetricsPercentileRanksProvider),
+      Private(AggTypesMetricsTopHitProvider)
     ],
     buckets: [
       Private(AggTypesBucketsDateHistogramProvider),
@@ -76,6 +78,6 @@ export default function AggTypeService(Private) {
     group: ['type'],
     initialSet: aggs.metrics.concat(aggs.buckets)
   });
-};
+}
 
 // preload

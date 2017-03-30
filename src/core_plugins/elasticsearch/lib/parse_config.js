@@ -50,15 +50,35 @@ function parseConfig() {
   }
 
   // SSL
-  config.ssl = { rejectUnauthorized: (0, _lodash.get)(serverConfig, 'ssl.verify') };
+  config.ssl = {};
 
-  if ((0, _lodash.get)(serverConfig, 'ssl.cert') && (0, _lodash.get)(serverConfig, 'ssl.key')) {
-    config.ssl.cert = readFile(serverConfig.ssl.cert);
-    config.ssl.key = readFile(serverConfig.ssl.key);
+  var verificationMode = (0, _lodash.get)(serverConfig, 'ssl.verificationMode');
+  switch (verificationMode) {
+    case 'none':
+      config.ssl.rejectUnauthorized = false;
+      break;
+    case 'certificate':
+      config.ssl.rejectUnauthorized = true;
+
+      // by default, NodeJS is checking the server identify
+      config.ssl.checkServerIdentity = _lodash.noop;
+      break;
+    case 'full':
+      config.ssl.rejectUnauthorized = true;
+      break;
+    default:
+      throw new Error('Unknown ssl verificationMode: ' + verificationMode);
   }
 
-  if ((0, _lodash.size)((0, _lodash.get)(serverConfig, 'ssl.ca'))) {
-    config.ssl.ca = serverConfig.ssl.ca.map(readFile);
+  if ((0, _lodash.size)((0, _lodash.get)(serverConfig, 'ssl.certificateAuthorities'))) {
+    config.ssl.ca = serverConfig.ssl.certificateAuthorities.map(readFile);
+  }
+
+  // Add client certificate and key if required by elasticsearch
+  if ((0, _lodash.get)(serverConfig, 'ssl.certificate') && (0, _lodash.get)(serverConfig, 'ssl.key')) {
+    config.ssl.cert = readFile(serverConfig.ssl.certificate);
+    config.ssl.key = readFile(serverConfig.ssl.key);
+    config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
   }
 
   config.defer = function () {

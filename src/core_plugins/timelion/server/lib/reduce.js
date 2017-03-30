@@ -62,7 +62,7 @@ module.exports = function reduce(args, fn) {
       });
     }
 
-    var reduced;
+    var reduced = undefined;
 
     if (argument != null) {
       reduced = _.map(seriesList.list, function (series) {

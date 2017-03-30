@@ -55,5 +55,3 @@ function toSeriesList(aggs, config) {
     };
   });
 }
-
-;

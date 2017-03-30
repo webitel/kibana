@@ -3,12 +3,12 @@
 var _ = require('lodash');
 
 module.exports = function des(points, alpha, beta) {
-  var level;
-  var prevLevel;
-  var trend;
-  var prevTrend;
-  var value;
-  var origin;
+  var level = undefined;
+  var prevLevel = undefined;
+  var trend = undefined;
+  var prevTrend = undefined;
+  var value = undefined;
+  var origin = undefined;
   var unknownCount = 0;
 
   if (points.length < 2) {

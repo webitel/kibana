@@ -40,7 +40,7 @@ module.exports = (function () {
 
     this.ready = (0, _lodash.constant)(this.mixin(require('./config/setup'), // sets this.config, reads this.settings
     require('./http'), // sets this.server
-    require('./logging'), require('./warnings'), require('./status'),
+    require('./logging'), require('./config/deprecation_warnings'), require('./warnings'), require('./status'),
 
     // writes pid file
     require('./pid'),

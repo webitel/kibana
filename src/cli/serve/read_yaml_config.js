@@ -11,17 +11,7 @@ var _fs = require('fs');
 
 var _jsYaml = require('js-yaml');
 
-var _ansicolors = require('ansicolors');
-
 var _utils = require('../../utils');
-
-var _legacy_config = require('./legacy_config');
-
-var _deprecated_config = require('./deprecated_config');
-
-var log = (0, _lodash.memoize)(function (message) {
-  console.log((0, _ansicolors.red)('WARNING:'), message);
-});
 
 function merge(sources) {
   return (0, _lodash.transform)(sources, function (merged, source) {
@@ -51,8 +41,5 @@ exports['default'] = function (paths) {
   var yamls = files.map(function (path) {
     return (0, _jsYaml.safeLoad)((0, _fs.readFileSync)(path, 'utf8'));
   });
-  var config = merge(yamls.map(function (file) {
-    return (0, _legacy_config.rewriteLegacyConfig)(file, log);
-  }));
-  return (0, _deprecated_config.checkForDeprecatedConfig)(config, log);
+  return merge(yamls);
 };

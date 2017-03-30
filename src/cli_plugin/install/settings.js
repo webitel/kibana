@@ -38,8 +38,6 @@ function parseMilliseconds(val) {
   return result;
 }
 
-;
-
 function parse(command, options, kbnPackage) {
   var settings = {
     timeout: options.timeout || 0,
@@ -62,5 +60,3 @@ function parse(command, options, kbnPackage) {
 
   return settings;
 }
-
-;

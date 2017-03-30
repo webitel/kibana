@@ -67,5 +67,4 @@ var UiNavLinkCollection = (function (_Collection) {
 })(_utilsCollection2['default']);
 
 exports['default'] = UiNavLinkCollection;
-;
 module.exports = exports['default'];

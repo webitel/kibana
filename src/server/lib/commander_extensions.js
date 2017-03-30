@@ -14,5 +14,4 @@ exports['default'] = function (program) {
   };
 };
 
-;
 module.exports = exports['default'];

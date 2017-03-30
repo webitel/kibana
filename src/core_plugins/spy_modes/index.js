@@ -12,5 +12,4 @@ exports['default'] = function (kibana) {
   });
 };
 
-;
 module.exports = exports['default'];

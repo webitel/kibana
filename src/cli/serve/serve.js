@@ -54,8 +54,13 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
     set('optimize.lazy', true);
-    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.ssl.cert', _dev_ssl.DEV_SSL_CERT_PATH);
+
+    if (opts.ssl) {
+      set('server.ssl.enabled', true);
+    }
+
+    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      set('server.ssl.certificate', _dev_ssl.DEV_SSL_CERT_PATH);
       set('server.ssl.key', _dev_ssl.DEV_SSL_KEY_PATH);
     }
   }
@@ -80,7 +85,7 @@ function readServerSettings(opts, extraCliOptions) {
 module.exports = function (program) {
   var command = program.command('serve');
 
-  command.description('Run the kibana server').collectUnknownOptions().option('-e, --elasticsearch <uri>', 'Elasticsearch instance').option('-c, --config <path>', 'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' + 'Use mulitple --config args to include multiple config files.', configPathCollector, [(0, _serverPath.getConfig)()]).option('-p, --port <port>', 'The port to bind to', parseInt).option('-q, --quiet', 'Prevent all logging except errors').option('-Q, --silent', 'Prevent all logging').option('--verbose', 'Turns on verbose logging').option('-H, --host <host>', 'The host to bind to').option('-l, --log-file <path>', 'The file to log to').option('--plugin-dir <path>', 'A path to scan for plugins, this can be specified multiple ' + 'times to specify multiple directories', pluginDirCollector, [(0, _utils.fromRoot)('plugins'), (0, _utils.fromRoot)('src/core_plugins')]).option('--plugin-path <path>', 'A path to a plugin which should be included by the server, ' + 'this can be specified multiple times to specify multiple paths', pluginPathCollector, []).option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+  command.description('Run the kibana server').collectUnknownOptions().option('-e, --elasticsearch <uri>', 'Elasticsearch instance').option('-c, --config <path>', 'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' + 'Use multiple --config args to include multiple config files.', configPathCollector, [(0, _serverPath.getConfig)()]).option('-p, --port <port>', 'The port to bind to', parseInt).option('-q, --quiet', 'Prevent all logging except errors').option('-Q, --silent', 'Prevent all logging').option('--verbose', 'Turns on verbose logging').option('-H, --host <host>', 'The host to bind to').option('-l, --log-file <path>', 'The file to log to').option('--plugin-dir <path>', 'A path to scan for plugins, this can be specified multiple ' + 'times to specify multiple directories', pluginDirCollector, [(0, _utils.fromRoot)('plugins'), (0, _utils.fromRoot)('src/core_plugins')]).option('--plugin-path <path>', 'A path to a plugin which should be included by the server, ' + 'this can be specified multiple times to specify multiple paths', pluginPathCollector, []).option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
 
   if (canCluster) {
     command.option('--dev', 'Run the server with development mode defaults').option('--no-ssl', 'Don\'t run the dev server using HTTPS').option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath').option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');

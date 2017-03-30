@@ -5,7 +5,7 @@ var _ = require('lodash');
 var buildTarget = require('../../lib/build_target.js');
 
 module.exports = function (setup) {
-  var targetSeries;
+  var targetSeries = undefined;
 
   var tlConfig = {
     getTargetSeries: function getTargetSeries() {

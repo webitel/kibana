@@ -4,6 +4,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 var _lodash = require('lodash');
 
+var _utils = require('../../utils');
+
 var _boom = require('boom');
 
 var _libHealth_check = require('./lib/health_check');
@@ -42,6 +44,14 @@ module.exports = function (_ref) {
       var string = Joi.string;
       var ref = Joi.ref;
 
+      var sslSchema = object({
+        verificationMode: string().valid('none', 'certificate', 'full')['default']('full'),
+        certificateAuthorities: array().single().items(string()),
+        certificate: string(),
+        key: string(),
+        keyPassphrase: string()
+      })['default']();
+
       return object({
         enabled: boolean()['default'](true),
         url: string().uri({ scheme: ['http', 'https'] })['default']('http://localhost:9200'),
@@ -55,12 +65,7 @@ module.exports = function (_ref) {
         pingTimeout: number()['default'](ref('requestTimeout')),
         startupTimeout: number()['default'](5000),
         logQueries: boolean()['default'](false),
-        ssl: object({
-          verify: boolean()['default'](true),
-          ca: array().single().items(string()),
-          cert: string(),
-          key: string()
-        })['default'](),
+        ssl: sslSchema,
         apiVersion: Joi.string()['default']('master'),
         healthCheck: object({
           delay: number()['default'](2500)
@@ -77,15 +82,36 @@ module.exports = function (_ref) {
           pingTimeout: number()['default'](ref('requestTimeout')),
           startupTimeout: number()['default'](5000),
           logQueries: boolean()['default'](false),
-          ssl: object({
-            verify: boolean()['default'](true),
-            ca: array().single().items(string()),
-            cert: string(),
-            key: string()
-          })['default'](),
+          ssl: sslSchema,
           apiVersion: Joi.string()['default']('master')
         })['default']()
       })['default']();
+    },
+
+    deprecations: function deprecations(_ref2) {
+      var rename = _ref2.rename;
+
+      var sslVerify = function sslVerify(basePath) {
+        var getKey = function getKey(path) {
+          return (0, _lodash.compact)([basePath, path]).join('.');
+        };
+
+        return function (settings, log) {
+          var sslSettings = (0, _lodash.get)(settings, getKey('ssl'));
+
+          if (!(0, _lodash.has)(sslSettings, 'verify')) {
+            return;
+          }
+
+          var verificationMode = (0, _lodash.get)(sslSettings, 'verify') ? 'full' : 'none';
+          (0, _lodash.set)(sslSettings, 'verificationMode', verificationMode);
+          (0, _utils.unset)(sslSettings, 'verify');
+
+          log('Config key "' + getKey('ssl.verify') + '" is deprecated. It has been replaced with "' + getKey('ssl.verificationMode') + '"');
+        };
+      };
+
+      return [rename('ssl.ca', 'ssl.certificateAuthorities'), rename('ssl.cert', 'ssl.certificate'), sslVerify(), rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'), rename('tribe.ssl.cert', 'tribe.ssl.certificate'), sslVerify('tribe')];
     },
 
     uiExports: {
@@ -119,8 +145,8 @@ module.exports = function (_ref) {
       (0, _libCreate_proxy2['default'])(server, 'POST', '/_msearch');
       (0, _libCreate_proxy2['default'])(server, 'POST', '/_search/scroll');
 
-      function noBulkCheck(_ref2, reply) {
-        var path = _ref2.path;
+      function noBulkCheck(_ref3, reply) {
+        var path = _ref3.path;
 
         if (/\/_bulk/.test(path)) {
           return reply({
@@ -130,8 +156,8 @@ module.exports = function (_ref) {
         return reply['continue']();
       }
 
-      function noDirectIndex(_ref3, reply) {
-        var path = _ref3.path;
+      function noDirectIndex(_ref4, reply) {
+        var path = _ref4.path;
 
         var requestPath = (0, _lodash.trimRight)((0, _lodash.trim)(path), '/');
         var matchPath = (0, _libCreate_proxy.createPath)('/elasticsearch', kibanaIndex);

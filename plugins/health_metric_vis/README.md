@@ -7,31 +7,37 @@ This plugin is inspired by the plugin [health_metric_vis](https://github.com/Dea
 <img src="https://github.com/clamarque/Kibana_health_metric_vis/blob/master/assets/img/demo.PNG">
 </p>
 
-##Quick Start
+## Quick Start
 
 You can install this plugin in Kibana 5.0.0 by doing the following instructions:
 
-###Clone
+### Simple installation
 
-`git clone https://github.com/clamarque/kibana_health_metric_vis.git`
+For kibana 5:
 
-`cd kibana_health_metric_vis.git`
+`$KIBANA_HOME/bin/kibana-plugin install https://github.com/clamarque/kibana_health_metric_vis/releases/download/v5.0/kibana_health_metric_vis-5.0.zip `
 
-`zip -r kibana kibana`
+Note: You can also look in [releases](https://github.com/clamarque/kibana_health_metric_vis/releases) for another version than this one!
 
-`$KIBANA_HOME/bin/kibana plugin --install health-metric-vis -u file://$HOME_DIRECTORY/kibana.zip`
+For kibana 4:
 
-###Download .zip
+`$KIBANA_HOME/bin/kibana plugin --install health-metric-vis -u https://github.com/clamarque/kibana_health_metric_vis/releases/download/v4.2/kibana_health_metric_vis-4.2.zip`
 
-`unzip kibana_health_metric_vis-master.zip`
+### Offline
 
-`cd kibana_health_metric_vis-master`
+For kibana 5:
 
-`zip -r kibana kibana`
+* Download the plugin [here](https://github.com/clamarque/kibana_health_metric_vis/releases/download/v5.0/kibana_health_metric_vis-5.0.zip)
+* `$KIBANA_HOME/bin/kibana-plugin install file:///$HOME_DIRECTORY/kibana_health_metric_vis-5.0.zip`
 
-`$KIBANA_HOME/bin/kibana plugin --install health-metric-vis -u file://$HOME_DIRECTORY/kibana.zip`
+For kibana 4:
+
+* Download the plugin [here](https://github.com/clamarque/kibana_health_metric_vis/releases/download/v4.2/kibana_health_metric_vis-4.2.zip)
+* `$KIBANA_HOME/bin/kibana plugin --install health-metric-vis -u file:///$HOME_DIRECTORY/kibana_health_metric_vis-4.2.zip`
 
 You can find the command for Windows [here](https://github.com/clamarque/Kibana_health_metric_vis/wiki#some-commands)
+
+**Warning:** If you download or clone the directory directly, the installation will not work. In fact since kibana 5, it is necessary to put all the files under a folder empty called kibana (This does not apply to version 4).
 
 ## How to use
 
@@ -43,4 +49,6 @@ You can also specify a maximum threshold **(critical)** that is not exceeded but
 
 [See more details, the conception of plugin](https://github.com/clamarque/Kibana_health_metric_vis/wiki)
 
+## Others plugins
 
+You can see others plugins listed by Elastic [here](https://www.elastic.co/guide/en/kibana/current/known-plugins.html)

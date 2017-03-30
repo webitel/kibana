@@ -28,6 +28,8 @@ var _lodash = require('lodash');
 
 var _serverProxy_config_collection = require('./server/proxy_config_collection');
 
+var _serverElasticsearch_proxy_config = require('./server/elasticsearch_proxy_config');
+
 exports['default'] = function (kibana) {
   var modules = (0, _path.resolve)(__dirname, 'public/webpackShims/');
   var src = (0, _path.resolve)(__dirname, 'public/src/');
@@ -70,20 +72,16 @@ exports['default'] = function (kibana) {
             cert: Joi.string(),
             key: Joi.string()
           })['default']()
-        }))['default']([{
-          match: {
-            protocol: '*',
-            host: '*',
-            port: '*',
-            path: '*'
-          },
-
-          timeout: 180000,
-          ssl: {
-            verify: true
-          }
-        }])
+        }))['default']()
       })['default']();
+    },
+
+    deprecations: function deprecations() {
+      return [function (settings, log) {
+        if ((0, _lodash.has)(settings, 'proxyConfig')) {
+          log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+        }
+      }];
     },
 
     init: function init(server, options) {
@@ -128,6 +126,14 @@ exports['default'] = function (kibana) {
 
           var requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
           var filterHeaders = server.plugins.elasticsearch.filterHeaders;
+
+          var additionalConfig = undefined;
+          if (server.config().get('console.proxyConfig')) {
+            additionalConfig = proxyConfigCollection.configForUri(uri);
+          } else {
+            additionalConfig = (0, _serverElasticsearch_proxy_config.getElasticsearchProxyConfig)(server);
+          }
+
           reply.proxy(_extends({
             mapUri: function mapUri(request, done) {
               done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist));
@@ -141,7 +147,7 @@ exports['default'] = function (kibana) {
               }
             }
 
-          }, proxyConfigCollection.configForUri(uri)));
+          }, additionalConfig));
         }
       };
 

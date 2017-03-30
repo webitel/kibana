@@ -20,5 +20,3 @@ function parse(command, options) {
 
   return settings;
 }
-
-;

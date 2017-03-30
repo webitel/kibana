@@ -22,11 +22,11 @@ module.exports = function (dataTuples, targetTuples) {
   var j = 0;
   var spreadCount = 0;
   var result = [];
-  var bucket;
-  var time;
-  var scaleSet;
-  var step;
-  var nextRealNumber;
+  var bucket = undefined;
+  var time = undefined;
+  var scaleSet = undefined;
+  var step = undefined;
+  var nextRealNumber = undefined;
 
   while (i < targetTuples.length) {
     scaleSet = [];

@@ -21,12 +21,14 @@ module.exports = function indexArguments(functionDef, orderedArgs) {
 
   // Also check and index the extended arguments if enabled
   if (functionDef.extended) {
-    var values = orderedArgs[orderedArgs.length - 1];
-    var names = orderedArgs[orderedArgs.length - 2];
-    _.each(values, function (value, i) {
-      validateArg(value, names[i], functionDef.extended);
-      indexedArgs[names[i]] = value;
-    });
+    (function () {
+      var values = orderedArgs[orderedArgs.length - 1];
+      var names = orderedArgs[orderedArgs.length - 2];
+      _.each(values, function (value, i) {
+        validateArg(value, names[i], functionDef.extended);
+        indexedArgs[names[i]] = value;
+      });
+    })();
   }
 
   return indexedArgs;

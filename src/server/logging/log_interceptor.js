@@ -116,4 +116,3 @@ var LogInterceptor = (function (_Stream$Transform) {
 })(_stream2['default'].Transform);
 
 exports.LogInterceptor = LogInterceptor;
-;

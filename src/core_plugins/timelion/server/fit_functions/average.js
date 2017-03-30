@@ -47,8 +47,8 @@ module.exports = function (dataTuples, targetTuples) {
     var i = 0;
     var naNCount = 0;
     var filledValues = [];
-    var previousRealNumber;
-    var stepSize;
+    var previousRealNumber = undefined;
+    var stepSize = undefined;
     while (i < resultValues.length) {
       if (isNaN(resultValues[i])) {
         if (i === 0) {

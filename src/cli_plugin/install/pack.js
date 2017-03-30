@@ -180,4 +180,4 @@ function assertValidPackageName(plugin) {
   if (!validation.validForNewPackages) {
     throw new Error('Invalid plugin name [' + plugin.name + '] in package.json');
   }
-};
+}

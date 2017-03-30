@@ -20,7 +20,7 @@ module.exports = function (tlConfig) {
 
   var queryCache = {};
   var stats = {};
-  var sheet;
+  var sheet = undefined;
 
   function getQueryCacheKey(query) {
     return JSON.stringify(_.omit(query, 'label'));
@@ -42,23 +42,27 @@ module.exports = function (tlConfig) {
       if (_.isObject(item)) {
         switch (item.type) {
           case 'function':
-            var itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item['function']);
-            if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
-              stats.queryCount++;
-              return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
+            {
+              var itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item['function']);
+              if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
+                stats.queryCount++;
+                return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
+              }
+              return invoke(item['function'], item.arguments);
             }
-            return invoke(item['function'], item.arguments);
           case 'reference':
-            var reference;
-            if (item.series) {
-              reference = sheet[item.plot - 1][item.series - 1];
-            } else {
-              reference = {
-                type: 'chainList',
-                list: sheet[item.plot - 1]
-              };
+            {
+              var reference = undefined;
+              if (item.series) {
+                reference = sheet[item.plot - 1][item.series - 1];
+              } else {
+                reference = {
+                  type: 'chainList',
+                  list: sheet[item.plot - 1]
+                };
+              }
+              return invoke('first', [reference]);
             }
-            return invoke('first', [reference]);
           case 'chain':
             return invokeChain(item);
           case 'chainList':
@@ -91,7 +95,7 @@ module.exports = function (tlConfig) {
     var chain = _.clone(chainObj.chain);
     var link = chain.shift();
 
-    var promise;
+    var promise = undefined;
     if (link.type === 'chain') {
       promise = invokeChain(link);
     } else if (!result) {

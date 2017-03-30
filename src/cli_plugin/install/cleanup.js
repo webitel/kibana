@@ -36,8 +36,6 @@ function cleanPrevious(settings, logger) {
   });
 }
 
-;
-
 function cleanArtifacts(settings) {
   // delete the working directory.
   // At this point we're bailing, so swallow any errors on delete.
@@ -46,5 +44,3 @@ function cleanArtifacts(settings) {
     _rimraf2['default'].sync(settings.plugins[0].path);
   } catch (e) {} // eslint-disable-line no-empty
 }
-
-;

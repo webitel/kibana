@@ -33,7 +33,7 @@ module.exports = function TimelionFunction(name, config) {
         // Don't fit if the series are already the same
         if (_.isEqual(_.map(series.data, 0), _.map(target, 0))) return series;
 
-        var fit;
+        var fit = undefined;
         if (args.byName.fit) {
           fit = args.byName.fit;
         } else if (series.fit) {

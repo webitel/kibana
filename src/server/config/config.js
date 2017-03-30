@@ -20,26 +20,15 @@ var _override = require('./override');
 
 var _override2 = _interopRequireDefault(_override);
 
-var _unset = require('./unset');
-
-var _unset2 = _interopRequireDefault(_unset);
-
 var _schema = require('./schema');
 
 var _schema2 = _interopRequireDefault(_schema);
 
-var _utilsPackage_json = require('../../utils/package_json');
-
-var _utilsPackage_json2 = _interopRequireDefault(_utilsPackage_json);
-
-var _deep_clone_with_buffers = require('./deep_clone_with_buffers');
-
-var _deep_clone_with_buffers2 = _interopRequireDefault(_deep_clone_with_buffers);
+var _utils = require('../../utils');
 
 var schema = Symbol('Joi Schema');
 var schemaExts = Symbol('Schema Extensions');
 var vals = Symbol('config values');
-var pendingSets = Symbol('Pending Settings');
 
 module.exports = (function () {
   _createClass(Config, null, [{
@@ -56,24 +45,22 @@ module.exports = (function () {
 
     this[schemaExts] = Object.create(null);
     this[vals] = Object.create(null);
-    this[pendingSets] = _lodash2['default'].merge(Object.create(null), initialSettings || {});
 
-    if (initialSchema) this.extendSchema(initialSchema);
+    this.extendSchema(initialSchema, initialSettings);
   }
 
   _createClass(Config, [{
-    key: 'getPendingSets',
-    value: function getPendingSets() {
-      return new Map(_lodash2['default'].pairs(this[pendingSets]));
-    }
-  }, {
     key: 'extendSchema',
-    value: function extendSchema(key, extension) {
+    value: function extendSchema(extension, settings, key) {
       var _this = this;
 
-      if (key && key.isJoi) {
-        return _lodash2['default'].each(key._inner.children, function (child) {
-          _this.extendSchema(child.key, child.schema);
+      if (!extension) {
+        return;
+      }
+
+      if (!key) {
+        return _lodash2['default'].each(extension._inner.children, function (child) {
+          _this.extendSchema(child.schema, _lodash2['default'].get(settings, child.key), child.key);
         });
       }
 
@@ -84,13 +71,7 @@ module.exports = (function () {
       _lodash2['default'].set(this[schemaExts], key, extension);
       this[schema] = null;
 
-      var initialVals = _lodash2['default'].get(this[pendingSets], key);
-      if (initialVals) {
-        this.set(key, initialVals);
-        (0, _unset2['default'])(this[pendingSets], key);
-      } else {
-        this._commit(this[vals]);
-      }
+      this.set(key, settings);
     }
   }, {
     key: 'removeSchema',
@@ -100,9 +81,8 @@ module.exports = (function () {
       }
 
       this[schema] = null;
-      (0, _unset2['default'])(this[schemaExts], key);
-      (0, _unset2['default'])(this[pendingSets], key);
-      (0, _unset2['default'])(this[vals], key);
+      (0, _utils.unset)(this[schemaExts], key);
+      (0, _utils.unset)(this[vals], key);
     }
   }, {
     key: 'resetTo',
@@ -113,7 +93,7 @@ module.exports = (function () {
     key: 'set',
     value: function set(key, value) {
       // clone and modify the config
-      var config = (0, _deep_clone_with_buffers2['default'])(this[vals]);
+      var config = (0, _utils.deepCloneWithBuffers)(this[vals]);
       if (_lodash2['default'].isPlainObject(key)) {
         config = (0, _override2['default'])(config, key);
       } else {
@@ -142,9 +122,9 @@ module.exports = (function () {
         dev: dev,
         notProd: !prod,
         notDev: !dev,
-        version: _lodash2['default'].get(_utilsPackage_json2['default'], 'version'),
-        buildNum: dev ? Math.pow(2, 53) - 1 : _lodash2['default'].get(_utilsPackage_json2['default'], 'build.number', NaN),
-        buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _lodash2['default'].get(_utilsPackage_json2['default'], 'build.sha', '')
+        version: _lodash2['default'].get(_utils.pkg, 'version'),
+        buildNum: dev ? Math.pow(2, 53) - 1 : _lodash2['default'].get(_utils.pkg, 'build.number', NaN),
+        buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _lodash2['default'].get(_utils.pkg, 'build.sha', '')
       };
 
       if (!context.dev && !context.prod) {
@@ -163,7 +143,7 @@ module.exports = (function () {
     key: 'get',
     value: function get(key) {
       if (!key) {
-        return (0, _deep_clone_with_buffers2['default'])(this[vals]);
+        return (0, _utils.deepCloneWithBuffers)(this[vals]);
       }
 
       var value = _lodash2['default'].get(this[vals], key);
@@ -172,7 +152,7 @@ module.exports = (function () {
           throw new Error('Unknown config key: ' + key);
         }
       }
-      return (0, _deep_clone_with_buffers2['default'])(value);
+      return (0, _utils.deepCloneWithBuffers)(value);
     }
   }, {
     key: 'has',

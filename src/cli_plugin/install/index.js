@@ -54,5 +54,4 @@ function pluginInstall(program) {
   program.command('install <plugin/url>').option('-q, --quiet', 'disable all process messaging except errors').option('-s, --silent', 'disable all process messaging').option('-c, --config <path>', 'path to the config file', (0, _serverPath.getConfig)()).option('-t, --timeout <duration>', 'length of time before failing; 0 for never fail', _settings.parseMilliseconds).option('-d, --plugin-dir <path>', 'path to the directory where plugins are stored', (0, _utils.fromRoot)('plugins')).description('install a plugin', 'Common examples:\n  install x-pack\n  install file:///Path/to/my/x-pack.zip\n  install https://path.to/my/x-pack.zip').action(processCommand);
 }
 
-;
 module.exports = exports['default'];

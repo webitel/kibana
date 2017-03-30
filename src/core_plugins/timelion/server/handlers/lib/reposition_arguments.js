@@ -7,10 +7,10 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
   var args = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
-    var argDef;
-    var targetIndex;
-    var value;
-    var storeAsArray;
+    var argDef = undefined;
+    var targetIndex = undefined;
+    var value = undefined;
+    var storeAsArray = undefined;
 
     if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];

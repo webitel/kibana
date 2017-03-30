@@ -5,10 +5,20 @@ var _createClass = (function () { function defineProperties(target, props) { for
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 var addPluginConfig = _asyncToGenerator(function* (pluginCollection, plugin) {
-  var configSchema = yield plugin.getConfigSchema();
-  var config = pluginCollection.kbnServer.config;
+  var _pluginCollection$kbnServer = pluginCollection.kbnServer;
+  var config = _pluginCollection$kbnServer.config;
+  var server = _pluginCollection$kbnServer.server;
+  var settings = _pluginCollection$kbnServer.settings;
 
-  config.extendSchema(plugin.configPrefix, configSchema);
+  var transformedSettings = (0, _configTransform_deprecations.transformDeprecations)(settings);
+  var pluginSettings = (0, _lodash.get)(transformedSettings, plugin.configPrefix);
+  var deprecations = plugin.getDeprecations();
+  var transformedPluginSettings = (0, _deprecation.createTransform)(deprecations)(pluginSettings, function (message) {
+    server.log(['warning', plugin.configPrefix, 'config', 'deprecation'], message);
+  });
+
+  var configSchema = yield plugin.getConfigSchema();
+  config.extendSchema(configSchema, transformedPluginSettings, plugin.configPrefix);
 });
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -37,13 +47,25 @@ var _utilsCollection = require('../../utils/collection');
 
 var _utilsCollection2 = _interopRequireDefault(_utilsCollection);
 
+var _configTransform_deprecations = require('../config/transform_deprecations');
+
+var _deprecation = require('../../deprecation');
+
+var _joi = require('joi');
+
+var _joi2 = _interopRequireDefault(_joi);
+
 var byIdCache = Symbol('byIdCache');
 var pluginApis = Symbol('pluginApis');
 
-function removePluginConfig(pluginCollection, plugin) {
+function disablePluginConfig(pluginCollection, plugin) {
+  // when disabling a plugin's config we remove the existing schema and
+  // replace it with a simple schema/config that only has enabled set to false
   var config = pluginCollection.kbnServer.config;
 
   config.removeSchema(plugin.configPrefix);
+  var schema = _joi2['default'].object({ enabled: _joi2['default'].bool() });
+  config.extendSchema(schema, { enabled: false }, plugin.configPrefix);
 }
 
 module.exports = (function (_Collection) {
@@ -104,7 +126,7 @@ module.exports = (function (_Collection) {
   }, {
     key: 'disable',
     value: _asyncToGenerator(function* (plugin) {
-      removePluginConfig(this, plugin);
+      disablePluginConfig(this, plugin);
       this['delete'](plugin);
     })
   }, {

@@ -55,8 +55,19 @@ module.exports = function () {
       defaultRoute: _joi2['default'].string()['default']('/app/kibana').regex(/^\//, 'start with a slash'),
       basePath: _joi2['default'].string()['default']('').allow('').regex(/(^$|^\/.*[^\/]$)/, 'start with a slash, don\'t end with one'),
       ssl: _joi2['default'].object({
-        cert: _joi2['default'].string(),
-        key: _joi2['default'].string()
+        enabled: _joi2['default'].boolean()['default'](false),
+        certificate: _joi2['default'].string().when('enabled', {
+          is: true,
+          then: _joi2['default'].required()
+        }),
+        key: _joi2['default'].string().when('enabled', {
+          is: true,
+          then: _joi2['default'].required()
+        }),
+        keyPassphrase: _joi2['default'].string(),
+        certificateAuthorities: _joi2['default'].array().single().items(_joi2['default'].string()),
+        supportedProtocols: _joi2['default'].array().items(_joi2['default'].string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+        cipherSuites: _joi2['default'].array().items(_joi2['default'].string())['default'](_crypto.constants.defaultCoreCipherList.split(':'))
       })['default'](),
       cors: _joi2['default'].when('$dev', {
         is: true,

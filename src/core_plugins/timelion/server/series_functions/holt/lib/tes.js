@@ -37,7 +37,7 @@ function initSeasonalComponents(samplePoints, seasonLength) {
   });
 
   return seasonals;
-};
+}
 
 // This is different from the DES method of establishing trend because it looks for
 // the difference in points between seasons
@@ -53,10 +53,10 @@ module.exports = function tes(points, alpha, beta, gamma, seasonLength, seasonsT
 
   var samplePoints = points.slice(0, seasonLength * seasonsToSample);
   var seasonals = initSeasonalComponents(samplePoints, seasonLength);
-  var level;
-  var prevLevel;
-  var trend;
-  var prevTrend;
+  var level = undefined;
+  var prevLevel = undefined;
+  var trend = undefined;
+  var prevTrend = undefined;
   var unknownCount = 0;
 
   var result = _.map(points, function (point, i) {

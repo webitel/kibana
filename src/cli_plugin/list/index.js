@@ -42,5 +42,4 @@ function pluginList(program) {
   program.command('list').option('-d, --plugin-dir <path>', 'path to the directory where plugins are stored', (0, _utils.fromRoot)('plugins')).description('list installed plugins').action(processCommand);
 }
 
-;
 module.exports = exports['default'];

@@ -38,12 +38,14 @@ module.exports = new Chainable('movingaverage', {
       }
 
       if (_position === 'center') {
-        var windowLeft = Math.floor(_window / 2);
-        var windowRight = _window - windowLeft;
-        eachSeries.data = _.map(pairs, function (point, i) {
-          if (i < windowLeft || i >= pairsLen - windowRight) return [point[0], null];
-          return toPoint(point, pairs.slice(i - windowLeft, i + windowRight));
-        });
+        (function () {
+          var windowLeft = Math.floor(_window / 2);
+          var windowRight = _window - windowLeft;
+          eachSeries.data = _.map(pairs, function (point, i) {
+            if (i < windowLeft || i >= pairsLen - windowRight) return [point[0], null];
+            return toPoint(point, pairs.slice(i - windowLeft, i + windowRight));
+          });
+        })();
       } else if (_position === 'left') {
         eachSeries.data = _.map(pairs, function (point, i) {
           if (i < _window) return [point[0], null];

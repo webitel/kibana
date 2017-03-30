@@ -28,5 +28,4 @@ exports['default'] = function (kbnServer, server, config) {
   });
 };
 
-;
 module.exports = exports['default'];

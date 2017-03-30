@@ -20,16 +20,18 @@ module.exports = new Datasource('static', {
   help: 'Draws a single value across the chart',
   fn: function staticFn(args, tlConfig) {
 
-    var data;
+    var data = undefined;
     var target = tlConfig.getTargetSeries();
     if (typeof args.byName.value === 'string') {
-      var points = args.byName.value.split(':');
-      var begin = _.first(target)[0];
-      var end = _.last(target)[0];
-      var step = (end - begin) / (points.length - 1);
-      data = _.map(points, function (point, i) {
-        return [begin + i * step, parseFloat(point)];
-      });
+      (function () {
+        var points = args.byName.value.split(':');
+        var begin = _.first(target)[0];
+        var end = _.last(target)[0];
+        var step = (end - begin) / (points.length - 1);
+        data = _.map(points, function (point, i) {
+          return [begin + i * step, parseFloat(point)];
+        });
+      })();
     } else {
       data = _.map(target, function (bucket) {
         return [bucket[0], args.byName.value];

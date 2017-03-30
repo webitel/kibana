@@ -117,5 +117,4 @@ exports['default'] = function (server) {
   };
 };
 
-;
 module.exports = exports['default'];

@@ -12,7 +12,7 @@ function unflatten(data) {
   _.each(data, function (val, p) {
     var cur = result;
     var prop = '';
-    var m;
+    var m = undefined;
     while (m = regex.exec(p)) {
       cur = cur[prop] || (cur[prop] = m[2] ? [] : {});
       prop = m[2] || m[1];
@@ -21,7 +21,7 @@ function unflatten(data) {
   });
 
   return result[''] || result;
-};
+}
 
 module.exports = new Chainable('props', {
   args: [{

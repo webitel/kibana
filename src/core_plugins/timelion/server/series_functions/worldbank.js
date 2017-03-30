@@ -35,7 +35,7 @@ module.exports = new Datasource('worldbank', {
       var respSeries = resp[1];
 
       var deduped = {};
-      var description;
+      var description = undefined;
       _.each(respSeries, function (bucket) {
         if (bucket.value != null) hasData = true;
         description = bucket.country.value + ' ' + bucket.indicator.value;
