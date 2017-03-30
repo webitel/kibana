@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --force-yes git build-essential python 
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     cd /kibana && npm install && npm cache clear && \
     cd /kibana/plugins/c3 && npm install && npm cache clear && \
+    cd /kibana/plugins/ob-kb-funnel && npm install && npm cache clear && \
     cd /kibana/plugins/webitel && npm install && npm cache clear
 
 COPY ./entrypoint.sh /
