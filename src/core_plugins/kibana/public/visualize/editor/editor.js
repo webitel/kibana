@@ -66,7 +66,7 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -219,8 +219,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
 
-    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-      timefilter.enabled = !!timeField;
+    $scope.$watchMulti([
+      'searchSource.get("index").timeFieldName',
+      'vis.type.requiresTimePicker',
+    ], function ([timeField, requiresTimePicker]) {
+      timefilter.enabled = Boolean(timeField || requiresTimePicker);
     });
 
     // update the searchSource when filters update
@@ -279,6 +282,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }
 
   $scope.fetch = function () {
+    // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
+    $rootScope.$broadcast('fetch');
     $state.save();
     searchSource.set('filter', queryFilter.getFilters());
     if (!$state.linked) searchSource.set('query', $state.query);
@@ -293,6 +298,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.doSave = function () {
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
+    $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 

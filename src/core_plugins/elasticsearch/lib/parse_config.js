@@ -1,11 +1,9 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.parseConfig = parseConfig;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _util = require('util');
 
@@ -23,18 +21,16 @@ var _bluebird = require('bluebird');
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
 
-var readFile = function readFile(file) {
-  return (0, _fs.readFileSync)(file, 'utf8');
-};
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function parseConfig() {
-  var serverConfig = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+const readFile = file => (0, _fs.readFileSync)(file, 'utf8');
 
-  var config = Object.assign({
+function parseConfig(serverConfig = {}) {
+  const config = Object.assign({
     keepAlive: true
   }, (0, _lodash.pick)(serverConfig, ['plugins', 'apiVersion', 'keepAlive', 'pingTimeout', 'requestTimeout', 'log', 'logQueries']));
 
-  var uri = _url2['default'].parse(serverConfig.url);
+  const uri = _url2.default.parse(serverConfig.url);
   config.host = {
     host: uri.hostname,
     port: uri.port,
@@ -46,13 +42,13 @@ function parseConfig() {
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    config.host.auth = _util2['default'].format('%s:%s', serverConfig.username, serverConfig.password);
+    config.host.auth = _util2.default.format('%s:%s', serverConfig.username, serverConfig.password);
   }
 
   // SSL
   config.ssl = {};
 
-  var verificationMode = (0, _lodash.get)(serverConfig, 'ssl.verificationMode');
+  const verificationMode = (0, _lodash.get)(serverConfig, 'ssl.verificationMode');
   switch (verificationMode) {
     case 'none':
       config.ssl.rejectUnauthorized = false;
@@ -67,7 +63,7 @@ function parseConfig() {
       config.ssl.rejectUnauthorized = true;
       break;
     default:
-      throw new Error('Unknown ssl verificationMode: ' + verificationMode);
+      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
   if ((0, _lodash.size)((0, _lodash.get)(serverConfig, 'ssl.certificateAuthorities'))) {
@@ -81,9 +77,7 @@ function parseConfig() {
     config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
   }
 
-  config.defer = function () {
-    return _bluebird2['default'].defer();
-  };
+  config.defer = () => _bluebird2.default.defer();
 
   return config;
 }

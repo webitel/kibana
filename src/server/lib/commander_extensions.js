@@ -1,10 +1,10 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (program) {
+exports.default = function (program) {
   function isCommand(val) {
     return typeof val === 'object' && val._name;
   }

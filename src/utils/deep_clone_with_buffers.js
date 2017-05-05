@@ -1,8 +1,12 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+exports.default = function (vals) {
+  return (0, _lodash.cloneDeep)(vals, cloneBuffersCustomizer);
+};
 
 var _lodash = require('lodash');
 
@@ -11,9 +15,5 @@ function cloneBuffersCustomizer(val) {
     return new Buffer(val);
   }
 }
-
-exports['default'] = function (vals) {
-  return (0, _lodash.cloneDeep)(vals, cloneBuffersCustomizer);
-};
 
 module.exports = exports['default'];

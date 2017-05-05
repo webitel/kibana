@@ -1,10 +1,9 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+exports.transformDeprecations = undefined;
 
 var _lodash = require('lodash');
 
@@ -12,12 +11,15 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _deprecation = require('../../deprecation');
 
-var rename = _deprecation.Deprecations.rename;
-var unused = _deprecation.Deprecations.unused;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var serverSslEnabled = function serverSslEnabled(settings, log) {
-  var has = (0, _lodash.partial)(_lodash2['default'].has, settings);
-  var set = (0, _lodash.partial)(_lodash2['default'].set, settings);
+const rename = _deprecation.Deprecations.rename,
+      unused = _deprecation.Deprecations.unused;
+
+
+const serverSslEnabled = (settings, log) => {
+  const has = (0, _lodash.partial)(_lodash2.default.has, settings);
+  const set = (0, _lodash.partial)(_lodash2.default.set, settings);
 
   if (!has('server.ssl.enabled') && has('server.ssl.certificate') && has('server.ssl.key')) {
     set('server.ssl.enabled', true);
@@ -25,7 +27,7 @@ var serverSslEnabled = function serverSslEnabled(settings, log) {
   }
 };
 
-var deprecations = [
+const deprecations = [
 //server
 rename('port', 'server.port'), rename('host', 'server.host'), rename('pid_file', 'pid.file'), rename('ssl_cert_file', 'server.ssl.certificate'), rename('server.ssl.cert', 'server.ssl.certificate'), rename('ssl_key_file', 'server.ssl.key'), unused('server.xsrf.token'), serverSslEnabled,
 
@@ -41,5 +43,4 @@ rename('ca', 'elasticsearch.ssl.ca'), rename('elasticsearch_preserve_host', 'ela
 // tilemap
 rename('tilemap_url', 'tilemap.url'), rename('tilemap_min_zoom', 'tilemap.options.minZoom'), rename('tilemap_max_zoom', 'tilemap.options.maxZoom'), rename('tilemap_attribution', 'tilemap.options.attribution'), rename('tilemap_subdomains', 'tilemap.options.subdomains')];
 
-var transformDeprecations = (0, _deprecation.createTransform)(deprecations);
-exports.transformDeprecations = transformDeprecations;
+const transformDeprecations = exports.transformDeprecations = (0, _deprecation.createTransform)(deprecations);

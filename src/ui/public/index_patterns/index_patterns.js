@@ -1,6 +1,5 @@
 import 'ui/filters/short_dots';
-import _ from 'lodash';
-import errors from 'ui/errors';
+import { IndexPatternMissingIndices } from 'ui/errors';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
@@ -16,8 +15,6 @@ function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
 
   const IndexPattern = Private(IndexPatternsIndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-
-  const notify = new Notifier({ location: 'IndexPatterns Service' });
 
   self.get = function (id) {
     if (!id) return self.make();
@@ -42,7 +39,7 @@ function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
   };
 
   self.errors = {
-    MissingIndices: errors.IndexPatternMissingIndices
+    MissingIndices: IndexPatternMissingIndices
   };
 
   self.cache = patternCache;

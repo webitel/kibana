@@ -122,3 +122,4 @@ webitel.members.enabled: true
 
 console.enabled: false
 timelion.enabled: false
+metrics.enabled: false

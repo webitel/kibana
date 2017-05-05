@@ -2,6 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -108,9 +109,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     return interval.val !== 'custom';
   };
 
-  $scope.toggleInterval = function () {
-    $scope.showInterval = !$scope.showInterval;
-  };
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Search',
@@ -144,7 +142,8 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.searchSource
   .set('index', $scope.indexPattern)
-  .highlightAll(true);
+  .highlightAll(true)
+  .version(true);
 
   if (savedSearch.id) {
     docTitle.change(savedSearch.title);
@@ -159,7 +158,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns'),
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
@@ -235,10 +234,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         timefilter.enabled = !!timefield;
       });
 
-      $scope.$watch('state.interval', function (interval, oldInterval) {
-        if (interval !== oldInterval && interval === 'auto') {
-          $scope.showInterval = false;
-        }
+      $scope.$watch('state.interval', function () {
         $scope.fetch();
       });
 
@@ -249,9 +245,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         const buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
         if (buckets && buckets.length === 1) {
-          $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
-        } else {
-          $scope.intervalName = 'auto';
+          $scope.bucketInterval = buckets[0].buckets.getInterval();
         }
       });
 
@@ -358,7 +352,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
-
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -370,7 +363,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     const sort = $state.sort;
     const timeField = $scope.indexPattern.timeFieldName;
-    const totalSize = $scope.size || $scope.opts.sampleSize;
 
     /**
      * Basically an emum.
@@ -484,10 +476,28 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .set('filter', queryFilter.getFilters());
   });
 
+  $scope.setSortOrder = function setSortOrder(columnName, direction) {
+    $scope.state.sort = [columnName, direction];
+  };
+
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
     filterManager.add(field, values, operation, $state.index);
+  };
+
+  $scope.addColumn = function addColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.addColumn($scope.state.columns, columnName);
+  };
+
+  $scope.removeColumn = function removeColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.removeColumn($scope.state.columns, columnName);
+  };
+
+  $scope.moveColumn = function moveColumn(columnName, newIndex) {
+    columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
   $scope.toTop = function () {

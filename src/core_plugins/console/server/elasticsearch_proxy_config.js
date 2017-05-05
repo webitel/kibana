@@ -1,10 +1,9 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+exports.getElasticsearchProxyConfig = undefined;
 
 var _lodash = require('lodash');
 
@@ -24,19 +23,19 @@ var _url = require('url');
 
 var _url2 = _interopRequireDefault(_url);
 
-var readFile = function readFile(file) {
-  return (0, _fs.readFileSync)(file, 'utf8');
-};
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var createAgent = function createAgent(server) {
-  var config = server.config();
-  var target = _url2['default'].parse(config.get('elasticsearch.url'));
+const readFile = file => (0, _fs.readFileSync)(file, 'utf8');
 
-  if (!/^https/.test(target.protocol)) return new _http2['default'].Agent();
+const createAgent = server => {
+  const config = server.config();
+  const target = _url2.default.parse(config.get('elasticsearch.url'));
 
-  var agentOptions = {};
+  if (!/^https/.test(target.protocol)) return new _http2.default.Agent();
 
-  var verificationMode = config.get('elasticsearch.ssl.verificationMode');
+  const agentOptions = {};
+
+  const verificationMode = config.get('elasticsearch.ssl.verificationMode');
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
@@ -45,16 +44,16 @@ var createAgent = function createAgent(server) {
       agentOptions.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      agentOptions.checkServerIdentity = _lodash2['default'].noop;
+      agentOptions.checkServerIdentity = _lodash2.default.noop;
       break;
     case 'full':
       agentOptions.rejectUnauthorized = true;
       break;
     default:
-      throw new Error('Unknown ssl verificationMode: ' + verificationMode);
+      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (_lodash2['default'].size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
+  if (_lodash2.default.size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
     agentOptions.ca = config.get('elasticsearch.ssl.certificateAuthorities').map(readFile);
   }
 
@@ -65,13 +64,12 @@ var createAgent = function createAgent(server) {
     agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
   }
 
-  return new _https2['default'].Agent(agentOptions);
+  return new _https2.default.Agent(agentOptions);
 };
 
-var getElasticsearchProxyConfig = function getElasticsearchProxyConfig(server) {
+const getElasticsearchProxyConfig = exports.getElasticsearchProxyConfig = server => {
   return {
     timeout: server.config().get('elasticsearch.requestTimeout'),
     agent: createAgent(server)
   };
 };
-exports.getElasticsearchProxyConfig = getElasticsearchProxyConfig;
