@@ -45,11 +45,14 @@ export class Job {
     clearTimeout(this.timerId)
   }
 
-  next () {
-    const intervalMs = this.getNextIntervalMs();
+  next (intervalMs) {
+
+    if (!intervalMs)
+        intervalMs = this.getNextIntervalMs();
 
     clearTimeout(this.timerId);
-    this.timerId = setTimeout( () => {
+
+    const fn = () => {
       console.log(`Execute job ${this.id}`);
       this.loadEmailConfig((err, emailData) => {
         if (err) {
@@ -70,7 +73,16 @@ export class Job {
         });
       });
 
-    }, intervalMs);
+    };
+
+    if (intervalMs > 0x7FFFFFFF) {//setTimeout limit is MAX_INT32=(2^31-1)
+      console.warn(`intervalMs > 0x7FFFFFFF, divide segment ${intervalMs}`);
+      setTimeout(() => {
+        this.next(intervalMs - 0x7FFFFFFF);
+      }, 0x7FFFFFFF);
+    } else {
+      this.timerId = setTimeout(fn, intervalMs);
+    }
   }
 
   loadEmailConfig (done) {
