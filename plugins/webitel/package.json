@@ -3,7 +3,7 @@
   "version": "5.4.0",
   "dependencies": {
     "async": "^2.1.2",
-    "cron-parser": "^2.3.0",
+    "cron-parser": "^2.4.0",
     "hapi-auth-cookie": "3.1.0",
     "joi": "6.10.1",
     "jszip": "^3.1.3",

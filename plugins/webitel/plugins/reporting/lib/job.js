@@ -22,7 +22,7 @@ export class Job {
     this.timerId = null;
     this.dateInterval = options._source.dateInterval || {};
     try {
-      this.interval = cronParser.parseExpression(this.data.cron);
+      this.interval = cronParser.parseExpression(this.data.cron, {tz: this.timeZone});
       console.log(`Create job ${this.id} >> ${this.data.cron}`);
       this.next();
     } catch (e) {
@@ -37,7 +37,7 @@ export class Job {
       nextJob = this.interval.next();
       n = nextJob.getTime() - Date.now()
     } while (n < 0);
-    console.log(`Job ${this.id} execute time ${nextJob.toString()} (interval ${n})`);
+    console.log(`Job ${this.id} execute time ${new Date(nextJob.getTime())} (interval ${n})`);
     return n;
   }
 
