@@ -75,12 +75,40 @@ function mapUri(cluster, proxyPrefix) {
 
       let payload = request.payload ? request.payload.toString('utf8') : null;
       if (payload) {
-        // console.dir(payload);
-        payload = payload.replace(/"(_?)index":"([\s\S]*?)"/gi, function (a, s, b) {
-          return '"' + s + 'index":"' + b + '-' + credentials.domain + '"';
-        });
+
+        const payloadLines = payload.split(/\n/);
+        const topLineJson = JSON.parse(payloadLines[0]);
+        let indx = (topLineJson.index || topLineJson._index);
+        if (indx instanceof Array) {
+          indx = indx.map(i => {
+            if (i.endsWith(credentials.domain)) {
+              return i;
+            }
+
+            return i + credentials.domain;
+          });
+
+        } else if (indx && !indx.endsWith(credentials.domain)) {
+          indx += credentials.domain
+        }
+
+        if (topLineJson.index) {
+          topLineJson.index = indx;
+        } else if (topLineJson._index) {
+          topLineJson._index = indx;
+        }
+
+        payloadLines[0] = JSON.stringify(topLineJson);
+
+        if (/"_index":/.test(payloadLines[0])) {
+          payloadLines[0] = payloadLines[0].replace(/"_index":"([\s\S]*?)"/gi, function (a, s, b) {
+            return '"_index":"' + s + '-' + credentials.domain + '"';
+          });
+        }
+
+        payload = payloadLines.join('\n');
         request.payload = new Buffer(payload);
-        // console.log('\x1b[31m', `>>> ${payload}` ,'\x1b[0m');
+        console.log('\x1b[31m', `>>> ${payload}` ,'\x1b[0m');
       }
     }
 
