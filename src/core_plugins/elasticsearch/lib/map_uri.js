@@ -77,33 +77,40 @@ function mapUri(cluster, proxyPrefix) {
       if (payload) {
 
         const payloadLines = payload.split(/\n/);
-        const topLineJson = JSON.parse(payloadLines[0]);
-        let indx = (topLineJson.index || topLineJson._index);
-        if (indx instanceof Array) {
-          indx = indx.map(i => {
-            if (i.endsWith(credentials.domain)) {
-              return i;
-            }
 
-            return i + credentials.domain;
-          });
+        for (let i = 0; i < payloadLines.length; i+=2) {
+          //console.log(payloadLines[i]);
+          if (!payloadLines[i])
+              continue;
 
-        } else if (indx && !indx.endsWith(credentials.domain)) {
-          indx += credentials.domain
-        }
+          let topLineJson = JSON.parse(payloadLines[i]);
+          let indx = (topLineJson.index || topLineJson._index);
+          if (indx instanceof Array) {
+            indx = indx.map(i => {
+              if (i.endsWith(credentials.domain)) {
+                return i;
+              }
 
-        if (topLineJson.index) {
-          topLineJson.index = indx;
-        } else if (topLineJson._index) {
-          topLineJson._index = indx;
-        }
+              return i + credentials.domain;
+            });
 
-        payloadLines[0] = JSON.stringify(topLineJson);
+          } else if (indx && !indx.endsWith(credentials.domain)) {
+            indx += credentials.domain
+          }
 
-        if (/"_index":/.test(payloadLines[0])) {
-          payloadLines[0] = payloadLines[0].replace(/"_index":"([\s\S]*?)"/gi, function (a, s, b) {
-            return '"_index":"' + s + '-' + credentials.domain + '"';
-          });
+          if (topLineJson.index) {
+            topLineJson.index = indx;
+          } else if (topLineJson._index) {
+            topLineJson._index = indx;
+          }
+
+          payloadLines[i] = JSON.stringify(topLineJson);
+
+          if (/"_index":/.test(payloadLines[0])) {
+            payloadLines[i] = payloadLines[i].replace(/"_index":"([\s\S]*?)"/gi, function (a, s, b) {
+              return '"_index":"' + s + '-' + credentials.domain + '"';
+            });
+          }
         }
 
         payload = payloadLines.join('\n');
