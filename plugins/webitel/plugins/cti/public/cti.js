@@ -1,4 +1,5 @@
 import angular from 'angular';
+import { Notifier } from 'ui/notify/notifier';
 
 define(function (require) {
     window.WEBITEL_PANEL_JQUERY = $;
@@ -26,7 +27,6 @@ define(function (require) {
 
     function WebitelSessionController($scope) {
         var webitelPanel;
-        const Notifier = require('ui/notify/notifier');
         $scope.useWebphone = localStorage.getItem("useWebPhone") == 'true';
         $scope.useWebrtc = localStorage.getItem("useWebRTC") == 'true';
         $scope.useWebrtcLeft = localStorage.getItem("leftPosition") == 'true';
