@@ -4,7 +4,7 @@
 
 "use strict";
 
-import management from 'ui/management';
+import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import 'plugins/reporting/views/management/reportingSection';

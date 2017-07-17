@@ -72,3 +72,12 @@ Object.defineProperty(exports, 'createConcatStream', {
     return _concat_stream.createConcatStream;
   }
 });
+
+var _map_stream = require('./map_stream');
+
+Object.defineProperty(exports, 'createMapStream', {
+  enumerable: true,
+  get: function get() {
+    return _map_stream.createMapStream;
+  }
+});

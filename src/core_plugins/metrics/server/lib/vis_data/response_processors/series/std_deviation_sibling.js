@@ -27,7 +27,7 @@ function stdDeviationSibling(resp, panel, series) {
   return next => results => {
     const metric = (0, _get_last_metric2.default)(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      (0, _get_splits2.default)(resp, series).forEach(split => {
+      (0, _get_splits2.default)(resp, panel, series).forEach(split => {
 
         const mapBucketByMode = mode => {
           return bucket => {

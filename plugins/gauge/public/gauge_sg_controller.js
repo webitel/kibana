@@ -1,8 +1,10 @@
+import {uiModules} from 'ui/modules';
+
 define(function (require) {
 
   var c3 = require('./bower_components/c3');
 
-  var module = require('ui/modules').get('kibana/gauge_sg', ['kibana']);
+  var module = uiModules.get('kibana/gauge_sg', ['kibana']);
 
   module.controller('KbnGaugeVisController', function ($scope, $element, Private) {
     var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));

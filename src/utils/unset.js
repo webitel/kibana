@@ -1,5 +1,10 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.unset = unset;
+
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -10,7 +15,7 @@ var _toPath2 = _interopRequireDefault(_toPath);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-module.exports = function unset(object, rawPath) {
+function unset(object, rawPath) {
   if (!object) return;
   const path = (0, _toPath2.default)(rawPath);
 
@@ -32,4 +37,4 @@ module.exports = function unset(object, rawPath) {
       }
       break;
   }
-};
+}

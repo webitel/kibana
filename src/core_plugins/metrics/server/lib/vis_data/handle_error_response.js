@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = panel => error => {
-  console.log(error);
+  if (error.isBoom && error.status === 401) throw error;
   const result = {};
   let errorResponse;
   try {

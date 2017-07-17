@@ -1,7 +1,11 @@
 import 'plugins/extended_metric_vis/extended_metric_vis.less';
 import 'plugins/extended_metric_vis/extended_metric_vis_controller';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import {VisVisTypeProvider} from 'ui/vis/vis_type';
+
 import extendedMetricVisTemplate from 'plugins/extended_metric_vis/extended_metric_vis.html';
 import metricVisParamsTemplate from 'plugins/extended_metric_vis/extended_metric_vis_params.html';
 // we need to load the css ourselves
@@ -9,11 +13,12 @@ import metricVisParamsTemplate from 'plugins/extended_metric_vis/extended_metric
 // we also need to load the controller and used by the template
 
 // register the provider with the visTypes registry
-require('ui/registry/vis_types').register(ExtendedMetricVisProvider);
+VisTypesRegistryProvider.register(ExtendedMetricVisProvider);
 
 function ExtendedMetricVisProvider(Private) {
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
+  const VisType = Private(VisVisTypeProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
@@ -23,6 +28,7 @@ function ExtendedMetricVisProvider(Private) {
     description: 'Based on the core Metric-Plugin but gives you the ability' +
       'to output custom aggregates on metric-results.',
     icon: 'fa-calculator',
+    category: VisType.CATEGORY.OTHER,
     template: extendedMetricVisTemplate,
     params: {
       defaults: {

@@ -78,7 +78,7 @@ exports.default = function (kibana) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
           const headers = filterHeaders(req.headers, whitelist);
 
-          if (config.has('console.proxyConfig')) {
+          if (!(0, _lodash.isEmpty)(config.get('console.proxyConfig'))) {
             return _extends({}, proxyConfigCollection.configForUri(uri), {
               headers
             });

@@ -1,7 +1,15 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.pkg = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _path = require('path');
 
-module.exports = require('../../package.json');
-module.exports.__filename = require.resolve('../../package.json');
-module.exports.__dirname = (0, _path.dirname)(module.exports.__filename);
+const pkg = exports.pkg = _extends({
+  __filename: require.resolve('../../package.json'),
+  __dirname: (0, _path.dirname)(require.resolve('../../package.json'))
+}, require('../../package.json'));

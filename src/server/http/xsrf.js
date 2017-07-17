@@ -19,7 +19,7 @@ exports.default = function (kbnServer, server, config) {
     const hasXsrfHeader = xsrfHeader in req.headers;
 
     if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-      return reply((0, _boom.badRequest)(`Request must contain an ${xsrfHeader} header`));
+      return reply((0, _boom.badRequest)(`Request must contain a ${xsrfHeader} header.`));
     }
 
     return reply.continue();

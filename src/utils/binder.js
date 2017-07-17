@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-class Binder {
+class BinderBase {
   constructor() {
     this.disposal = [];
   }
@@ -22,5 +22,4 @@ class Binder {
     destroyers.forEach(fn => fn());
   }
 }
-exports.default = Binder;
-module.exports = exports["default"];
+exports.BinderBase = BinderBase;

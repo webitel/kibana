@@ -34,9 +34,7 @@ var _UglifyJsPlugin2 = _interopRequireDefault(_UglifyJsPlugin);
 
 var _lodash = require('lodash');
 
-var _from_root = require('../utils/from_root');
-
-var _from_root2 = _interopRequireDefault(_from_root);
+var _utils = require('../utils');
 
 var _options = require('./babel/options');
 
@@ -124,7 +122,7 @@ class BaseOptimizer {
 
     const config = {
       node: { fs: 'empty' },
-      context: (0, _from_root2.default)('.'),
+      context: (0, _utils.fromRoot)('.'),
       entry: this.bundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
@@ -162,9 +160,9 @@ class BaseOptimizer {
         extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
-        fallback: [(0, _from_root2.default)('webpackShims'), (0, _from_root2.default)('node_modules')],
+        fallback: [(0, _utils.fromRoot)('webpackShims'), (0, _utils.fromRoot)('node_modules')],
         loaderPostfixes: ['-loader', ''],
-        root: (0, _from_root2.default)('.'),
+        root: (0, _utils.fromRoot)('.'),
         alias: this.env.aliases,
         unsafeCache: this.unsafeCache
       },

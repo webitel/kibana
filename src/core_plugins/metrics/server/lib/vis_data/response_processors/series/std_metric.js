@@ -37,7 +37,7 @@ function stdMetric(resp, panel, series) {
     }
     if (/_bucket$/.test(metric.type)) return next(results);
     const decoration = (0, _get_default_decoration2.default)(series);
-    (0, _get_splits2.default)(resp, series).forEach(split => {
+    (0, _get_splits2.default)(resp, panel, series).forEach(split => {
       const data = split.timeseries.buckets.map((0, _map_bucket2.default)(metric));
       results.push(_extends({
         id: `${split.id}`,

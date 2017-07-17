@@ -5,9 +5,9 @@
 "use strict";
 
 
-import UiModules from 'ui/modules';
+import {uiModules} from 'ui/modules';
 
-UiModules.get('webitel/reporting')
+uiModules.get('webitel/reporting')
   .service('emailService', function ($http) {
     this.get = (cb) => {
       $http.get('../api/reporting/v1/email').then(

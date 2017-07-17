@@ -1,3 +1,8 @@
+import {VisVisTypeProvider} from 'ui/vis/vis_type';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
+
 define(function (require) {
   
   // we need to load the css ourselves
@@ -7,11 +12,12 @@ define(function (require) {
   require('plugins/gauge_sg/gauge_sg_controller');
 
   // register the provider with the visTypes registry
-  require('ui/registry/vis_types').register(MetricVisProvider);
+    VisTypesRegistryProvider.register(MetricVisProvider);
 
   function MetricVisProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
-    var Schemas = Private(require('ui/vis/schemas'));
+    var TemplateVisType = Private(TemplateVisTypeProvider);
+    var Schemas = Private(VisSchemasProvider);
+    const VisType = Private(VisVisTypeProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
@@ -20,6 +26,7 @@ define(function (require) {
       title: 'Gauge',
       description: 'Display as Gauge Chart',
       icon: 'fa-tachometer',
+      category: VisType.CATEGORY.OTHER,
       template: require('plugins/gauge_sg/gauge_sg.html'),
       params: {
         defaults: {

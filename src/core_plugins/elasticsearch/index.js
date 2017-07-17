@@ -30,10 +30,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
-module.exports = function ({ Plugin }) {
-  return new Plugin({
+module.exports = function (kibana) {
+  return new kibana.Plugin({
     require: ['kibana'],
-
     config(Joi) {
       const array = Joi.array,
             boolean = Joi.boolean,
@@ -170,10 +169,10 @@ module.exports = function ({ Plugin }) {
       (0, _create_proxy2.default)(server, ['PUT', 'POST', 'DELETE'], `/${kibanaIndex}/{paths*}`, {
         pre: [noDirectIndex, noBulkCheck]
       });
-
       // Set up the health check service and start it.
+      const mappings = kibana.uiExports.mappings.getCombined();
 
-      var _healthCheck = (0, _health_check2.default)(this, server);
+      var _healthCheck = (0, _health_check2.default)(this, server, { mappings });
 
       const start = _healthCheck.start,
             waitUntilReady = _healthCheck.waitUntilReady;

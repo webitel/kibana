@@ -60,10 +60,6 @@ var _ui = require('../ui');
 
 var _ui2 = _interopRequireDefault(_ui);
 
-var _settings = require('../ui/settings');
-
-var _settings2 = _interopRequireDefault(_settings);
-
 var _optimize = require('../optimize');
 
 var _optimize2 = _interopRequireDefault(_optimize);
@@ -71,6 +67,10 @@ var _optimize2 = _interopRequireDefault(_optimize);
 var _initialize = require('./plugins/initialize');
 
 var _initialize2 = _interopRequireDefault(_initialize);
+
+var _index_patterns = require('./index_patterns');
+
+var _saved_objects = require('./saved_objects');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -91,8 +91,10 @@ module.exports = class KbnServer {
     _setup2.default,
     // sets this.server
     _http2.default, _logging2.default, _warnings2.default, _status2.default,
+
     // writes pid file
     _pid2.default,
+
     // find plugins and set this.plugins
     _scan2.default,
 
@@ -104,15 +106,20 @@ module.exports = class KbnServer {
 
     // tell the config we are done loading plugins
     _complete2.default,
+
     // setup this.uiExports and this.bundles
-    _ui2.default,
+    _ui2.default, _index_patterns.indexPatternsMixin,
+
+    // setup saved object routes
+    _saved_objects.savedObjectsMixin,
 
     // setup server.uiSettings
-    _settings2.default,
+    _ui.uiSettingsMixin,
 
     // ensure that all bundles are built, or that the
     // lazy bundle server is running
     _optimize2.default,
+
     // finally, initialize the plugins
     _initialize2.default, () => {
       if (this.config.get('server.autoListen')) {

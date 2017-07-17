@@ -60,6 +60,19 @@ exports.default = {
       }
     };
   },
+  static: bucket => {
+    checkMetric(bucket, ['value']);
+    return {
+      bucket_script: {
+        buckets_path: { count: '_count' },
+        script: {
+          inline: bucket.value,
+          lang: 'painless'
+        },
+        gap_policy: 'skip'
+      }
+    };
+  },
   avg: stdMetric,
   max: stdMetric,
   min: stdMetric,

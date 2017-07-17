@@ -27,7 +27,7 @@ function stdDeviationBands(resp, panel, series) {
   return next => results => {
     const metric = (0, _get_last_metric2.default)(series);
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
-      (0, _get_splits2.default)(resp, series).forEach(split => {
+      (0, _get_splits2.default)(resp, panel, series).forEach(split => {
         const upper = split.timeseries.buckets.map((0, _map_bucket2.default)(_lodash2.default.assign({}, metric, { mode: 'upper' })));
         const lower = split.timeseries.buckets.map((0, _map_bucket2.default)(_lodash2.default.assign({}, metric, { mode: 'lower' })));
         results.push({

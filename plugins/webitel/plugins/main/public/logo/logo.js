@@ -5,7 +5,7 @@
 "use strict";
 
 import chrome from 'ui/chrome';
-import uiModules from 'ui/modules';
+import {uiModules} from 'ui/modules';
 import kibanaLogoUrl from 'plugins/webitel_main/logo/kibanaWebitel.svg';
 import 'plugins/webitel_main/logo/logo.less';
 

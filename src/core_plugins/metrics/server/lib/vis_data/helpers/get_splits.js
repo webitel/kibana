@@ -28,9 +28,12 @@ var _get_split_colors = require('./get_split_colors');
 
 var _get_split_colors2 = _interopRequireDefault(_get_split_colors);
 
+var _format_key = require('./format_key');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getSplits(resp, series) {
+function getSplits(resp, panel, series) {
+  const color = new _color2.default(series.color);
   const metric = (0, _get_last_metric2.default)(series);
   if (_lodash2.default.has(resp, `aggregations.${series.id}.buckets`)) {
     const buckets = _lodash2.default.get(resp, `aggregations.${series.id}.buckets`);
@@ -39,8 +42,8 @@ function getSplits(resp, series) {
       const colors = (0, _get_split_colors2.default)(series.color, size, series.split_color_mode);
       return buckets.map(bucket => {
         bucket.id = `${series.id}:${bucket.key}`;
-        bucket.label = bucket.key;
-        bucket.color = colors.shift();
+        bucket.label = (0, _format_key.formatKey)(bucket.key, series);
+        bucket.color = panel.type === 'top_n' ? color.hex() : colors.shift();
         return bucket;
       });
     }
@@ -57,7 +60,6 @@ function getSplits(resp, series) {
     }
   }
 
-  const color = new _color2.default(series.color);
   const timeseries = _lodash2.default.get(resp, `aggregations.${series.id}.timeseries`);
   const mergeObj = {
     timeseries

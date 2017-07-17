@@ -1,10 +1,10 @@
-FROM node:6.10.3-slim
+FROM node:6.11.1-slim
 MAINTAINER Vitaly Kovalyshyn "v.kovalyshyn@webitel.com"
 
 ENV VERSION
-ENV WEBITEL_MAJOR 3.5
+ENV WEBITEL_MAJOR 3.7
 ENV WEBITEL_REPO_BASE https://github.com/webitel
-ENV KIBANA_VERSION 5.3.0
+ENV KIBANA_VERSION 5.5.0
 
 RUN mkdir /kibana
 COPY bin /kibana/bin

@@ -39,7 +39,8 @@ const lookup = {
   'series_agg': 'Series Agg',
   'serial_diff': 'Serial Difference',
   'filter_ratio': 'Filter Ratio',
-  'positive_only': 'Positive Only'
+  'positive_only': 'Positive Only',
+  'static': 'Static Value'
 };
 
 const pipeline = ['calculation', 'derivative', 'cumulative_sum', 'moving_average', 'avg_bucket', 'min_bucket', 'max_bucket', 'sum_bucket', 'variance_bucket', 'sum_of_squares_bucket', 'std_deviation_bucket', 'series_agg', 'serial_diff', 'positive_only'];

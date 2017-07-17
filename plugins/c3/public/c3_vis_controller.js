@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import {uiModules} from 'ui/modules';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import errors from 'ui/errors';	
 

@@ -102,6 +102,7 @@ module.exports = class Config {
       notProd: !prod,
       notDev: !dev,
       version: _lodash2.default.get(_utils.pkg, 'version'),
+      branch: _lodash2.default.get(_utils.pkg, 'branch'),
       buildNum: dev ? Math.pow(2, 53) - 1 : _lodash2.default.get(_utils.pkg, 'build.number', NaN),
       buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _lodash2.default.get(_utils.pkg, 'build.sha', '')
     };
@@ -110,7 +111,10 @@ module.exports = class Config {
       throw new TypeError(`Unexpected environment "${env}", expected one of "development" or "production"`);
     }
 
-    const results = _joi2.default.validate(newVals, this.getSchema(), { context });
+    const results = _joi2.default.validate(newVals, this.getSchema(), {
+      context,
+      abortEarly: false
+    });
 
     if (results.error) {
       throw results.error;

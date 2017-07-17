@@ -35,7 +35,7 @@ function percentile(resp, panel, series) {
     const metric = (0, _get_last_metric2.default)(series);
     if (metric.type !== 'percentile') return next(results);
 
-    (0, _get_splits2.default)(resp, series).forEach(split => {
+    (0, _get_splits2.default)(resp, panel, series).forEach(split => {
       metric.percentiles.forEach(percentile => {
         const label = split.label + ` (${percentile.value})`;
         const data = split.timeseries.buckets.map(bucket => {

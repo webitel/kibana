@@ -30,11 +30,15 @@ var _ensure_not_tribe = require('./ensure_not_tribe');
 
 var _ensure_allow_explicit_index = require('./ensure_allow_explicit_index');
 
+var _determine_enabled_scripting_langs = require('./determine_enabled_scripting_langs');
+
 var _util = require('util');
 
 var _util2 = _interopRequireDefault(_util);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _bluebird2.default(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _bluebird2.default.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 const NoConnections = _elasticsearch2.default.errors.NoConnections;
 
@@ -44,7 +48,7 @@ const NO_INDEX = 'no_index';
 const INITIALIZING = 'initializing';
 const READY = 'ready';
 
-module.exports = function (plugin, server) {
+module.exports = function (plugin, server, { mappings }) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
@@ -95,7 +99,7 @@ module.exports = function (plugin, server) {
     return getHealth().then(function (health) {
       if (health === NO_INDEX) {
         plugin.status.yellow('No existing Kibana index found');
-        return (0, _create_kibana_index2.default)(server);
+        return (0, _create_kibana_index2.default)(server, mappings);
       }
 
       if (health === INITIALIZING) {
@@ -117,14 +121,18 @@ module.exports = function (plugin, server) {
   }
 
   function check() {
-    const healthCheck = waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url')).then(waitForEsVersion).then(() => (0, _ensure_not_tribe.ensureNotTribe)(callAdminAsKibanaUser)).then(() => (0, _ensure_allow_explicit_index.ensureAllowExplicitIndex)(callAdminAsKibanaUser, config)).then(waitForShards).then(_lodash2.default.partial(_migrate_config2.default, server)).then(() => {
+    const results = {};
+
+    const healthCheck = waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url')).then(waitForEsVersion).then(() => (0, _ensure_not_tribe.ensureNotTribe)(callAdminAsKibanaUser)).then(() => (0, _ensure_allow_explicit_index.ensureAllowExplicitIndex)(callAdminAsKibanaUser, config)).then(waitForShards).then(_lodash2.default.partial(_migrate_config2.default, server, { mappings })).then(_asyncToGenerator(function* () {
+      results.enabledScriptingLangs = yield (0, _determine_enabled_scripting_langs.determineEnabledScriptingLangs)(callDataAsKibanaUser);
+    })).then(() => {
       const tribeUrl = config.get('elasticsearch.tribe.url');
       if (tribeUrl) {
         return waitForPong(callDataAsKibanaUser, tribeUrl).then(() => (0, _ensure_es_version.ensureEsVersion)(server, _kibana_version2.default.get(), callDataAsKibanaUser));
       }
     });
 
-    return healthCheck.then(setGreenStatus).catch(err => plugin.status.red(err));
+    return healthCheck.then(() => server.expose('latestHealthCheckResults', results)).then(setGreenStatus).catch(err => plugin.status.red(err));
   }
 
   let timeoutId = null;

@@ -9,38 +9,45 @@ var _util = require('util');
 
 var _stream = require('stream');
 
-var _log_levels = require('./log_levels');
-
 var _ansicolors = require('ansicolors');
 
-function createToolingLog(logLevel = 'silent') {
-  const logLevelFlags = (0, _log_levels.createLogLevelFlags)(logLevel);
+var _log_levels = require('./log_levels');
 
+function createToolingLog(initialLogLevelName = 'silent') {
+  // current log level (see logLevel.name and logLevel.flags) changed
+  // with ToolingLog#setLevel(newLogLevelName);
+  let logLevel = (0, _log_levels.parseLogLevel)(initialLogLevelName);
+
+  // current indentation level, changed with ToolingLog#indent(delta)
   let indentString = '';
 
   class ToolingLog extends _stream.PassThrough {
+    constructor() {
+      super({ objectMode: true });
+    }
+
     verbose(...args) {
-      if (!logLevelFlags.verbose) return;
+      if (!logLevel.flags.verbose) return;
       this.write(' %s ', (0, _ansicolors.magenta)('sill'), (0, _util.format)(...args));
     }
 
     debug(...args) {
-      if (!logLevelFlags.debug) return;
+      if (!logLevel.flags.debug) return;
       this.write(' %s ', (0, _ansicolors.brightBlack)('debg'), (0, _util.format)(...args));
     }
 
     info(...args) {
-      if (!logLevelFlags.info) return;
+      if (!logLevel.flags.info) return;
       this.write(' %s ', (0, _ansicolors.blue)('info'), (0, _util.format)(...args));
     }
 
     warning(...args) {
-      if (!logLevelFlags.warning) return;
+      if (!logLevel.flags.warning) return;
       this.write(' %s ', (0, _ansicolors.yellow)('warn'), (0, _util.format)(...args));
     }
 
     error(err) {
-      if (!logLevelFlags.error) return;
+      if (!logLevel.flags.error) return;
 
       if (typeof err !== 'string' && !(err instanceof Error)) {
         err = new Error(`"${err}" thrown`);
@@ -53,6 +60,14 @@ function createToolingLog(logLevel = 'silent') {
       const width = Math.max(0, indentString.length + delta);
       indentString = ' '.repeat(width);
       return indentString.length;
+    }
+
+    getLevel() {
+      return logLevel.name;
+    }
+
+    setLevel(newLogLevelName) {
+      logLevel = (0, _log_levels.parseLogLevel)(newLogLevelName);
     }
 
     write(...args) {

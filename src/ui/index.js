@@ -3,6 +3,16 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.uiSettingsMixin = undefined;
+
+var _ui_settings = require('./ui_settings');
+
+Object.defineProperty(exports, 'uiSettingsMixin', {
+  enumerable: true,
+  get: function get() {
+    return _ui_settings.uiSettingsMixin;
+  }
+});
 
 var _lodash = require('lodash');
 
@@ -39,7 +49,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 exports.default = (() => {
   var _ref = _asyncToGenerator(function* (kbnServer, server, config) {
     let getKibanaPayload = (() => {
-      var _ref2 = _asyncToGenerator(function* ({ app, request, includeUserProvidedConfig }) {
+      var _ref2 = _asyncToGenerator(function* ({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
         const uiSettings = server.uiSettings();
         const translations = yield uiI18n.getTranslationsForRequest(request);
 
@@ -47,6 +57,7 @@ exports.default = (() => {
           app: app,
           nav: uiExports.navLinks.inOrder,
           version: kbnServer.version,
+          branch: config.get('pkg.branch'),
           buildNum: config.get('pkg.buildNum'),
           buildSha: config.get('pkg.buildSha'),
           basePath: config.get('server.basePath'),
@@ -65,7 +76,7 @@ exports.default = (() => {
             return function (_x5, _x6) {
               return _ref3.apply(this, arguments);
             };
-          })(), (0, _lodash.defaults)((yield app.getInjectedVars()) || {}, uiExports.defaultInjectedVars))
+          })(), (0, _lodash.defaults)(injectedVarsOverrides, (yield app.getInjectedVars()) || {}, uiExports.defaultInjectedVars))
         };
       });
 
@@ -75,7 +86,7 @@ exports.default = (() => {
     })();
 
     let renderApp = (() => {
-      var _ref4 = _asyncToGenerator(function* ({ app, reply, includeUserProvidedConfig = true }) {
+      var _ref4 = _asyncToGenerator(function* ({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
         try {
           const request = reply.request;
           const translations = yield uiI18n.getTranslationsForRequest(request);
@@ -85,7 +96,8 @@ exports.default = (() => {
             kibanaPayload: yield getKibanaPayload({
               app,
               request,
-              includeUserProvidedConfig
+              includeUserProvidedConfig,
+              injectedVarsOverrides
             }),
             bundlePath: `${config.get('server.basePath')}/bundles`,
             i18n: function i18n(key) {
@@ -221,11 +233,12 @@ exports.default = (() => {
       }
     });
 
-    server.decorate('reply', 'renderApp', function (app) {
+    server.decorate('reply', 'renderApp', function (app, injectedVarsOverrides) {
       return renderApp({
         app,
         reply: this,
-        includeUserProvidedConfig: true
+        includeUserProvidedConfig: true,
+        injectedVarsOverrides
       });
     });
 
@@ -242,5 +255,3 @@ exports.default = (() => {
     return _ref.apply(this, arguments);
   };
 })();
-
-module.exports = exports['default'];

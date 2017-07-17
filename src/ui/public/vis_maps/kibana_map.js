@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import zoomToPrecision from 'ui/utils/zoom_to_precision';
+import { zoomToPrecision } from 'ui/utils/zoom_to_precision';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -17,7 +17,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" aria-label="Fit Data Bounds"></a>')
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -77,7 +77,7 @@ function makeLegedControl(container, kibanaMap, position) {
  * Collects map functionality required for Kibana.
  * Serves as simple abstraction for leaflet as well.
  */
-class KibanaMap extends EventEmitter {
+export class KibanaMap extends EventEmitter {
 
   constructor(containerNode, options) {
 
@@ -101,10 +101,11 @@ class KibanaMap extends EventEmitter {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
       center: options.center ? options.center : [0, 0],
-      zoom: options.zoom ? options.zoom : 0
+      zoom: options.zoom ? options.zoom : 2
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
@@ -293,6 +294,10 @@ class KibanaMap extends EventEmitter {
     return this._leafletMap.getZoom();
   }
 
+  getMaxZoomLevel() {
+    return this._leafletMap.getMaxZoom();
+  }
+
   getAutoPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
@@ -473,7 +478,7 @@ class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }
@@ -542,12 +547,6 @@ class KibanaMap extends EventEmitter {
       this.setCenter(centerFromUIState[0], centerFromUIState[1]);
     }
   }
-
-
 }
 
-
-
-
-export default KibanaMap;
 

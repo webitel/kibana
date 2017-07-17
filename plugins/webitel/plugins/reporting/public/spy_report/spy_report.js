@@ -2,6 +2,7 @@ import _ from 'lodash';
 import 'ui/agg_table';
 import reportSpyModeTemplate from 'plugins/reporting/spy_report/spy_report.html';
 import 'plugins/reporting/views/management/job.css';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 require('plugins/reporting/services/jobService');
 
@@ -142,4 +143,4 @@ function VisSpyReportProvider(Notifier, $filter, $rootScope, config, Private, jo
   };
 }
 
-require('ui/registry/spy_modes').register(VisSpyReportProvider);
+SpyModesRegistryProvider.register(VisSpyReportProvider);

@@ -156,7 +156,18 @@ module.exports = (() => {
           try {
             const url = yield shortUrlLookup.getUrl(request.params.urlId, request);
             (0, _short_url_assert_valid.shortUrlAssertValid)(url);
-            reply().redirect(config.get('server.basePath') + url);
+
+            const uiSettings = server.uiSettings();
+            const stateStoreInSessionStorage = yield uiSettings.get(request, 'state:storeInSessionStorage');
+            if (!stateStoreInSessionStorage) {
+              reply().redirect(config.get('server.basePath') + url);
+              return;
+            }
+
+            const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+            reply.renderApp(app, {
+              redirectUrl: url
+            });
           } catch (err) {
             reply((0, _short_url_error.handleShortUrlError)(err));
           }

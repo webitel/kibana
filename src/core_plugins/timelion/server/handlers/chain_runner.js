@@ -192,7 +192,7 @@ module.exports = function (tlConfig) {
     tlConfig.time = request.time;
     tlConfig.time.to = (0, _date_math2.default)(request.time.to, true).valueOf();
     tlConfig.time.from = (0, _date_math2.default)(request.time.from).valueOf();
-    tlConfig.time.interval = (0, _calculate_interval2.default)(tlConfig.time.from, tlConfig.time.to, tlConfig.settings['timelion:target_buckets'] || 200, tlConfig.time.interval);
+    tlConfig.time.interval = (0, _calculate_interval2.default)(tlConfig.time.from, tlConfig.time.to, tlConfig.settings['timelion:target_buckets'] || 200, tlConfig.time.interval, tlConfig.settings['timelion:min_interval'] || '1ms');
 
     tlConfig.setTargetSeries();
 

@@ -4,9 +4,9 @@
 
 "use strict";
 
-import UiModules from 'ui/modules';
+import {uiModules} from 'ui/modules';
 
-UiModules.get('webitel/reporting')
+uiModules.get('webitel/reporting')
   .service('jobService', function ($http) {
     this.getAll = (cb) => {
       $http.get('../api/reporting/v1/jobs').then(

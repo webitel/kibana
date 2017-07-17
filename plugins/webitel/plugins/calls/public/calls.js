@@ -1,17 +1,18 @@
 import 'plugins/calls/calls_vis.css';
 import 'plugins/calls/calls_controller';
 
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 
 import visTemplate from 'plugins/calls/calls_vis.html';
 import visParamTemplate from 'plugins/calls/calls_vis_params.html';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import {VisVisTypeProvider} from 'ui/vis/vis_type';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 // register the provider with the visTypes registry
-require('ui/registry/vis_types').register(CallsProvider);
+VisTypesRegistryProvider.register(CallsProvider);
 
 function CallsProvider(Private) {
-    var TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    var TemplateVisType = Private(TemplateVisTypeProvider);
     const VisType = Private(VisVisTypeProvider);
     
     return new TemplateVisType({

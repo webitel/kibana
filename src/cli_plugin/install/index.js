@@ -15,10 +15,6 @@ var _logger = require('../lib/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var _package_json = require('../../utils/package_json');
-
-var _package_json2 = _interopRequireDefault(_package_json);
-
 var _path = require('../../server/path');
 
 var _settings = require('./settings');
@@ -32,7 +28,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function processCommand(command, options) {
   let settings;
   try {
-    settings = (0, _settings.parse)(command, options, _package_json2.default);
+    settings = (0, _settings.parse)(command, options, _utils.pkg);
   } catch (ex) {
     //The logger has not yet been initialized.
     console.error(ex.message);

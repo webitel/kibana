@@ -5,7 +5,7 @@
 "use strict";
 
 require('plugins/exports/directives/export_data_config');
-const navbarExtensions = require('ui/registry/navbar_extensions');
+import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
 
 function discoverExportProvider() {
     return {
@@ -18,4 +18,4 @@ function discoverExportProvider() {
     }
 }
 
-navbarExtensions.register(discoverExportProvider);
+NavBarExtensionsRegistryProvider.register(discoverExportProvider);

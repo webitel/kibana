@@ -5,17 +5,18 @@
 import 'plugins/members/members_vis.css';
 import 'plugins/members/members_controller';
 
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 
 import visTemplate from 'plugins/members/members_vis.html';
 import visParamTemplate from 'plugins/members/members_vis_params.html';
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import {VisVisTypeProvider} from 'ui/vis/vis_type';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 // register the provider with the visTypes registry
-require('ui/registry/vis_types').register(MembersListProvider);
+VisTypesRegistryProvider.register(MembersListProvider);
 
 function MembersListProvider(Private) {
-    var TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    var TemplateVisType = Private(TemplateVisTypeProvider);
     const VisType = Private(VisVisTypeProvider);
 
     return new TemplateVisType({

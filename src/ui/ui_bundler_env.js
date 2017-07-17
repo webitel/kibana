@@ -1,12 +1,8 @@
 'use strict';
 
-var _from_root = require('../utils/from_root');
-
-var _from_root2 = _interopRequireDefault(_from_root);
+var _utils = require('../utils');
 
 var _lodash = require('lodash');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const arr = v => [].concat(v || []);
 
@@ -32,8 +28,8 @@ module.exports = class UiBundlerEnv {
 
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
-      ui: (0, _from_root2.default)('src/ui/public'),
-      test_harness: (0, _from_root2.default)('src/test_harness/public'),
+      ui: (0, _utils.fromRoot)('src/ui/public'),
+      test_harness: (0, _utils.fromRoot)('src/test_harness/public'),
       querystring: 'querystring-browser'
     };
 

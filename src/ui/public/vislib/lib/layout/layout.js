@@ -1,15 +1,15 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibLibLayoutLayoutTypesProvider from './layout_types';
-import AxisProvider from 'ui/vislib/lib/axis';
-import ChartTitleProvider from 'ui/vislib/lib/chart_title';
+import { VislibLibLayoutLayoutTypesProvider } from './layout_types';
+import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
+import { VislibLibChartTitleProvider } from 'ui/vislib/lib/chart_title';
 
-export default function LayoutFactory(Private) {
+export function VislibLibLayoutLayoutProvider(Private) {
 
   const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
-  const Axis = Private(AxisProvider);
-  const ChartTitle = Private(ChartTitleProvider);
+  const Axis = Private(VislibLibAxisProvider);
+  const ChartTitle = Private(VislibLibChartTitleProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -71,23 +71,23 @@ export default function LayoutFactory(Private) {
       const position = axis.axisConfig.get('position');
       const chartTitle = new ChartTitle(visConfig);
 
-      const el = $(this.el).find(`.axis-wrapper-${position}`);
+      const axisWrapperElement = $(this.el).find(`.axis-wrapper-${position}`);
 
-      el.css('visibility', 'hidden');
+      axisWrapperElement.css('visibility', 'hidden');
       axis.render();
       chartTitle.render();
-      const width = el.width();
-      const height = el.height();
+      const width = axisWrapperElement.width();
+      const height = axisWrapperElement.height();
       axis.destroy();
-      el.find('.chart-title svg').remove();
-      el.css('visibility', '');
+      $(this.el).find('.chart-title svg').remove();
+      axisWrapperElement.css('visibility', '');
 
 
       if (axis.axisConfig.isHorizontal()) {
         const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
         spacerNodes.height(`${height}px`);
       } else {
-        el.find('.y-axis-div-wrapper').width(`${width}px`);
+        axisWrapperElement.find('.y-axis-div-wrapper').width(`${width}px`);
       }
     }
 

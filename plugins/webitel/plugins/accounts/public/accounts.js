@@ -3,15 +3,16 @@ import 'plugins/accounts/accounts_controller';
 
 import visTemplate from 'plugins/accounts/accounts_vis.html';
 import visParamTemplate from 'plugins/accounts/accounts_vis_params.html';
-import VisVisTypeProvider from 'ui/vis/vis_type';
 
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import {VisVisTypeProvider} from 'ui/vis/vis_type';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 
 // register the provider with the visTypes registry
-require('ui/registry/vis_types').register(AccountProvider);
+VisTypesRegistryProvider.register(AccountProvider);
 
 function AccountProvider(Private) {
-    var TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    var TemplateVisType = Private(TemplateVisTypeProvider);
     const VisType = Private(VisVisTypeProvider);
 
     return new TemplateVisType({

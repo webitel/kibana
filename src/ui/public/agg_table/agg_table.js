@@ -2,15 +2,15 @@ import 'ui/paginated_table';
 import 'ui/compile_recursive_directive';
 import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 uiModules
 .get('kibana')
 .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
-  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('html');
+  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
   return {
     restrict: 'E',
@@ -130,7 +130,7 @@ uiModules
                 return prev + curr[i].value;
               }, 0);
             }
-            const formatter = agg.fieldFormatter('html');
+            const formatter = agg.fieldFormatter('text');
 
             switch ($scope.totalFunc) {
               case 'sum':

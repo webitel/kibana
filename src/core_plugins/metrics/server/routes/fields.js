@@ -16,7 +16,10 @@ exports.default = server => {
     path: '/api/metrics/fields',
     method: 'GET',
     handler: (req, reply) => {
-      return (0, _get_fields2.default)(req).then(reply).catch(() => reply([]));
+      (0, _get_fields2.default)(req).then(reply).catch(err => {
+        if (err.isBoom && err.status === 401) return reply(err);
+        reply([]);
+      });
     }
   });
 };

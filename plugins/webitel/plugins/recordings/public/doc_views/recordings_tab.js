@@ -4,7 +4,7 @@
 
 "use strict";
 
-import docViewsRegistry from 'ui/registry/doc_views';
+import {DocViewsRegistryProvider} from 'ui/registry/doc_views';
 
 require('plugins/recordings/doc_views/recordings_tab.css');
 const template = require('plugins/recordings/doc_views/recordings_tab.html');
@@ -38,7 +38,7 @@ module.service('webitelRecords', ($http, $q) => {
     return deferred.promise;
 });
 
-docViewsRegistry.register(function () {
+DocViewsRegistryProvider.register(function () {
     return {
         title: 'Recordings',
         order: 30,

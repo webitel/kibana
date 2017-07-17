@@ -34,7 +34,7 @@ function stdSibling(resp, panel, series) {
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
     const decoration = (0, _get_default_decoration2.default)(series);
-    (0, _get_splits2.default)(resp, series).forEach(split => {
+    (0, _get_splits2.default)(resp, panel, series).forEach(split => {
       const data = split.timeseries.buckets.map(bucket => {
         return [bucket.key, (0, _get_sibling_agg_value2.default)(split, metric)];
       });

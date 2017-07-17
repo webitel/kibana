@@ -12,10 +12,6 @@ var _manage_uuid = require('./server/lib/manage_uuid');
 
 var _manage_uuid2 = _interopRequireDefault(_manage_uuid);
 
-var _ingest = require('./server/routes/api/ingest');
-
-var _ingest2 = _interopRequireDefault(_ingest);
-
 var _search = require('./server/routes/api/search');
 
 var _search2 = _interopRequireDefault(_search);
@@ -24,13 +20,23 @@ var _settings = require('./server/routes/api/settings');
 
 var _settings2 = _interopRequireDefault(_settings);
 
+var _import = require('./server/routes/api/import');
+
+var _export = require('./server/routes/api/export');
+
 var _scripts = require('./server/routes/api/scripts');
 
 var _scripts2 = _interopRequireDefault(_scripts);
 
+var _suggestions = require('./server/routes/api/suggestions');
+
 var _system_api = require('./server/lib/system_api');
 
 var systemApi = _interopRequireWildcard(_system_api);
+
+var _mappings = require('./mappings.json');
+
+var _mappings2 = _interopRequireDefault(_mappings);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -44,7 +50,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-
     config: function config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -62,8 +67,8 @@ module.exports = function (kibana) {
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
         uses: ['visTypes', 'spyModes', 'fieldFormats', 'navbarExtensions', 'managementSections', 'devTools', 'docViews'],
-
         injectVars: function injectVars(server) {
+
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS
@@ -72,14 +77,20 @@ module.exports = function (kibana) {
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
+          const regionmapsConfig = serverConfig.get('regionmap');
+          const mapConfig = serverConfig.get('map');
+
+          regionmapsConfig.layers = regionmapsConfig.layers ? regionmapsConfig.layers : [];
+
           return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+            regionmapsConfig: regionmapsConfig,
+            mapConfig: mapConfig,
             tilemapsConfig: {
               deprecated: {
                 isOverridden: isOverridden,
                 config: tilemapConfig
-              },
-              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+              }
             }
           };
         }
@@ -138,7 +149,8 @@ module.exports = function (kibana) {
         };
       },
 
-      translations: [(0, _path.resolve)(__dirname, './translations/en.json')]
+      translations: [(0, _path.resolve)(__dirname, './translations/en.json')],
+      mappings: _mappings2.default
     },
 
     preInit: (() => {
@@ -165,10 +177,12 @@ module.exports = function (kibana) {
       // uuid
       (0, _manage_uuid2.default)(server);
       // routes
-      (0, _ingest2.default)(server);
       (0, _search2.default)(server);
       (0, _settings2.default)(server);
       (0, _scripts2.default)(server);
+      (0, _import.importApi)(server);
+      (0, _export.exportApi)(server);
+      (0, _suggestions.registerSuggestionsApi)(server);
       server.expose('systemApi', systemApi);
     }
   });

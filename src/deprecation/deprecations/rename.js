@@ -3,8 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.rename = rename;
 
-exports.default = function (oldKey, newKey) {
+var _lodash = require('lodash');
+
+var _utils = require('../../utils');
+
+function rename(oldKey, newKey) {
   return (settings, log = _lodash.noop) => {
     const value = (0, _lodash.get)(settings, oldKey);
     if ((0, _lodash.isUndefined)(value)) {
@@ -16,10 +21,4 @@ exports.default = function (oldKey, newKey) {
 
     log(`Config key "${oldKey}" is deprecated. It has been replaced with "${newKey}"`);
   };
-};
-
-var _lodash = require('lodash');
-
-var _utils = require('../../utils');
-
-module.exports = exports['default'];
+}

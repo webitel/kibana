@@ -20,8 +20,7 @@ exports.default = server => {
     path: '/api/metrics/vis/data',
     method: 'POST',
     handler: (req, reply) => {
-      return (0, _get_vis_data2.default)(req).then(reply).catch(err => {
-        console.error(err.stack);
+      (0, _get_vis_data2.default)(req).then(reply).catch(err => {
         reply(_boom2.default.wrap(err, 400));
       });
     }

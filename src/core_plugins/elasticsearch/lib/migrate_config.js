@@ -1,20 +1,19 @@
 'use strict';
 
+var _lodash = require('lodash');
+
 var _upgrade_config = require('./upgrade_config');
 
 var _upgrade_config2 = _interopRequireDefault(_upgrade_config);
 
-var _kibana_index_mappings = require('./kibana_index_mappings');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-module.exports = function (server) {
+module.exports = function (server, { mappings }) {
   const config = server.config();
 
   var _server$plugins$elast = server.plugins.elasticsearch.getCluster('admin');
 
   const callWithInternalUser = _server$plugins$elast.callWithInternalUser;
-
 
   const options = {
     index: config.get('kibana.index'),
@@ -24,7 +23,7 @@ module.exports = function (server) {
       sort: [{
         buildNum: {
           order: 'desc',
-          unmapped_type: _kibana_index_mappings.mappings.config.properties.buildNum.type
+          unmapped_type: (0, _lodash.get)(mappings, 'config.properties.buildNum.type') || 'keyword'
         }
       }]
     }

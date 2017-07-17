@@ -31,7 +31,8 @@ module.exports = function (kibana) {
         }
       },
       hacks: ['plugins/timelion/lib/panel_registry', 'plugins/timelion/panels/timechart/timechart'],
-      visTypes: ['plugins/timelion/vis']
+      visTypes: ['plugins/timelion/vis'],
+      mappings: require('./mappings.json')
     },
     init: require('./init.js')
   });

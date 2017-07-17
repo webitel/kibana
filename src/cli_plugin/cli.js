@@ -4,9 +4,7 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _package_json = require('../utils/package_json');
-
-var _package_json2 = _interopRequireDefault(_package_json);
+var _utils = require('../utils');
 
 var _command = require('../cli/command');
 
@@ -29,7 +27,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new _command2.default('bin/kibana-plugin');
 
-program.version(_package_json2.default.version).description('The Kibana plugin manager enables you to install and remove plugins that ' + 'provide additional functionality to Kibana');
+program.version(_utils.pkg.version).description('The Kibana plugin manager enables you to install and remove plugins that ' + 'provide additional functionality to Kibana');
 
 (0, _list2.default)(program);
 (0, _install2.default)(program);

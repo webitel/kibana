@@ -4,9 +4,7 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _package_json = require('../utils/package_json');
-
-var _package_json2 = _interopRequireDefault(_package_json);
+var _utils = require('../utils');
 
 var _command = require('./command');
 
@@ -21,7 +19,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new _command2.default('bin/kibana');
 
-program.version(_package_json2.default.version).description('Kibana is an open source (Apache Licensed), browser ' + 'based analytics and search dashboard for Elasticsearch.');
+program.version(_utils.pkg.version).description('Kibana is an open source (Apache Licensed), browser ' + 'based analytics and search dashboard for Elasticsearch.');
 
 // attach commands
 (0, _serve2.default)(program);

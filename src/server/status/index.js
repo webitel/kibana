@@ -6,9 +6,35 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function (kbnServer, server, config) {
   kbnServer.status = new _server_status2.default(kbnServer.server);
+  kbnServer.legacyMetrics = new _samples2.default(12);
 
   if (server.plugins['even-better']) {
-    kbnServer.mixin(require('./metrics').collectMetrics);
+    const metrics = new _metrics.Metrics(config, server);
+    const port = config.get('server.port');
+
+    let lastReport = Date.now();
+
+    server.plugins['even-better'].monitor.on('ops', event => {
+      const now = Date.now();
+      const secSinceLast = (now - lastReport) / 1000;
+      lastReport = now;
+
+      const requests = (0, _lodash.get)(event, ['requests', port, 'total'], 0);
+      const requestsPerSecond = requests / secSinceLast;
+
+      metrics.capture(event).then(data => {
+        kbnServer.metrics = data;
+
+        kbnServer.legacyMetrics.add({
+          heapTotal: (0, _lodash.get)(event, 'psmem.heapTotal'),
+          heapUsed: (0, _lodash.get)(event, 'psmem.heapUsed'),
+          load: event.osload,
+          responseTimeAvg: (0, _lodash.get)(data, 'response_times.avg_in_millis'),
+          responseTimeMax: (0, _lodash.get)(data, 'response_times.max_in_millis'),
+          requestsPerSecond: requestsPerSecond
+        });
+      });
+    });
   }
 
   const wrapAuth = (0, _wrap_auth_config2.default)(config.get('status.allowAnonymous'));
@@ -68,6 +94,12 @@ exports.default = function (kbnServer, server, config) {
   }));
 };
 
+var _lodash = require('lodash');
+
+var _samples = require('./samples');
+
+var _samples2 = _interopRequireDefault(_samples);
+
 var _server_status = require('./server_status');
 
 var _server_status2 = _interopRequireDefault(_server_status);
@@ -75,6 +107,8 @@ var _server_status2 = _interopRequireDefault(_server_status);
 var _wrap_auth_config = require('./wrap_auth_config');
 
 var _wrap_auth_config2 = _interopRequireDefault(_wrap_auth_config);
+
+var _metrics = require('./metrics');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

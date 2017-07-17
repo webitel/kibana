@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _nodeUuid = require('node-uuid');
+var _uuid = require('uuid');
 
-var _nodeUuid2 = _interopRequireDefault(_nodeUuid);
+var _uuid2 = _interopRequireDefault(_uuid);
 
 var _bluebird = require('bluebird');
 
@@ -103,7 +103,7 @@ exports.default = (() => {
 
     if (!serverConfigUuid) {
       // config uuid missing
-      serverConfigUuid = _nodeUuid2.default.v4();
+      serverConfigUuid = _uuid2.default.v4();
       config.set('server.uuid', serverConfigUuid);
     }
 

@@ -19,6 +19,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 module.exports = () => _joi2.default.object({
   pkg: _joi2.default.object({
     version: _joi2.default.string().default(_joi2.default.ref('$version')),
+    branch: _joi2.default.string().default(_joi2.default.ref('$branch')),
     buildNum: _joi2.default.number().default(_joi2.default.ref('$buildNum')),
     buildSha: _joi2.default.string().default(_joi2.default.ref('$buildSha'))
   }).default(),
@@ -157,12 +158,14 @@ module.exports = () => _joi2.default.object({
     allowAnonymous: _joi2.default.boolean().default(false),
     v6ApiFormat: _joi2.default.boolean().default(false)
   }).default(),
-  tilemap: _joi2.default.object({
+  map: _joi2.default.object({
     manifestServiceUrl: _joi2.default.when('$dev', {
       is: true,
-      then: _joi2.default.string().default('https://tiles-stage.elastic.co/v2/manifest'),
-      otherwise: _joi2.default.string().default('https://tiles.elastic.co/v2/manifest')
-    }),
+      then: _joi2.default.string().default('https://catalogue.maps.elastic.co/v1/manifest'),
+      otherwise: _joi2.default.string().default('https://catalogue.maps.elastic.co/v1/manifest')
+    })
+  }).default(),
+  tilemap: _joi2.default.object({
     url: _joi2.default.string(),
     options: _joi2.default.object({
       attribution: _joi2.default.string(),
@@ -175,6 +178,17 @@ module.exports = () => _joi2.default.object({
       reuseTiles: _joi2.default.boolean(),
       bounds: _joi2.default.array().items(_joi2.default.array().items(_joi2.default.number()).min(2).required()).min(2)
     }).default()
+  }).default(),
+  regionmap: _joi2.default.object({
+    layers: _joi2.default.array().items(_joi2.default.object({
+      url: _joi2.default.string(),
+      type: _joi2.default.string(),
+      name: _joi2.default.string(),
+      fields: _joi2.default.array().items(_joi2.default.object({
+        name: _joi2.default.string(),
+        description: _joi2.default.string()
+      }))
+    }))
   }).default(),
   uiSettings: _joi2.default.object({
     // this is used to prevent the uiSettings from initializing. Since they

@@ -55,6 +55,7 @@ class ProxyConfig {
     };
 
     if ((0, _lodash.values)(sslAgentOpts).filter(Boolean).length) {
+      sslAgentOpts.rejectUnauthorized = this.verifySsl == null ? true : this.verifySsl;
       return new _https.Agent(sslAgentOpts);
     }
   }
@@ -68,7 +69,7 @@ class ProxyConfig {
     if (!match) return {};
     return {
       timeout: this.timeout,
-      rejectUnauthorized: this.sslAgent ? true : this.verifySsl,
+      rejectUnauthorized: this.sslAgent ? undefined : this.verifySsl,
       agent: protocol === 'https:' ? this.sslAgent : undefined
     };
   }
