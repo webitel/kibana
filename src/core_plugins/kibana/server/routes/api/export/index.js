@@ -29,7 +29,8 @@ function exportApi(server) {
         query: _joi2.default.object().keys({
           dashboard: _joi2.default.alternatives().try(_joi2.default.string(), _joi2.default.array().items(_joi2.default.string())).required()
         })
-      }
+      },
+      tags: ['api']
     },
     method: ['GET'],
     handler: (req, reply) => {

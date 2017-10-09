@@ -61,8 +61,17 @@ function modifyUrl(url, block) {
   };
 
   // the block modifies the meaningfulParts object, or returns a new one
-  const modifications = block(meaningfulParts) || meaningfulParts;
+  const modifiedParts = block(meaningfulParts) || meaningfulParts;
 
   // format the modified/replaced meaningfulParts back into a url
-  return (0, _url.format)(modifications);
+  return (0, _url.format)({
+    protocol: modifiedParts.protocol,
+    slashes: modifiedParts.slashes,
+    auth: modifiedParts.auth,
+    hostname: modifiedParts.hostname,
+    port: modifiedParts.port,
+    pathname: modifiedParts.pathname,
+    query: modifiedParts.query,
+    hash: modifiedParts.hash
+  });
 }

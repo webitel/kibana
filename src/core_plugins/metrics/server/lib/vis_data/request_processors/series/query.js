@@ -5,10 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = query;
 
-var _get_bucket_size = require('../../helpers/get_bucket_size');
-
-var _get_bucket_size2 = _interopRequireDefault(_get_bucket_size);
-
 var _offset_time = require('../../offset_time');
 
 var _offset_time2 = _interopRequireDefault(_offset_time);
@@ -23,12 +19,7 @@ function query(req, panel, series) {
   return next => doc => {
     var _getIntervalAndTimefi = (0, _get_interval_and_timefield2.default)(panel, series);
 
-    const timeField = _getIntervalAndTimefi.timeField,
-          interval = _getIntervalAndTimefi.interval;
-
-    var _getBucketSize = (0, _get_bucket_size2.default)(req, interval);
-
-    const bucketSize = _getBucketSize.bucketSize;
+    const timeField = _getIntervalAndTimefi.timeField;
 
     var _offsetTime = (0, _offset_time2.default)(req, series.offset_time);
 
@@ -47,7 +38,7 @@ function query(req, panel, series) {
       range: {
         [timeField]: {
           gte: from.valueOf(),
-          lte: to.valueOf() - bucketSize * 1000,
+          lte: to.valueOf(),
           format: 'epoch_millis'
         }
       }

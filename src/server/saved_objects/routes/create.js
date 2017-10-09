@@ -13,13 +13,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const createCreateRoute = exports.createCreateRoute = prereqs => {
   return {
-    path: '/api/saved_objects/{type}',
+    path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     config: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
+        query: _joi2.default.object().keys({
+          overwrite: _joi2.default.boolean().default(false)
+        }),
         params: _joi2.default.object().keys({
-          type: _joi2.default.string().required()
+          type: _joi2.default.string().required(),
+          id: _joi2.default.string()
         }).required(),
         payload: _joi2.default.object({
           attributes: _joi2.default.object().required()
@@ -27,11 +31,14 @@ const createCreateRoute = exports.createCreateRoute = prereqs => {
       },
       handler(request, reply) {
         const savedObjectsClient = request.pre.savedObjectsClient;
-        const type = request.params.type;
-        const attributes = request.payload.attributes;
+        var _request$params = request.params;
+        const type = _request$params.type,
+              id = _request$params.id;
+        const overwrite = request.query.overwrite;
 
+        const options = { id, overwrite };
 
-        reply(savedObjectsClient.create(type, attributes));
+        reply(savedObjectsClient.create(type, request.payload.attributes, options));
       }
     }
   };

@@ -3,16 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.uiSettingsMixin = undefined;
-
-var _ui_settings = require('./ui_settings');
-
-Object.defineProperty(exports, 'uiSettingsMixin', {
-  enumerable: true,
-  get: function get() {
-    return _ui_settings.uiSettingsMixin;
-  }
-});
 
 var _lodash = require('lodash');
 
@@ -42,6 +32,8 @@ var _ui_bundler_env2 = _interopRequireDefault(_ui_bundler_env);
 
 var _ui_i18n = require('./ui_i18n');
 
+var _ui_settings = require('./ui_settings');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -50,7 +42,7 @@ exports.default = (() => {
   var _ref = _asyncToGenerator(function* (kbnServer, server, config) {
     let getKibanaPayload = (() => {
       var _ref2 = _asyncToGenerator(function* ({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-        const uiSettings = server.uiSettings();
+        const uiSettings = request.getUiSettingsService();
         const translations = yield uiI18n.getTranslationsForRequest(request);
 
         return {
@@ -66,7 +58,7 @@ exports.default = (() => {
           translations: translations,
           uiSettings: yield (0, _bluebird.props)({
             defaults: uiSettings.getDefaults(),
-            user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+            user: includeUserProvidedConfig && uiSettings.getUserProvided()
           }),
           vars: yield (0, _bluebird.reduce)(uiExports.injectedVarsReplacers, (() => {
             var _ref3 = _asyncToGenerator(function* (acc, replacer) {
@@ -117,6 +109,8 @@ exports.default = (() => {
     const uiExports = kbnServer.uiExports = new _ui_exports2.default({
       urlBasePath: config.get('server.basePath')
     });
+
+    yield kbnServer.mixin(_ui_settings.uiSettingsMixin);
 
     const uiI18n = kbnServer.uiI18n = new _ui_i18n.UiI18n(config.get('i18n.defaultLocale'));
     uiI18n.addUiExportConsumer(uiExports);
@@ -255,3 +249,5 @@ exports.default = (() => {
     return _ref.apply(this, arguments);
   };
 })();
+
+module.exports = exports['default'];

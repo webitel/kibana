@@ -18,7 +18,7 @@ module.exports = function handleESError(error) {
   }
 
   if (error instanceof _elasticsearch.errors.ConnectionFault || error instanceof _elasticsearch.errors.ServiceUnavailable || error instanceof _elasticsearch.errors.NoConnections || error instanceof _elasticsearch.errors.RequestTimeout) {
-    return _boom2.default.serverTimeout(error);
+    return _boom2.default.serverUnavailable(error);
   } else if (error instanceof _elasticsearch.errors.Conflict || _lodash2.default.contains(error.message, 'index_template_already_exists')) {
     return _boom2.default.conflict(error);
   } else if (error instanceof _elasticsearch.errors[403]) {

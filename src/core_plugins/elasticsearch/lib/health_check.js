@@ -32,6 +32,8 @@ var _ensure_allow_explicit_index = require('./ensure_allow_explicit_index');
 
 var _determine_enabled_scripting_langs = require('./determine_enabled_scripting_langs');
 
+var _ensure_types_exist = require('./ensure_types_exist');
+
 var _util = require('util');
 
 var _util2 = _interopRequireDefault(_util);
@@ -123,7 +125,12 @@ module.exports = function (plugin, server, { mappings }) {
   function check() {
     const results = {};
 
-    const healthCheck = waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url')).then(waitForEsVersion).then(() => (0, _ensure_not_tribe.ensureNotTribe)(callAdminAsKibanaUser)).then(() => (0, _ensure_allow_explicit_index.ensureAllowExplicitIndex)(callAdminAsKibanaUser, config)).then(waitForShards).then(_lodash2.default.partial(_migrate_config2.default, server, { mappings })).then(_asyncToGenerator(function* () {
+    const healthCheck = waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url')).then(waitForEsVersion).then(() => (0, _ensure_not_tribe.ensureNotTribe)(callAdminAsKibanaUser)).then(() => (0, _ensure_allow_explicit_index.ensureAllowExplicitIndex)(callAdminAsKibanaUser, config)).then(waitForShards).then(() => (0, _ensure_types_exist.ensureTypesExist)({
+      callCluster: callAdminAsKibanaUser,
+      log: (...args) => server.log(...args),
+      indexName: config.get('kibana.index'),
+      types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
+    })).then(_lodash2.default.partial(_migrate_config2.default, server)).then(_asyncToGenerator(function* () {
       results.enabledScriptingLangs = yield (0, _determine_enabled_scripting_langs.determineEnabledScriptingLangs)(callDataAsKibanaUser);
     })).then(() => {
       const tribeUrl = config.get('elasticsearch.tribe.url');
@@ -159,6 +166,11 @@ module.exports = function (plugin, server, { mappings }) {
     timeoutId = null;
     return true;
   }
+
+  server.ext('onPreStop', (request, reply) => {
+    stopChecking();
+    reply();
+  });
 
   return {
     waitUntilReady: waitUntilReady,

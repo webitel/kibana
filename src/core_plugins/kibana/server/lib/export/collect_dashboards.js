@@ -17,8 +17,11 @@ let collectDashboards = exports.collectDashboards = (() => {
       };
     });
 
-    const docs = yield savedObjectsClient.bulkGet(objects);
-    const results = yield Promise.all(docs.map(function (d) {
+    var _ref2 = yield savedObjectsClient.bulkGet(objects);
+
+    const savedObjects = _ref2.saved_objects;
+
+    const results = yield Promise.all(savedObjects.map(function (d) {
       return (0, _collect_panels.collectPanels)(savedObjectsClient, d);
     }));
 

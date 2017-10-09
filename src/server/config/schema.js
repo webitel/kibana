@@ -64,6 +64,7 @@ module.exports = () => _joi2.default.object({
     autoListen: _joi2.default.boolean().default(true),
     defaultRoute: _joi2.default.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: _joi2.default.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    customResponseHeaders: _joi2.default.object().unknown(true).default({}),
     ssl: _joi2.default.object({
       enabled: _joi2.default.boolean().default(false),
       certificate: _joi2.default.string().when('enabled', {
@@ -161,7 +162,7 @@ module.exports = () => _joi2.default.object({
   map: _joi2.default.object({
     manifestServiceUrl: _joi2.default.when('$dev', {
       is: true,
-      then: _joi2.default.string().default('https://catalogue.maps.elastic.co/v1/manifest'),
+      then: _joi2.default.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
       otherwise: _joi2.default.string().default('https://catalogue.maps.elastic.co/v1/manifest')
     })
   }).default(),
@@ -183,6 +184,7 @@ module.exports = () => _joi2.default.object({
     layers: _joi2.default.array().items(_joi2.default.object({
       url: _joi2.default.string(),
       type: _joi2.default.string(),
+      attribution: _joi2.default.string(),
       name: _joi2.default.string(),
       fields: _joi2.default.array().items(_joi2.default.object({
         name: _joi2.default.string(),

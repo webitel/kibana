@@ -32,7 +32,9 @@ var _time_shift = require('./time_shift');
 
 var _time_shift2 = _interopRequireDefault(_time_shift);
 
+var _drop_last_bucket = require('./drop_last_bucket');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = [_percentile2.default, _std_deviation_bands2.default, _std_deviation_sibling2.default, _std_metric2.default, _std_sibling2.default, _series_agg2.default, _time_shift2.default];
+exports.default = [_percentile2.default, _std_deviation_bands2.default, _std_deviation_sibling2.default, _std_metric2.default, _std_sibling2.default, _series_agg2.default, _time_shift2.default, _drop_last_bucket.dropLastBucket];
 module.exports = exports['default'];

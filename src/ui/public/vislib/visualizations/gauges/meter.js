@@ -146,6 +146,7 @@ export function MeterGaugeProvider() {
     }
 
     drawGauge(svg, data, width, height) {
+      const self = this;
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
@@ -153,7 +154,6 @@ export function MeterGaugeProvider() {
       const minAngle = this.gaugeConfig.minAngle;
       const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
-      const yFieldFormatter = this.gaugeChart.handler.data.get('yAxisFormatter');
 
       const extendRange = this.gaugeConfig.extendRange;
       const maxY = _.max(data.values, 'y').y;
@@ -172,7 +172,7 @@ export function MeterGaugeProvider() {
       const arc = d3.svg.arc()
         .startAngle(minAngle)
         .endAngle(function (d) {
-          return Math.max(0, Math.min(maxAngle, angle(d.y)));
+          return Math.max(0, Math.min(maxAngle, angle(Math.max(min, d.y))));
         })
         .innerRadius(function (d, i, j) {
           return Math.max(0, radius(j + 1) + gaugePadding);
@@ -211,12 +211,11 @@ export function MeterGaugeProvider() {
         .attr('d', bgArc)
         .style('fill', this.gaugeConfig.style.bgFill);
 
-      const self = this;
       const series = gauges
         .append('path')
         .attr('d', arc)
         .style('fill', function (d) {
-          return self.getColorBucket(d.y);
+          return self.getColorBucket(Math.max(min, d.y));
         });
 
       const smallContainer = svg.node().getBBox().height < 70;
@@ -252,30 +251,33 @@ export function MeterGaugeProvider() {
             }
             return smallContainer || textTooLong ? 'none' : 'initial';
           });
-
-        gauges
-          .append('text')
-          .attr('class', 'chart-label')
-          .attr('y', -5)
-          .text(d => {
-            if (this.gaugeConfig.percentageMode) {
-              const percentage = Math.round(100 * (d.y - min) / (max - min));
-              return `${percentage}%`;
-            }
-            return yFieldFormatter(d.y);
-          })
-          .attr('style', 'dominant-baseline: central;')
-          .style('text-anchor', 'middle')
-          .style('font-size', '2em')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > maxRadius;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return textTooLong ? 'none' : 'initial';
-          });
       }
+
+      gauges
+        .append('text')
+        .attr('class', 'chart-label')
+        .attr('y', -5)
+        .text(d => {
+          if (this.gaugeConfig.percentageMode) {
+            const percentage = Math.round(100 * (d.y - min) / (max - min));
+            return `${percentage}%`;
+          }
+          if (d.aggConfig) {
+            return d.aggConfig.fieldFormatter('text')(d.y);
+          }
+          return d.y;
+        })
+        .attr('style', 'dominant-baseline: central;')
+        .style('text-anchor', 'middle')
+        .style('font-size', '2em')
+        .style('display', function () {
+          const textLength = this.getBBox().width;
+          const textTooLong = textLength > maxRadius;
+          if (textTooLong) {
+            hiddenLabels = true;
+          }
+          return textTooLong ? 'none' : 'initial';
+        });
 
       if (this.gaugeConfig.scale.show) {
         this.drawScale(svg, radius(1), angle);

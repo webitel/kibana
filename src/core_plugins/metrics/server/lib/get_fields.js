@@ -3,52 +3,27 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getParams = getParams;
-exports.handleResponse = handleResponse;
+exports.getFields = undefined;
+
+let getFields = exports.getFields = (() => {
+  var _ref = _asyncToGenerator(function* (req) {
+    const indexPatternsService = req.pre.indexPatternsService;
+
+    const index = req.query.index || '*';
+    const resp = yield indexPatternsService.getFieldsForWildcard({ pattern: index });
+    const fields = resp.filter(function (field) {
+      return field.aggregatable;
+    });
+    return (0, _lodash.uniq)(fields, function (field) {
+      return field.name;
+    });
+  });
+
+  return function getFields(_x) {
+    return _ref.apply(this, arguments);
+  };
+})();
 
 var _lodash = require('lodash');
 
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function getParams(req) {
-  const index = req.query.index || '*';
-  return {
-    index,
-    fields: ['*'],
-    ignoreUnavailable: false,
-    allowNoIndices: false,
-    includeDefaults: true
-  };
-}
-
-function handleResponse(resp) {
-  return _lodash2.default.reduce(resp, (acc, index) => {
-    _lodash2.default.each(index.mappings, type => {
-      _lodash2.default.each(type, (field, fullName) => {
-        const name = _lodash2.default.last(fullName.split(/\./));
-        const enabled = _lodash2.default.get(field, `mapping.${name}.enabled`, true);
-        const fieldType = _lodash2.default.get(field, `mapping.${name}.type`);
-        if (enabled && fieldType) {
-          acc.push({
-            name: _lodash2.default.get(field, 'full_name', fullName),
-            type: fieldType
-          });
-        }
-      });
-    });
-    return (0, _lodash2.default)(acc).sortBy('name').uniq(row => row.name).value();
-  }, []);
-}
-
-function getFields(req) {
-  var _req$server$plugins$e = req.server.plugins.elasticsearch.getCluster('data');
-
-  const callWithRequest = _req$server$plugins$e.callWithRequest;
-
-  const params = getParams(req);
-  return callWithRequest(req, 'indices.getFieldMapping', params).then(handleResponse);
-}
-
-exports.default = getFields;
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }

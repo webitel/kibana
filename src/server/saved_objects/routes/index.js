@@ -4,6 +4,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _bulk_get = require('./bulk_get');
+
+Object.defineProperty(exports, 'createBulkGetRoute', {
+  enumerable: true,
+  get: function get() {
+    return _bulk_get.createBulkGetRoute;
+  }
+});
+
 var _create = require('./create');
 
 Object.defineProperty(exports, 'createCreateRoute', {
@@ -31,12 +40,12 @@ Object.defineProperty(exports, 'createFindRoute', {
   }
 });
 
-var _read = require('./read');
+var _get = require('./get');
 
-Object.defineProperty(exports, 'createReadRoute', {
+Object.defineProperty(exports, 'createGetRoute', {
   enumerable: true,
   get: function get() {
-    return _read.createReadRoute;
+    return _get.createGetRoute;
   }
 });
 

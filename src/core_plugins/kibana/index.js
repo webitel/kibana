@@ -16,10 +16,6 @@ var _search = require('./server/routes/api/search');
 
 var _search2 = _interopRequireDefault(_search);
 
-var _settings = require('./server/routes/api/settings');
-
-var _settings2 = _interopRequireDefault(_settings);
-
 var _import = require('./server/routes/api/import');
 
 var _export = require('./server/routes/api/export');
@@ -37,6 +33,8 @@ var systemApi = _interopRequireWildcard(_system_api);
 var _mappings = require('./mappings.json');
 
 var _mappings2 = _interopRequireDefault(_mappings);
+
+var _ui_setting_defaults = require('./ui_setting_defaults');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -150,7 +148,9 @@ module.exports = function (kibana) {
       },
 
       translations: [(0, _path.resolve)(__dirname, './translations/en.json')],
-      mappings: _mappings2.default
+
+      mappings: _mappings2.default,
+      uiSettingDefaults: (0, _ui_setting_defaults.getUiSettingDefaults)()
     },
 
     preInit: (() => {
@@ -178,7 +178,6 @@ module.exports = function (kibana) {
       (0, _manage_uuid2.default)(server);
       // routes
       (0, _search2.default)(server);
-      (0, _settings2.default)(server);
       (0, _scripts2.default)(server);
       (0, _import.importApi)(server);
       (0, _export.exportApi)(server);

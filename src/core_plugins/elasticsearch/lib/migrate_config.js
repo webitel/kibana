@@ -1,6 +1,8 @@
 'use strict';
 
-var _lodash = require('lodash');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _upgrade_config = require('./upgrade_config');
 
@@ -8,26 +10,31 @@ var _upgrade_config2 = _interopRequireDefault(_upgrade_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-module.exports = function (server, { mappings }) {
-  const config = server.config();
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-  var _server$plugins$elast = server.plugins.elasticsearch.getCluster('admin');
+exports.default = (() => {
+  var _ref = _asyncToGenerator(function* (server) {
+    const savedObjectsClient = server.savedObjectsClientFactory({
+      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+    });
 
-  const callWithInternalUser = _server$plugins$elast.callWithInternalUser;
+    var _ref2 = yield savedObjectsClient.find({
+      type: 'config',
+      page: 1,
+      perPage: 1000,
+      sortField: 'buildNum',
+      sortOrder: 'desc'
+    });
 
-  const options = {
-    index: config.get('kibana.index'),
-    type: 'config',
-    body: {
-      size: 1000,
-      sort: [{
-        buildNum: {
-          order: 'desc',
-          unmapped_type: (0, _lodash.get)(mappings, 'config.properties.buildNum.type') || 'keyword'
-        }
-      }]
-    }
+    const configSavedObjects = _ref2.saved_objects;
+
+
+    return yield (0, _upgrade_config2.default)(server, savedObjectsClient)(configSavedObjects);
+  });
+
+  return function (_x) {
+    return _ref.apply(this, arguments);
   };
+})();
 
-  return callWithInternalUser('search', options).then((0, _upgrade_config2.default)(server));
-};
+module.exports = exports['default'];

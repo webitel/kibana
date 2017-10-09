@@ -31,7 +31,8 @@ function importApi(server) {
           force: _joi2.default.boolean().default(false),
           exclude: [_joi2.default.string(), _joi2.default.array().items(_joi2.default.string())]
         })
-      }
+      },
+      tags: ['api']
     },
 
     handler: (req, reply) => {

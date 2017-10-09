@@ -1,5 +1,7 @@
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _url = require('url');
 
 var _path = require('path');
@@ -110,12 +112,17 @@ module.exports = (() => {
     server.ext('onPreResponse', function (req, reply) {
       const response = req.response;
 
+      const customHeaders = _extends({}, config.get('server.customResponseHeaders'), {
+        'kbn-name': kbnServer.name,
+        'kbn-version': kbnServer.version
+      });
+
       if (response.isBoom) {
-        response.output.headers['kbn-name'] = kbnServer.name;
-        response.output.headers['kbn-version'] = kbnServer.version;
+        response.output.headers = _extends({}, response.output.headers, customHeaders);
       } else {
-        response.header('kbn-name', kbnServer.name);
-        response.header('kbn-version', kbnServer.version);
+        Object.keys(customHeaders).forEach(name => {
+          response.header(name, customHeaders[name]);
+        });
       }
 
       return reply.continue();
@@ -157,8 +164,8 @@ module.exports = (() => {
             const url = yield shortUrlLookup.getUrl(request.params.urlId, request);
             (0, _short_url_assert_valid.shortUrlAssertValid)(url);
 
-            const uiSettings = server.uiSettings();
-            const stateStoreInSessionStorage = yield uiSettings.get(request, 'state:storeInSessionStorage');
+            const uiSettings = request.getUiSettingsService();
+            const stateStoreInSessionStorage = yield uiSettings.get('state:storeInSessionStorage');
             if (!stateStoreInSessionStorage) {
               reply().redirect(config.get('server.basePath') + url);
               return;

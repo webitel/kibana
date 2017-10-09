@@ -31,8 +31,11 @@ let collectIndexPatterns = exports.collectIndexPatterns = (() => {
 
     if (docs.length === 0) return [];
 
-    const response = yield savedObjectsClient.bulkGet(docs);
-    return response;
+    var _ref2 = yield savedObjectsClient.bulkGet(docs);
+
+    const savedObjects = _ref2.saved_objects;
+
+    return savedObjects;
   });
 
   return function collectIndexPatterns(_x, _x2) {

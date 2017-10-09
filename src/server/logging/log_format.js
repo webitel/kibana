@@ -12,7 +12,7 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _numeral = require('@spalger/numeral');
+var _numeral = require('@elastic/numeral');
 
 var _numeral2 = _interopRequireDefault(_numeral);
 

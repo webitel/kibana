@@ -18,15 +18,18 @@ let collectPanels = exports.collectPanels = (() => {
 
     if (panels.length === 0) return [].concat([dashboard]);
 
-    const docs = yield savedObjectsClient.bulkGet(panels);
+    var _ref2 = yield savedObjectsClient.bulkGet(panels);
 
-    var _ref2 = yield Promise.all([(0, _collect_index_patterns.collectIndexPatterns)(savedObjectsClient, docs), (0, _collect_search_sources.collectSearchSources)(savedObjectsClient, docs)]),
-        _ref3 = _slicedToArray(_ref2, 2);
+    const savedObjects = _ref2.saved_objects;
 
-    const indexPatterns = _ref3[0],
-          searchSources = _ref3[1];
+    var _ref3 = yield Promise.all([(0, _collect_index_patterns.collectIndexPatterns)(savedObjectsClient, savedObjects), (0, _collect_search_sources.collectSearchSources)(savedObjectsClient, savedObjects)]),
+        _ref4 = _slicedToArray(_ref3, 2);
 
-    return docs.concat(indexPatterns).concat(searchSources).concat([dashboard]);
+    const indexPatterns = _ref4[0],
+          searchSources = _ref4[1];
+
+
+    return savedObjects.concat(indexPatterns).concat(searchSources).concat([dashboard]);
   });
 
   return function collectPanels(_x, _x2) {

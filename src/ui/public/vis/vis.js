@@ -13,6 +13,7 @@ import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';
+import { updateVisualizationConfig } from './vis_update';
 
 export function VisProvider(Notifier, Private) {
   const aggTypes = Private(AggTypesIndexProvider);
@@ -98,6 +99,9 @@ export function VisProvider(Notifier, Private) {
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.params.defaults || {})
     );
+    if (!this.params.type) this.params.type = this.type.name;
+
+    updateVisualizationConfig(state.params, this.params);
 
     this.aggs = new AggConfigs(this, state.aggs);
   };

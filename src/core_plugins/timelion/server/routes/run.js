@@ -19,7 +19,10 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
-  reply({ title: e.toString(), message: e.toString(), stack: e.stack }).code(400);
+  reply({
+    title: e.toString(),
+    message: e.toString()
+  }).code(500);
 }
 
 module.exports = server => {
@@ -29,7 +32,7 @@ module.exports = server => {
     handler: (() => {
       var _ref = _asyncToGenerator(function* (request, reply) {
         try {
-          const uiSettings = yield server.uiSettings().getAll(request);
+          const uiSettings = yield request.getUiSettingsService().getAll();
 
           const tlConfig = require('../handlers/lib/tl_config.js')({
             server,
@@ -53,6 +56,7 @@ module.exports = server => {
             stats: chainRunner.getStats()
           });
         } catch (err) {
+          server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
           // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
           if (err.isBoom) {
             reply(err);

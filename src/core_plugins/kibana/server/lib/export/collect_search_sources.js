@@ -24,10 +24,13 @@ let collectSearchSources = exports.collectSearchSources = (() => {
 
     if (docs.length === 0) return [];
 
-    const savedSearches = yield savedObjectsClient.bulkGet(docs);
-    const indexPatterns = yield (0, _collect_index_patterns.collectIndexPatterns)(savedObjectsClient, savedSearches);
+    var _ref2 = yield savedObjectsClient.bulkGet(docs);
 
-    return savedSearches.concat(indexPatterns);
+    const savedObjects = _ref2.saved_objects;
+
+    const indexPatterns = yield (0, _collect_index_patterns.collectIndexPatterns)(savedObjectsClient, savedObjects);
+
+    return savedObjects.concat(indexPatterns);
   });
 
   return function collectSearchSources(_x, _x2) {

@@ -8,6 +8,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 exports.readFieldCapsResponse = readFieldCapsResponse;
 
+var _lodash = require('lodash');
+
 var _utils = require('../../../../../utils');
 
 var _should_read_field_from_doc_values = require('./should_read_field_from_doc_values');
@@ -74,12 +76,24 @@ function readFieldCapsResponse(fieldCapsResponse) {
     const capsByType = capsByNameThenType[fieldName];
     const types = Object.keys(capsByType);
 
-    if (types.length > 1) {
+    // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
+    const isSearchable = types.some(type => {
+      return !!capsByType[type].searchable || !!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0;
+    });
+
+    const isAggregatable = types.some(type => {
+      return !!capsByType[type].aggregatable || !!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0;
+    });
+
+    // If there are multiple types but they all resolve to the same kibana type
+    // ignore the conflict and carry on (my wayward son)
+    const uniqueKibanaTypes = (0, _lodash.uniq)(types.map(_utils.castEsToKbnFieldTypeName));
+    if (uniqueKibanaTypes.length > 1) {
       return {
         name: fieldName,
         type: 'conflict',
-        searchable: false,
-        aggregatable: false,
+        searchable: isSearchable,
+        aggregatable: isAggregatable,
         readFromDocValues: false,
         conflictDescriptions: types.reduce((acc, esType) => _extends({}, acc, {
           [esType]: capsByType[esType].indices
@@ -88,13 +102,12 @@ function readFieldCapsResponse(fieldCapsResponse) {
     }
 
     const esType = types[0];
-    const caps = capsByType[esType];
     return {
       name: fieldName,
       type: (0, _utils.castEsToKbnFieldTypeName)(esType),
-      searchable: caps.searchable,
-      aggregatable: caps.aggregatable,
-      readFromDocValues: (0, _should_read_field_from_doc_values.shouldReadFieldFromDocValues)(caps.aggregatable, esType)
+      searchable: isSearchable,
+      aggregatable: isAggregatable,
+      readFromDocValues: (0, _should_read_field_from_doc_values.shouldReadFieldFromDocValues)(isAggregatable, esType)
     };
   });
 }

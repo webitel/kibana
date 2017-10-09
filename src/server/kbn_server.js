@@ -113,9 +113,6 @@ module.exports = class KbnServer {
     // setup saved object routes
     _saved_objects.savedObjectsMixin,
 
-    // setup server.uiSettings
-    _ui.uiSettingsMixin,
-
     // ensure that all bundles are built, or that the
     // lazy bundle server is running
     _optimize2.default,

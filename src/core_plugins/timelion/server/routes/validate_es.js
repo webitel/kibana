@@ -5,7 +5,7 @@ module.exports = function (server) {
     method: 'GET',
     path: '/api/timelion/validate/es',
     handler: function handler(request, reply) {
-      return server.uiSettings().getAll(request).then(uiSettings => {
+      return request.getUiSettingsService().getAll().then(uiSettings => {
         var _server$plugins$elast = server.plugins.elasticsearch.getCluster('data');
 
         const callWithRequest = _server$plugins$elast.callWithRequest;

@@ -9,10 +9,14 @@ import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter'
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'ui/vis_maps/lib/service_settings';
 
-
 const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
+
+  const DEFAULT_ZOOM_SETTINGS = {
+    zoom: 2,
+    mapCenter: [0, 0]
+  };
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
@@ -54,7 +58,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         return;
       }
 
-      updateChoroplethLayer($scope.vis.params.selectedLayer.url);
+      updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
 
@@ -74,7 +78,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         return;
       }
 
-      updateChoroplethLayer(visParams.selectedLayer.url);
+      updateChoroplethLayer(visParams.selectedLayer.url, visParams.selectedLayer.attribution);
       choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
       setTooltipFormatter();
@@ -90,10 +94,19 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   async function makeKibanaMap() {
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
-    kibanaMap = new KibanaMap($element[0], minMaxZoom);
-    const url = tmsSettings.getUrl();
-    const options = tmsSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
+
+    const options = { ...minMaxZoom };
+    const uiState = $scope.vis.getUiState();
+    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+    const centerFromUIState = uiState.get('mapCenter');
+    options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : DEFAULT_ZOOM_SETTINGS.zoom;
+    options.center = centerFromUIState ? centerFromUIState : DEFAULT_ZOOM_SETTINGS.mapCenter;
+    kibanaMap = new KibanaMap($element[0], options);
+
+
+    const tmsUrl = tmsSettings.getUrl();
+    const tmsOptions = tmsSettings.getTMSOptions();
+    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
@@ -109,7 +122,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     }
   }
 
-  function updateChoroplethLayer(url) {
+  function updateChoroplethLayer(url, attribution) {
 
     if (choroplethLayer && choroplethLayer.equalsGeoJsonUrl(url)) {//no need to recreate the layer
       return;
@@ -118,7 +131,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
     const previousMetrics = choroplethLayer ? choroplethLayer.getMetrics() : null;
     const previousMetricsAgg = choroplethLayer ? choroplethLayer.getMetricsAgg() : null;
-    choroplethLayer = new ChoroplethLayer(url);
+    choroplethLayer = new ChoroplethLayer(url, attribution);
     if (previousMetrics && previousMetricsAgg) {
       choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
     }

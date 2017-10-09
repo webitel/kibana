@@ -5,10 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = dateHistogram;
 
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _get_bucket_size = require('../../helpers/get_bucket_size');
 
 var _get_bucket_size2 = _interopRequireDefault(_get_bucket_size);
@@ -21,6 +17,8 @@ var _get_interval_and_timefield = require('../../get_interval_and_timefield');
 
 var _get_interval_and_timefield2 = _interopRequireDefault(_get_interval_and_timefield);
 
+var _lodash = require('lodash');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function dateHistogram(req, panel, series) {
@@ -32,21 +30,21 @@ function dateHistogram(req, panel, series) {
 
     var _getBucketSize = (0, _get_bucket_size2.default)(req, interval);
 
-    const bucketSize = _getBucketSize.bucketSize,
-          intervalString = _getBucketSize.intervalString;
+    const intervalString = _getBucketSize.intervalString;
 
     var _offsetTime = (0, _offset_time2.default)(req, series.offset_time);
 
     const from = _offsetTime.from,
           to = _offsetTime.to;
 
-    _lodash2.default.set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
+
+    (0, _lodash.set)(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
       field: timeField,
       interval: intervalString,
       min_doc_count: 0,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf() - bucketSize * 1000
+        max: to.valueOf()
       }
     });
     return next(doc);

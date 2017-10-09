@@ -10,14 +10,7 @@ let exportDashboards = exports.exportDashboards = (() => {
     const ids = _lodash2.default.flatten([req.query.dashboard]);
     const config = req.server.config();
 
-    var _req$server$plugins$e = req.server.plugins.elasticsearch.getCluster('admin');
-
-    const callWithRequest = _req$server$plugins$e.callWithRequest;
-
-    const callAdminCluster = function callAdminCluster(...args) {
-      return callWithRequest(req, ...args);
-    };
-    const savedObjectsClient = new _saved_objects.SavedObjectsClient(config.get('kibana.index'), callAdminCluster);
+    const savedObjectsClient = req.getSavedObjectsClient();
 
     const objects = yield (0, _collect_dashboards.collectDashboards)(savedObjectsClient, ids);
     return {
@@ -36,8 +29,6 @@ var _lodash = require('lodash');
 var _lodash2 = _interopRequireDefault(_lodash);
 
 var _collect_dashboards = require('./collect_dashboards');
-
-var _saved_objects = require('../../../../../server/saved_objects');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
