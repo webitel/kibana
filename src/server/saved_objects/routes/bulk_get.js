@@ -25,8 +25,11 @@ const createBulkGetRoute = exports.createBulkGetRoute = prereqs => ({
     handler(request, reply) {
       const savedObjectsClient = request.pre.savedObjectsClient;
 
+      /*WEBITEL*/
+      if (!request.auth.credentials)
+          return reply(new Error('Session unauthorized'));
 
-      reply(savedObjectsClient.bulkGet(request.payload));
+      reply(savedObjectsClient.bulkGet(request.payload, request.auth.credentials.domain));
     }
   }
 });

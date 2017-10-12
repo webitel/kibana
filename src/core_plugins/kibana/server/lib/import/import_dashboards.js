@@ -18,7 +18,11 @@ let importDashboards = exports.importDashboards = (() => {
       return !exclude.includes(item.type);
     });
 
-    const objects = yield savedObjectsClient.bulkCreate(docs, { overwrite });
+    /*WEBITEL*/
+    if (!req.auth.credentials)
+        return reply(new Error('Session unauthorized'));
+
+    const objects = yield savedObjectsClient.bulkCreate(docs, { overwrite }, req.auth.credentials.domain);
     return { objects };
   });
 

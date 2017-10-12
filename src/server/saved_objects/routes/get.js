@@ -28,8 +28,11 @@ const createGetRoute = exports.createGetRoute = prereqs => ({
       const type = _request$params.type,
             id = _request$params.id;
 
+      /*WEBITEL*/
+      if (!request.auth.credentials)
+          return reply(new Error('Session unauthorized'));
 
-      reply(savedObjectsClient.get(type, id));
+      reply(savedObjectsClient.get(type, id, request.auth.credentials.domain));
     }
   }
 });

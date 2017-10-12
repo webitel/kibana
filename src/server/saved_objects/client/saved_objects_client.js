@@ -46,7 +46,9 @@ class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { id, type, version, attributes }
   */
-  create(type, attributes = {}, options = {}) {
+
+  /*WEBITEL*/
+  create(type, attributes = {}, options = {}, domainName) {
     var _this = this;
 
     return _asyncToGenerator(function* () {
@@ -63,7 +65,7 @@ class SavedObjectsClient {
           type,
           [type]: attributes
         }
-      });
+      }, domainName);
 
       return (0, _lib.normalizeEsDoc)(response, { type, attributes });
     })();
@@ -128,14 +130,16 @@ class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  delete(type, id) {
+
+  /*WEBITEL*/
+  delete(type, id, domainName) {
     var _this3 = this;
 
     return _asyncToGenerator(function* () {
       const response = yield _this3._withKibanaIndex('deleteByQuery', {
         body: (0, _lib.createIdQuery)({ type, id }),
         refresh: 'wait_for'
-      });
+      }, domainName);
 
       if ((0, _lodash.get)(response, 'deleted') === 0) {
         throw _lib.errors.decorateNotFoundError(_boom2.default.notFound());
@@ -156,7 +160,8 @@ class SavedObjectsClient {
    * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  find(options = {}) {
+  /*WEBITEL*/
+  find(options = {}, domainName) {
     var _this4 = this;
 
     return _asyncToGenerator(function* () {
@@ -179,7 +184,7 @@ class SavedObjectsClient {
         body: (0, _lib.createFindQuery)(_this4._mappings, { search, searchFields, type, sortField, sortOrder })
       };
 
-      const response = yield _this4._withKibanaIndex('search', esOptions);
+      const response = yield _this4._withKibanaIndex('search', esOptions, domainName);
 
       return {
         saved_objects: (0, _lodash.get)(response, 'hits.hits', []).map(function (hit) {
@@ -205,8 +210,11 @@ class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  bulkGet(objects = []) {
+
+  /*WEBITEL*/
+  bulkGet(objects = [], domainName) {
     var _this5 = this;
+
 
     return _asyncToGenerator(function* () {
       if (objects.length === 0) {
@@ -217,7 +225,7 @@ class SavedObjectsClient {
         return [...acc, {}, (0, _lib.createIdQuery)({ type, id })];
       }, []);
 
-      const response = yield _this5._withKibanaIndex('msearch', { body: docs });
+      const response = yield _this5._withKibanaIndex('msearch', { body: docs }, domainName);
       const responses = (0, _lodash.get)(response, 'responses', []);
 
       return {
@@ -248,6 +256,7 @@ class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   get(type, id) {
+    console.log(type, id)
     var _this6 = this;
 
     return _asyncToGenerator(function* () {
@@ -276,7 +285,9 @@ class SavedObjectsClient {
    * @property {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  update(type, id, attributes, options = {}) {
+
+  /*WEBITEL*/
+  update(type, id, attributes, options = {}, domainName) {
     var _this7 = this;
 
     return _asyncToGenerator(function* () {
@@ -296,38 +307,40 @@ class SavedObjectsClient {
             [type]: attributes
           }
         }
-      });
+      }, domainName);
 
       return (0, _lib.normalizeEsDoc)(response, { id, type, attributes });
     })();
   }
 
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
+  /*WEBITEL*/
+  _withKibanaIndexAndMappingFallback(method, params, fallbackParams, domainName) {
     const fallbacks = {
       'create': ['type_missing_exception'],
       'index': ['type_missing_exception'],
       'update': ['document_missing_exception']
     };
 
-    return this._withKibanaIndex(method, params).catch(err => {
+    return this._withKibanaIndex(method, params, domainName).catch(err => {
       const fallbackWhen = (0, _lodash.get)(fallbacks, method, []);
       const type = (0, _lodash.get)(err, 'body.error.type');
 
       if (type && fallbackWhen.includes(type)) {
-        return this._withKibanaIndex(method, _extends({}, params, fallbackParams));
+        return this._withKibanaIndex(method, _extends({}, params, fallbackParams), domainName);
       }
 
       throw err;
     });
   }
 
-  _withKibanaIndex(method, params) {
+  /*WEBITEL*/
+  _withKibanaIndex(method, params, domainName) {
     var _this8 = this;
 
     return _asyncToGenerator(function* () {
       try {
         return yield _this8._callAdminCluster(method, _extends({}, params, {
-          index: _this8._kibanaIndex
+          index: domainName ? _this8._kibanaIndex + '-' + domainName : _this8._kibanaIndex
         }));
       } catch (err) {
         throw (0, _lib.decorateEsError)(err);

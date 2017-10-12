@@ -38,7 +38,11 @@ const createUpdateRoute = exports.createUpdateRoute = prereqs => {
 
         const options = { version };
 
-        reply(savedObjectsClient.update(type, id, attributes, options));
+        /*WEBITEL*/
+        if (!request.auth.credentials)
+            return reply(new Error('Session unauthorized'));
+
+        reply(savedObjectsClient.update(type, id, attributes, options, request.auth.credentials.domain));
       }
     }
   };

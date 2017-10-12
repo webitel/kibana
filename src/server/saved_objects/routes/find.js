@@ -38,7 +38,12 @@ const createFindRoute = exports.createFindRoute = prereqs => ({
         options.type = request.params.type;
       }
 
-      reply(request.pre.savedObjectsClient.find(options));
+      /*WEBITEL*/
+      if (!request.auth.credentials)
+        return reply(new Error('Session unauthorized'));
+
+      reply(request.pre.savedObjectsClient.find(options, request.auth.credentials.domain));
+      /*WEBITEL*/
     }
   }
 });

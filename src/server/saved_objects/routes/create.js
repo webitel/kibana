@@ -38,7 +38,11 @@ const createCreateRoute = exports.createCreateRoute = prereqs => {
 
         const options = { id, overwrite };
 
-        reply(savedObjectsClient.create(type, request.payload.attributes, options));
+        /*WEBITEL*/
+        if (!request.auth.credentials)
+            return reply(new Error('Session unauthorized'));
+
+        reply(savedObjectsClient.create(type, request.payload.attributes, options, request.auth.credentials.domain));
       }
     }
   };
