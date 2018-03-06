@@ -1,4 +1,4 @@
-FROM node:6.11.1-slim
+FROM node:6.12.2-slim
 MAINTAINER Vitaly Kovalyshyn "v.kovalyshyn@webitel.com"
 
 ENV VERSION
