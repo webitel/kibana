@@ -1,6 +1,7 @@
 .idea
-optimize/bundles
 optimize/.babelcache.json
+optimize/bundles/*
+!optimize/bundles/vendors.style.css
 node_modules
 node
 plugins/network_vis
