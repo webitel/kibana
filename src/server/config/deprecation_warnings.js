@@ -1,15 +1,7 @@
-'use strict';
+import { transformDeprecations } from './transform_deprecations';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (kbnServer, server) {
-  (0, _transform_deprecations.transformDeprecations)(kbnServer.settings, message => {
+export default function (kbnServer, server) {
+  transformDeprecations(kbnServer.settings, (message) => {
     server.log(['warning', 'config', 'deprecation'], message);
   });
-};
-
-var _transform_deprecations = require('./transform_deprecations');
-
-module.exports = exports['default'];
+}

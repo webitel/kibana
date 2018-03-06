@@ -1,14 +1,23 @@
 /* eslint max-len:0 */
-import React, { Component, PropTypes } from 'react';
+/* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+// Markdown builder is not yet properly accessible
+
+import PropTypes from 'prop-types';
+
+import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import AceEditor from 'react-ace';
+import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 
-class MarkdownEditor extends Component {
+import {
+  EuiText,
+  EuiCodeBlock,
+} from '@elastic/eui';
 
+class MarkdownEditor extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -30,9 +39,9 @@ class MarkdownEditor extends Component {
   }
 
   render() {
-    const { model, visData } = this.props;
+    const { model, visData, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model);
+    const variables = convertSeriesToVars(series, model, dateFormat);
     const rows = [];
     const rawFormatter = tickFormatter('0.[0000]');
 
@@ -43,12 +52,10 @@ class MarkdownEditor extends Component {
       rows.push(
         <tr key={key}>
           <td>
-            <a onClick={this.handleVarClick(snippet)}>
-              { snippet }
-            </a>
+            <a onClick={this.handleVarClick(snippet)}>{snippet}</a>
           </td>
           <td>
-            <code>"{ value }"</code>
+            <code>&ldquo;{value}&rdquo;</code>
           </td>
         </tr>
       );
@@ -62,12 +69,12 @@ class MarkdownEditor extends Component {
       rows.push(
         <tr key={key}>
           <td>
-            <a onClick={this.handleVarClick(snippet)}>
-              { `{{ ${key} }}` }
-            </a>
+            <a onClick={this.handleVarClick(snippet)}>{`{{ ${key} }}`}</a>
           </td>
           <td>
-            <code>[ [ "{date}", "{value}" ], ... ]</code>
+            <code>
+              [ [ &ldquo;{date}&rdquo;, &ldquo;{value}&rdquo; ], ... ]
+            </code>
           </td>
         </tr>
       );
@@ -75,7 +82,7 @@ class MarkdownEditor extends Component {
 
     function walk(obj, path = []) {
       for (const name in obj) {
-        if (_.isArray(obj[name])) {
+        if (Array.isArray(obj[name])) {
           createArrayRow(path.concat(name).join('.'));
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));
@@ -87,11 +94,10 @@ class MarkdownEditor extends Component {
 
     walk(variables);
 
-
     return (
       <div className="vis_editor__markdown">
         <div className="vis_editor__markdown-editor">
-          <AceEditor
+          <KuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
             theme="github"
@@ -100,40 +106,57 @@ class MarkdownEditor extends Component {
             name={`ace-${model.id}`}
             setOptions={{ wrap: true, fontSize: '14px' }}
             value={model.markdown}
-            onChange={this.handleChange}/>
+            onChange={this.handleChange}
+          />
         </div>
         <div className="vis_editor__markdown-variables">
-          <div>The following variables can be used in the Markdown by using the Handlebar (mustache) syntax. <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">Click here for documentation</a> on the available expressions.</div>
+          <EuiText>
+            The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
+            <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+              Click here for documentation
+            </a>{' '}
+            on the available expressions.
+          </EuiText>
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Value</th>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
               </tr>
             </thead>
-            <tbody>
-              {rows}
-            </tbody>
+            <tbody>{rows}</tbody>
           </table>
-          <div className="vis_editor__markdown-code-desc">There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for creating lists with data from a group by...</div>
-          <pre>
-            <code>{`# All servers:
+          {rows.length === 0 && (
+            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+          )}
 
-{{#each _all}}
-- {{ label }} {{ last.formatted }}
-{{/each}}`}</code>
-          </pre>
+          <div className="vis_editor__markdown-code-desc">
+            <EuiText>
+              <p>
+                There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
+                creating lists with data from a group by...
+              </p>
+            </EuiText>
+          </div>
+
+          <EuiCodeBlock>
+            {`# All servers:
+
+            {{#each _all}}
+            - {{ label }} {{ last.formatted }}
+            {{/each}}`}
+          </EuiCodeBlock>
         </div>
       </div>
     );
   }
-
 }
 
 MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownEditor;

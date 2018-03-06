@@ -1,5 +1,3 @@
-"use strict";
-
 let _ = require("lodash");
 
 function addSimpleCat(endpoint, api, params, patterns) {
@@ -7,7 +5,8 @@ function addSimpleCat(endpoint, api, params, patterns) {
   _.each(params || [], function (p) {
     if (_.isString(p)) {
       url_params[p] = "__flag__";
-    } else {
+    }
+    else {
       var k = Object.keys(p)[0];
       url_params[k] = p[k];
     }
@@ -22,7 +21,9 @@ function addSimpleCat(endpoint, api, params, patterns) {
 function addNodeattrsCat(api) {
   api.addEndpointDescription('_cat/nodeattrs', {
     methods: ['GET'],
-    patterns: ["_cat/nodeattrs"],
+    patterns: [
+      "_cat/nodeattrs"
+    ],
     url_params: {
       help: "__flag__",
       v: "__flag__",
@@ -31,12 +32,18 @@ function addNodeattrsCat(api) {
   });
 }
 
-module.exports = function (api) {
+export default function (api) {
   addSimpleCat('_cat/aliases', api);
   addSimpleCat('_cat/allocation', api, null, ['_cat/allocation', '_cat/allocation/{nodes}']);
   addSimpleCat('_cat/count', api);
-  addSimpleCat('_cat/health', api, [{ "ts": ["false", "true"] }]);
-  addSimpleCat('_cat/indices', api, [{ h: [] }, "pri"], ['_cat/indices', '_cat/indices/{indices}']);
+  addSimpleCat('_cat/health', api, [
+    { "ts": ["false", "true"] }
+  ]);
+  addSimpleCat('_cat/indices', api, [
+      { h: [] },
+      "pri",
+    ],
+    ['_cat/indices', '_cat/indices/{indices}']);
   addSimpleCat('_cat/master', api);
   addSimpleCat('_cat/nodes', api);
   addSimpleCat('_cat/pending_tasks', api);
@@ -46,4 +53,4 @@ module.exports = function (api) {
   addSimpleCat('_cat/plugins', api);
   addSimpleCat('_cat/segments', api);
   addNodeattrsCat(api);
-};
+}

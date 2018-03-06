@@ -4,26 +4,26 @@
 
 "use strict";
 
-import main from './plugins/main';
+import { webitelMain } from './plugins/webitel_main';
 import security from './plugins/security';
 import accounts from './plugins/accounts';
-import calls from './plugins/calls';
 import agents from './plugins/agents';
+import calls from './plugins/calls';
 import members from './plugins/members';
 import exports from './plugins/exports';
 import recordings from './plugins/recordings';
-import cti from './plugins/cti';
 import reporting from './plugins/reporting';
+import cti from './plugins/cti';
 
 module.exports = kibana => [
-    main(kibana),
-    security(kibana),
-    accounts(kibana),
-    calls(kibana),
-    agents(kibana),
-    members(kibana),
-    exports(kibana),
-    recordings(kibana),
-    cti(kibana),
-    reporting(kibana)
+  webitelMain(kibana),
+  security(kibana),
+  accounts(kibana),
+  agents(kibana),
+  calls(kibana),
+  members(kibana),
+  exports(kibana),
+  recordings(kibana),
+  reporting(kibana),
+  cti(kibana),
 ];

@@ -1,20 +1,5 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isEsIndexNotFoundError = isEsIndexNotFoundError;
-exports.createNoMatchingIndicesError = createNoMatchingIndicesError;
-exports.isNoMatchingIndicesError = isNoMatchingIndicesError;
-exports.convertEsError = convertEsError;
-
-var _boom = require('boom');
-
-var _boom2 = _interopRequireDefault(_boom);
-
-var _lodash = require('lodash');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import Boom from 'boom';
+import { get } from 'lodash';
 
 const ERR_ES_INDEX_NOT_FOUND = 'index_not_found_exception';
 const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
@@ -25,8 +10,8 @@ const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
  *  @param  {Any}  err
  *  @return {Boolean}
  */
-function isEsIndexNotFoundError(err) {
-  return (0, _lodash.get)(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
+export function isEsIndexNotFoundError(err) {
+  return get(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
 }
 
 /**
@@ -35,8 +20,8 @@ function isEsIndexNotFoundError(err) {
  *  @param  {String} pattern the pattern which indexes were supposed to match
  *  @return {Boom}
  */
-function createNoMatchingIndicesError(pattern) {
-  const err = _boom2.default.notFound(`No indices match pattern "${pattern}"`);
+export function createNoMatchingIndicesError(pattern) {
+  const err = Boom.notFound(`No indices match pattern "${pattern}"`);
   err.output.payload.code = ERR_NO_MATCHING_INDICES;
   return err;
 }
@@ -47,8 +32,8 @@ function createNoMatchingIndicesError(pattern) {
  *  @param  {Any} err
  *  @return {Boolean}
  */
-function isNoMatchingIndicesError(err) {
-  return (0, _lodash.get)(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
+export function isNoMatchingIndicesError(err) {
+  return get(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
 }
 
 /**
@@ -57,12 +42,12 @@ function isNoMatchingIndicesError(err) {
  *  @param  {[type]} indices [description]
  *  @return {[type]}         [description]
  */
-function convertEsError(indices, error) {
+export function convertEsError(indices, error) {
   if (isEsIndexNotFoundError(error)) {
     return createNoMatchingIndicesError(indices);
   }
 
   const statusCode = error.statusCode;
   const message = error.body ? error.body.error : undefined;
-  return _boom2.default.wrap(error, statusCode, message);
+  return Boom.boomify(error, { statusCode, message });
 }

@@ -25,7 +25,12 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
        * @type {function} - an optional function. If supplied an `Add new X` button is shown
        * and this function is called when clicked.
        */
-      onAddNew: '='
+      onAddNew: '=',
+      /**
+       * @{type} boolean - set this to true, if you don't want the search box above the
+       * table to automatically gain focus once loaded
+       */
+      disableAutoFocus: '='
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
@@ -134,16 +139,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       //key handler for the filter text box
       self.filterKeyDown = function ($event) {
         switch (keyMap[$event.keyCode]) {
-          case 'tab':
-            if (self.hitCount === 0) return;
-
-            self.selector.index = 0;
-            self.selector.enabled = true;
-
-            selectTopHit();
-
-            $event.preventDefault();
-            break;
           case 'enter':
             if (self.hitCount !== 1) return;
 
@@ -267,15 +262,21 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         if (prevSearch === filter) return;
 
         prevSearch = filter;
+
+        const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
-        .then(function (hits) {
-          // ensure that we don't display old results
-          // as we can't really cancel requests
-          if (currentFilter === filter) {
-            self.hitCount = hits.total;
-            self.hits = _.sortBy(hits.hits, 'title');
-          }
-        });
+          .then(function (hits) {
+
+            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'lab'));
+            hits.total = hits.hits.length;
+
+            // ensure that we don't display old results
+            // as we can't really cancel requests
+            if (currentFilter === filter) {
+              self.hitCount = hits.total;
+              self.hits = _.sortBy(hits.hits, 'title');
+            }
+          });
       }
     }
   };

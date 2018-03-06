@@ -1,13 +1,13 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
-module.exports.AutocompleteComponent = function (name) {
+export function AutocompleteComponent(name) {
   this.name = name;
-};
+}
 
 /** called to get the possible suggestions for tokens, when this object is at the end of
  * the resolving chain (and thus can suggest possible continuation paths)
  */
-module.exports.AutocompleteComponent.prototype.getTerms = function () {
+AutocompleteComponent.prototype.getTerms = function () {
   return [];
 };
 
@@ -21,14 +21,14 @@ module.exports.AutocompleteComponent.prototype.getTerms = function () {
  priority: optional priority to solve collisions between multiple paths. Min value is used across entire chain
  }
  */
-module.exports.AutocompleteComponent.prototype.match = function () {
+AutocompleteComponent.prototype.match = function () {
   return {
     next: this.next
   };
 };
 
 function SharedComponent(name, parent) {
-  module.exports.AutocompleteComponent.call(this, name);
+  AutocompleteComponent.call(this, name);
   this._nextDict = {};
   if (parent) {
     parent.addComponent(this);
@@ -38,10 +38,8 @@ function SharedComponent(name, parent) {
 }
 
 SharedComponent.prototype = _.create(
-  module.exports.AutocompleteComponent.prototype,
+  AutocompleteComponent.prototype,
   { 'constructor': SharedComponent });
-
-module.exports.SharedComponent = SharedComponent;
 
 (function (cls) {
   /* return the first component with a given name */
@@ -61,7 +59,7 @@ module.exports.SharedComponent = SharedComponent;
 /** A component that suggests one of the give options, but accepts anything */
 function ListComponent(name, list, parent, multi_valued, allow_non_valid_values) {
   SharedComponent.call(this, name, parent);
-  this.listGenerator = _.isArray(list) ? function () {
+  this.listGenerator = Array.isArray(list) ? function () {
     return list
   } : list;
   this.multi_valued = _.isUndefined(multi_valued) ? true : multi_valued;
@@ -69,7 +67,6 @@ function ListComponent(name, list, parent, multi_valued, allow_non_valid_values)
 }
 
 ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ListComponent });
-module.exports.ListComponent = ListComponent;
 
 
 (function (cls) {
@@ -123,7 +120,7 @@ module.exports.ListComponent = ListComponent;
   };
 
   cls.match = function (token, context, editor) {
-    if (!_.isArray(token)) {
+    if (!Array.isArray(token)) {
       token = [token]
     }
     if (!this.allow_non_valid_values && !this.validateTokens(token, context, editor)) {
@@ -142,7 +139,6 @@ function SimpleParamComponent(name, parent) {
 }
 
 SimpleParamComponent.prototype = _.create(SharedComponent.prototype, { "constructor": SimpleParamComponent });
-module.exports.SimpleParamComponent = SimpleParamComponent;
 
 (function (cls) {
   cls.match = function (token, context, editor) {
@@ -163,7 +159,8 @@ function ConstantComponent(name, parent, options) {
 }
 
 ConstantComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ConstantComponent });
-module.exports.ConstantComponent = ConstantComponent;
+
+export { SharedComponent, ListComponent, SimpleParamComponent, ConstantComponent };
 
 (function (cls) {
   cls.getTerms = function () {
@@ -171,7 +168,7 @@ module.exports.ConstantComponent = ConstantComponent;
   };
 
   cls.addOption = function (options) {
-    if (!_.isArray(options)) {
+    if (!Array.isArray(options)) {
       options = [options];
     }
 
@@ -188,7 +185,7 @@ module.exports.ConstantComponent = ConstantComponent;
   }
 })(ConstantComponent.prototype);
 
-module.exports.wrapComponentWithDefaults = function (component, defaults) {
+export function wrapComponentWithDefaults(component, defaults) {
   function Wrapper() {
 
   }
@@ -214,7 +211,7 @@ module.exports.wrapComponentWithDefaults = function (component, defaults) {
     return result;
   };
   return new Wrapper();
-};
+}
 
 let tracer = function () {
   if (window.engine_trace) {
@@ -264,7 +261,7 @@ function walkTokenPath(tokenPath, walkingStates, context, editor) {
       if (result && !_.isEmpty(result)) {
         tracer("matched [" + token + "] with:", result);
         var next, extensionList;
-        if (result.next && !_.isArray(result.next)) {
+        if (result.next && !Array.isArray(result.next)) {
           next = [result.next];
         }
         else {
@@ -304,13 +301,13 @@ function walkTokenPath(tokenPath, walkingStates, context, editor) {
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
 }
 
-module.exports.resolvePathToComponents = function (tokenPath, context, editor, components) {
+export function resolvePathToComponents(tokenPath, context, editor, components) {
   var walkStates = walkTokenPath(tokenPath, [new WalkingState("ROOT", components, [])], context, editor);
   var result = [].concat.apply([], _.pluck(walkStates, 'components'));
   return result;
-};
+}
 
-module.exports.populateContext = function (tokenPath, context, editor, includeAutoComplete, components) {
+export function populateContext(tokenPath, context, editor, includeAutoComplete, components) {
 
   var walkStates = walkTokenPath(tokenPath, [new WalkingState("ROOT", components, [])], context, editor);
   if (includeAutoComplete) {
@@ -353,4 +350,4 @@ module.exports.populateContext = function (tokenPath, context, editor, includeAu
       _.assign(context, extension);
     });
   }
-};
+}

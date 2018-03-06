@@ -1,35 +1,23 @@
-'use strict';
+import _ from 'lodash';
+import buildTarget from '../../lib/build_target.js';
 
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _build_target = require('../../lib/build_target.js');
-
-var _build_target2 = _interopRequireDefault(_build_target);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function (setup) {
+export default function tlConfigFn(setup) {
   let targetSeries;
 
   let tlConfig = {
-    getTargetSeries: function getTargetSeries() {
-      return _lodash2.default.map(targetSeries, function (bucket) {
-        // eslint-disable-line no-use-before-define
+    getTargetSeries: function () {
+      return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
         return [bucket, null];
       });
     },
-    setTargetSeries: function setTargetSeries() {
-      targetSeries = (0, _build_target2.default)(this);
+    setTargetSeries: function () {
+      targetSeries = buildTarget(this);
     },
-    writeTargetSeries: function writeTargetSeries(series) {
-      targetSeries = _lodash2.default.map(series, function (p) {
-        return p[0];
-      });
+    writeTargetSeries: function (series) {
+      targetSeries = _.map(series, function (p) {return p[0];});
     }
   };
 
-  tlConfig = _lodash2.default.extend(tlConfig, setup);
+  tlConfig = _.extend(tlConfig, setup);
   return tlConfig;
-};
+}

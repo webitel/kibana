@@ -1,17 +1,10 @@
-'use strict';
+import { Minimatch } from 'minimatch';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.WildcardMatcher = undefined;
-
-var _minimatch = require('minimatch');
-
-class WildcardMatcher {
+export class WildcardMatcher {
   constructor(wildcardPattern, emptyVal) {
     this.emptyVal = emptyVal;
     this.pattern = String(wildcardPattern || '*');
-    this.matcher = new _minimatch.Minimatch(this.pattern, {
+    this.matcher = new Minimatch(this.pattern, {
       noglobstar: true,
       dot: true,
       nocase: true,
@@ -29,4 +22,3 @@ class WildcardMatcher {
     return this.matcher.match(candidate || '');
   }
 }
-exports.WildcardMatcher = WildcardMatcher;

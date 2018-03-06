@@ -1,22 +1,13 @@
-'use strict';
+import { resolve } from 'path';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.buildDocsScript = buildDocsScript;
-exports.buildDocsArgs = buildDocsArgs;
-exports.defaultDocsRepoPath = defaultDocsRepoPath;
+const kibanaDir = resolve(__dirname, '..', '..');
 
-var _path = require('path');
-
-const kibanaDir = (0, _path.resolve)(__dirname, '..', '..');
-
-function buildDocsScript(cmd) {
-  return (0, _path.resolve)(process.cwd(), cmd.docrepo, 'build_docs.pl');
+export function buildDocsScript(cmd) {
+  return resolve(process.cwd(), cmd.docrepo, 'build_docs.pl');
 }
 
-function buildDocsArgs(cmd) {
-  const docsIndexFile = (0, _path.resolve)(kibanaDir, 'docs', 'index.asciidoc');
+export function buildDocsArgs(cmd) {
+  const docsIndexFile = resolve(kibanaDir, 'docs', 'index.asciidoc');
   let args = ['--doc', docsIndexFile, '--chunk=1'];
   if (cmd.open) {
     args = [...args, '--open'];
@@ -24,6 +15,6 @@ function buildDocsArgs(cmd) {
   return args;
 }
 
-function defaultDocsRepoPath() {
-  return (0, _path.resolve)(kibanaDir, '..', 'docs');
+export function defaultDocsRepoPath() {
+  return resolve(kibanaDir, '..', 'docs');
 }

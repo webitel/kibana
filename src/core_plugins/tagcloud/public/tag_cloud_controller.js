@@ -1,25 +1,21 @@
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
-module.controller('KbnTagCloudController', function ($scope, $element, Private, getAppState) {
+module.controller('KbnTagCloudController', function ($scope, $element) {
 
   const containerNode = $element[0];
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const maxTagCount = 200;
   let truncated = false;
+  let bucketAgg;
 
   const tagCloud = new TagCloud(containerNode);
   tagCloud.on('select', (event) => {
-    const appState = getAppState();
-    const clickHandler = filterBarClickHandler(appState);
-    const aggs = $scope.vis.aggs.getResponseAggs();
-    const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-    clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    if (!bucketAgg) return;
+    const filter = bucketAgg.createFilter(event);
+    $scope.vis.API.queryFilter.addFilters(filter);
   });
+
   tagCloud.on('renderComplete', () => {
 
     const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
@@ -28,46 +24,48 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     if (!$scope.vis.aggs[0] || !$scope.vis.aggs[1]) {
       incompleteMessage.style.display = 'none';
       truncatedMessage.style.display = 'none';
+      $scope.renderComplete();
       return;
     }
 
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
-    bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
-
-
+    bucketName.textContent = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
-
     const status = tagCloud.getStatus();
-
     if (TagCloud.STATUS.COMPLETE === status) {
       incompleteMessage.style.display = 'none';
     } else if (TagCloud.STATUS.INCOMPLETE === status) {
       incompleteMessage.style.display = 'block';
     }
-    $element.trigger('renderComplete');
+
+    $scope.renderComplete();
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('renderComplete', async function () {
 
-    if (!response) {
+    if ($scope.updateStatus.resize) {
+      tagCloud.resize();
+    }
+
+    if ($scope.updateStatus.params) {
+      tagCloud.setOptions($scope.vis.params);
+    }
+
+    if (!$scope.esResponse || !$scope.esResponse.tables.length) {
       tagCloud.setData([]);
       return;
     }
 
-    const tagsAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
-    if (!tagsAggId || !response.aggregations) {
-      tagCloud.setData([]);
-      return;
-    }
+    const data = $scope.esResponse.tables[0];
+    bucketAgg = data.columns[0].aggConfig;
 
-    const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
-    const buckets = response.aggregations[tagsAggId].buckets;
-
-    const tags = buckets.map((bucket) => {
+    const tags = data.rows.map(row => {
+      const [tag, count] = row;
       return {
-        text: bucket.key,
-        value: getValue(metricsAgg, bucket)
+        displayText: bucketAgg ? bucketAgg.fieldFormatter()(tag) : tag,
+        rawText: tag,
+        value: count
       };
     });
 
@@ -81,30 +79,5 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     tagCloud.setData(tags);
   });
-
-
-  $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
-
-  $scope.$watch(getContainerSize, _.debounce(() => {
-    tagCloud.resize();
-  }, 1000, { trailing: true }), true);
-
-
-  function getContainerSize() {
-    return { width: $element.width(), height: $element.height() };
-  }
-
-  function getValue(metricsAgg, bucket) {
-    let size = metricsAgg.getValue(bucket);
-    if (typeof size !== 'number' || isNaN(size)) {
-      try {
-        size = bucket[1].values[0].value;//lift out first value (e.g. median aggregations return as array)
-      } catch (e) {
-        size = 1;//punt
-      }
-    }
-    return size;
-  }
-
 
 });

@@ -1,36 +1,21 @@
-'use strict';
+import util from 'util';
+import url from 'url';
+import { get, noop, size, pick } from 'lodash';
+import { readFileSync } from 'fs';
+import Bluebird from 'bluebird';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.parseConfig = parseConfig;
+const readFile = (file) => readFileSync(file, 'utf8');
 
-var _util = require('util');
+export function parseConfig(serverConfig = {}) {
+  const config = {
+    keepAlive: true,
+    ...pick(serverConfig, [
+      'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
+      'requestTimeout', 'log', 'logQueries'
+    ])
+  };
 
-var _util2 = _interopRequireDefault(_util);
-
-var _url = require('url');
-
-var _url2 = _interopRequireDefault(_url);
-
-var _lodash = require('lodash');
-
-var _fs = require('fs');
-
-var _bluebird = require('bluebird');
-
-var _bluebird2 = _interopRequireDefault(_bluebird);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const readFile = file => (0, _fs.readFileSync)(file, 'utf8');
-
-function parseConfig(serverConfig = {}) {
-  const config = Object.assign({
-    keepAlive: true
-  }, (0, _lodash.pick)(serverConfig, ['plugins', 'apiVersion', 'keepAlive', 'pingTimeout', 'requestTimeout', 'log', 'logQueries']));
-
-  const uri = _url2.default.parse(serverConfig.url);
+  const uri = url.parse(serverConfig.url);
   config.host = {
     host: uri.hostname,
     port: uri.port,
@@ -42,13 +27,13 @@ function parseConfig(serverConfig = {}) {
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    config.host.auth = _util2.default.format('%s:%s', serverConfig.username, serverConfig.password);
+    config.host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
   }
 
   // SSL
   config.ssl = {};
 
-  const verificationMode = (0, _lodash.get)(serverConfig, 'ssl.verificationMode');
+  const verificationMode = get(serverConfig, 'ssl.verificationMode');
   switch (verificationMode) {
     case 'none':
       config.ssl.rejectUnauthorized = false;
@@ -57,7 +42,7 @@ function parseConfig(serverConfig = {}) {
       config.ssl.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      config.ssl.checkServerIdentity = _lodash.noop;
+      config.ssl.checkServerIdentity = noop;
       break;
     case 'full':
       config.ssl.rejectUnauthorized = true;
@@ -66,18 +51,18 @@ function parseConfig(serverConfig = {}) {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if ((0, _lodash.size)((0, _lodash.get)(serverConfig, 'ssl.certificateAuthorities'))) {
+  if (size(get(serverConfig, 'ssl.certificateAuthorities'))) {
     config.ssl.ca = serverConfig.ssl.certificateAuthorities.map(readFile);
   }
 
   // Add client certificate and key if required by elasticsearch
-  if ((0, _lodash.get)(serverConfig, 'ssl.certificate') && (0, _lodash.get)(serverConfig, 'ssl.key')) {
+  if (get(serverConfig, 'ssl.certificate') && get(serverConfig, 'ssl.key')) {
     config.ssl.cert = readFile(serverConfig.ssl.certificate);
     config.ssl.key = readFile(serverConfig.ssl.key);
     config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
   }
 
-  config.defer = () => _bluebird2.default.defer();
+  config.defer = () => Bluebird.defer();
 
   return config;
 }

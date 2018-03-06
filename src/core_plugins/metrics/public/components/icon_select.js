@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Select from 'react-select';
 
 class IconOption extends Component {
@@ -28,8 +29,13 @@ class IconOption extends Component {
   render() {
     const icon = this.props.option.value;
     const label = this.props.option.label;
+    // We can ignore that the <div> does not have keyboard handlers even though
+    // it has mouse handlers, since react-select still takes care, that this works
+    // well with keyboard.
+    /* eslint-disable jsx-a11y/no-static-element-interactions */
     return (
-      <div className={this.props.className}
+      <div
+        className={this.props.className}
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
@@ -41,11 +47,12 @@ class IconOption extends Component {
           <span
             className={`vis_editor__icon_select-option kuiIcon ${icon}`}
             aria-hidden="true"
-          ></span>
+          />
           { this.props.children }
         </span>
       </div>
     );
+    /* eslint-enable jsx-a11y/no-static-element-interactions */
   }
 
 }
@@ -71,7 +78,7 @@ function IconValue(props) {
         className="Select-value-label"
         aria-label={`${label} icon`}
       >
-        <span className={`vis_editor__icon_select-value kuiIcon ${icon}`}></span>
+        <span className={`vis_editor__icon_select-value kuiIcon ${icon}`} />
         { props.children }
       </span>
     </div>
@@ -87,12 +94,14 @@ IconValue.propTypes = {
 function IconSelect(props) {
   return (
     <Select
+      inputProps={{ id: props.id }}
       clearable={false}
       onChange={props.onChange}
       value={props.value}
       optionComponent={IconOption}
       valueComponent={IconValue}
-      options={props.icons} />
+      options={props.icons}
+    />
   );
 }
 
@@ -118,6 +127,7 @@ IconSelect.defaultProps = {
 
 IconSelect.propTypes = {
   icons: PropTypes.array,
+  id: PropTypes.string,
   onChange: PropTypes.func,
   value: PropTypes.string.isRequired
 };

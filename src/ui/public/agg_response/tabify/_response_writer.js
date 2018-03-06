@@ -75,7 +75,11 @@ export function TabbedAggResponseWriterProvider(Private) {
     if (group) {
       table.aggConfig = agg;
       table.key = key;
-      table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel();
+      table.title = (table.fieldFormatter()(key));
+      // aggs that don't implement makeLabel should not add to title
+      if (agg.makeLabel() !== agg.name) {
+        table.title += ': ' + agg.makeLabel();
+      }
     }
 
     // link the parent and child
@@ -190,7 +194,7 @@ export function TabbedAggResponseWriterProvider(Private) {
         newList.unshift(injected);
       }
 
-      const newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
+      const newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr), acr.filters);
       newList.unshift(newAcr);
 
       // and replace the acr in the row buffer if its there
@@ -211,9 +215,9 @@ export function TabbedAggResponseWriterProvider(Private) {
    * @param  {function} block - the function to run while this value is in the row
    * @return {any} - the value that was added
    */
-  TabbedAggResponseWriter.prototype.cell = function (agg, value, block) {
+  TabbedAggResponseWriter.prototype.cell = function (agg, value, block, filters) {
     if (this.asAggConfigResults) {
-      value = new AggConfigResult(agg, this.acrStack[0], value, value);
+      value = new AggConfigResult(agg, this.acrStack[0], value, value, filters);
     }
 
     const staskResult = this.asAggConfigResults && value.type === 'bucket';

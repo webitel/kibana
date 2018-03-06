@@ -37,6 +37,8 @@ export function GaugeChartProvider(Private) {
           const width = Math.floor(verticalSplit ? $(this).width() : containerWidth / data.series.length);
           const height = Math.floor((verticalSplit ? containerHeight / data.series.length : $(this).height()) - 25);
 
+          if (height < 0 || width < 0) return;
+
           div
             .style('text-align', 'center')
             .style('overflow-y', 'auto');
@@ -51,27 +53,10 @@ export function GaugeChartProvider(Private) {
 
             const gauges = self.gauge.drawGauge(g, series, width, height);
 
-            if (self.gaugeConfig.type === 'simple') {
-              const bbox = svg.node().firstChild.getBBox();
-              const finalWidth = bbox.width + containerMargin * 2;
-              const finalHeight = bbox.height + containerMargin * 2;
-              svg
-                .attr('width', () => {
-                  return finalWidth;
-                })
-                .attr('height', () => {
-                  return finalHeight;
-                });
-
-              const transformX = finalWidth / 2;
-              const transformY = finalHeight / 2;
-              g.attr('transform', `translate(${transformX}, ${transformY})`);
-            } else {
-              svg.attr('height', height);
-              const transformX = width / 2;
-              const transformY = height / 2;
-              g.attr('transform', `translate(${transformX}, ${transformY})`);
-            }
+            svg.attr('height', height);
+            const transformX = width / 2;
+            const transformY = self.gaugeConfig.gaugeType === 'Arc' ? height / (2 * 0.75) : height / 2;
+            g.attr('transform', `translate(${transformX}, ${transformY})`);
 
             self.addEvents(gauges);
           });

@@ -1,12 +1,14 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from '../../series_config';
+import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import Tooltip from '../../tooltip';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
+import { createUpDownHandler } from '../../lib/sort_keyhandler';
 
 function TopNSeries(props) {
   const {
@@ -47,7 +49,8 @@ function TopNSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort">
+            sortHandle="vis_editor__agg_sort"
+          >
             { aggs }
           </Sortable>
           <div className="vis_editor__series_row">
@@ -56,7 +59,8 @@ function TopNSeries(props) {
                 onChange={props.onChange}
                 fields={fields}
                 panel={panel}
-                model={model}/>
+                model={model}
+              />
             </div>
           </div>
         </div>
@@ -66,16 +70,28 @@ function TopNSeries(props) {
         <SeriesConfig
           fields={props.fields}
           model={props.model}
-          onChange={props.onChange} />
+          onChange={props.onChange}
+        />
       );
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div className={metricsClassName}
-            onClick={() => props.switchTab('metrics')}>Metrics</div>
-          <div className={optionsClassname}
-            onClick={() => props.switchTab('options')}>Options</div>
+        <div className="kbnTabs sm" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'metrics'}
+            className={metricsClassName}
+            onClick={() => props.switchTab('metrics')}
+          >Metrics
+          </button>
+          <button
+            role="tab"
+            data-test-subj="seriesOptions"
+            aria-selected={selectedTab === 'options'}
+            className={optionsClassname}
+            onClick={() => props.switchTab('options')}
+          >Options
+          </button>
         </div>
         {seriesBody}
       </div>
@@ -87,16 +103,21 @@ function TopNSeries(props) {
       disableTrash={true}
       onChange={props.onChange}
       name="color"
-      value={model.color}/>
+      value={model.color}
+    />
   );
 
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
       <Tooltip text="Sort">
-        <div className="vis_editor__sort thor__button-outlined-default sm">
-          <i className="fa fa-sort"></i>
-        </div>
+        <button
+          className="vis_editor__sort thor__button-outlined-default sm"
+          aria-label="Sort series by pressing up/down"
+          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+        >
+          <i className="fa fa-sort" />
+        </button>
       </Tooltip>
     );
   }
@@ -106,17 +127,26 @@ function TopNSeries(props) {
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          <button
+            className="vis_editor__series-visibility-toggle"
+            onClick={props.toggleVisible}
+            aria-label="Toggle series editor"
+            aria-expanded={props.visible}
+          >
+            <i className={caretClassName}/>
+          </button>
           { colorPicker }
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
-              placeholder='Label'
-              value={model.label}/>
+              placeholder="Label"
+              value={model.label}
+            />
           </div>
           { dragHandle }
           <AddDeleteButtons
@@ -127,7 +157,8 @@ function TopNSeries(props) {
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
-            disableAdd={disableAdd}/>
+            disableAdd={disableAdd}
+          />
         </div>
       </div>
       { body }

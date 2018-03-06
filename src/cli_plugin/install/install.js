@@ -1,75 +1,41 @@
-'use strict';
+import { download } from './download';
+import Promise from 'bluebird';
+import path from 'path';
+import { cleanPrevious, cleanArtifacts } from './cleanup';
+import { extract, getPackData } from './pack';
+import { renamePlugin } from './rename';
+import { sync as rimrafSync } from 'rimraf';
+import { existingInstall, rebuildCache, assertVersion } from './kibana';
+import mkdirp from 'mkdirp';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+const mkdir = Promise.promisify(mkdirp);
 
-var _download = require('./download');
+export default async function install(settings, logger) {
+  try {
+    await cleanPrevious(settings, logger);
 
-var _bluebird = require('bluebird');
+    await mkdir(settings.workingPath);
 
-var _bluebird2 = _interopRequireDefault(_bluebird);
+    await download(settings, logger);
 
-var _path = require('path');
+    await getPackData(settings, logger);
 
-var _path2 = _interopRequireDefault(_path);
+    await extract(settings, logger);
 
-var _cleanup = require('./cleanup');
+    rimrafSync(settings.tempArchiveFile);
 
-var _pack = require('./pack');
+    existingInstall(settings, logger);
 
-var _rename = require('./rename');
+    assertVersion(settings);
 
-var _rimraf = require('rimraf');
+    await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
 
-var _kibana = require('./kibana');
+    await rebuildCache(settings, logger);
 
-var _mkdirp = require('mkdirp');
-
-var _mkdirp2 = _interopRequireDefault(_mkdirp);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _bluebird2.default(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _bluebird2.default.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-const mkdir = _bluebird2.default.promisify(_mkdirp2.default);
-
-exports.default = (() => {
-  var _ref = _asyncToGenerator(function* (settings, logger) {
-    try {
-      yield (0, _cleanup.cleanPrevious)(settings, logger);
-
-      yield mkdir(settings.workingPath);
-
-      yield (0, _download.download)(settings, logger);
-
-      yield (0, _pack.getPackData)(settings, logger);
-
-      yield (0, _pack.extract)(settings, logger);
-
-      (0, _rimraf.sync)(settings.tempArchiveFile);
-
-      (0, _kibana.existingInstall)(settings, logger);
-
-      (0, _kibana.assertVersion)(settings);
-
-      yield (0, _rename.renamePlugin)(settings.workingPath, _path2.default.join(settings.pluginDir, settings.plugins[0].name));
-
-      yield (0, _kibana.rebuildCache)(settings, logger);
-
-      logger.log('Plugin installation complete');
-    } catch (err) {
-      logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
-      (0, _cleanup.cleanArtifacts)(settings);
-      process.exit(70); // eslint-disable-line no-process-exit
-    }
-  });
-
-  function install(_x, _x2) {
-    return _ref.apply(this, arguments);
+    logger.log('Plugin installation complete');
+  } catch (err) {
+    logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
+    cleanArtifacts(settings);
+    process.exit(70); // eslint-disable-line no-process-exit
   }
-
-  return install;
-})();
-
-module.exports = exports['default'];
+}

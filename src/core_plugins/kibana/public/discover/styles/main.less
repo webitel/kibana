@@ -5,9 +5,18 @@
   overflow-x: hidden;
 }
 
+  .discover-sidebar-list-header {
+    margin-top: 5px;
+  }
+
+  .discover-popular-fields {
+    padding-top: 10px;
+  }
+
   .discover-wrapper {
     padding-right: 0px !important;
     padding-left: @collapser-width;
+    z-index: @discoverWrapperDepth;
   }
 
   .discover-content {
@@ -19,6 +28,11 @@
     display: block;
     position: relative;
 
+    .series > rect {
+      fill-opacity: 0.5;
+      stroke-width: 1;
+    }
+
     header {
       min-height: @input-height-base + 8px;
       padding: 4px 0;
@@ -29,7 +43,6 @@
      */
     visualize {
       height: 200px; /* 1 */
-      max-height: 600px;
 
       .loading {
         opacity: 1 !important;
@@ -65,6 +78,7 @@
     bottom: 0;
     right: 0;
     z-index: 20;
+    padding-top: 10px;
 
     opacity: 0.75;
     text-align: center;
@@ -122,8 +136,8 @@
       background-color: transparent;
       padding: 0;
       border: none;
-      width: 7px; /* 1 */
-      height: 7px;
+      width: 14px; /* 1 */
+      height: 14px;
     }
 
     .discover-field-filter {
@@ -187,19 +201,13 @@
   }
 
 .discover-field-details {
-  border-top: 1px solid;
-  border-top-color: @discover-field-details-border;
-  padding: 5px 10px;
+  padding: 10px;
   background-color: @discover-field-details-bg;
   color: @discover-field-details-color;
 }
 
   .discover-field-details-count {
     white-space: nowrap;
-  }
-
-  .discover-field-details-error {
-    margin-top: 5px;
   }
 
   .discover-field-details-item {
@@ -211,6 +219,7 @@
   }
 
   .discover-field-details-item-title {
+    line-height: 1.5;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -235,17 +244,18 @@
  */
 .discover-field-details {
   .progress {
+    background-color: darken(@globalColorLightGray, 5%);
     margin-bottom: 0px;
+    border-radius: 0px;
 
     .progress-bar {
       padding-left: 10px;
       text-align: right;
-      line-height: 18px;
+      line-height: 20px;
       max-width: 100%;
-      border-radius: 4px;
 
       span {
-        background-color: @discover-field-details-progress-bar-bg;
+        background-color: rgba(0,0,0,.8);
         padding: 3px;
         border-radius: 4px;
         margin-left: 3px;
@@ -272,8 +282,9 @@ field-name,
 
 disc-field-chooser {
   .sidebar-item.active .sidebar-item-title {
-    background-color: @sidebar-active-bg;
-    color: @sidebar-active-color;
+    background: @discover-field-details-bg;
+    color: @globalColorBlack;
+    font-weight: bold;
   }
   .sidebar-item-title {
     position: relative;
@@ -297,3 +308,19 @@ disc-field-chooser {
       width: auto;
     }
   }
+
+.discover-skip-button {
+  position: absolute;
+  left: -10000px;
+  top: 4px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+
+  &:focus {
+    left: initial;
+    right: 15px;
+    width: auto;
+    height: auto;
+  }
+}

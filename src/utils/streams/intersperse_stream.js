@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createIntersperseStream = createIntersperseStream;
-
-var _stream = require('stream');
+import { Transform } from 'stream';
 
 /**
  *  Create a Transform stream that receives values in object mode,
@@ -28,10 +21,10 @@ var _stream = require('stream');
  *  @param  {String|Buffer} intersperseChunk
  *  @return {Transform}
  */
-function createIntersperseStream(intersperseChunk) {
+export function createIntersperseStream(intersperseChunk) {
   let first = true;
 
-  return new _stream.Transform({
+  return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     transform(chunk, enc, callback) {

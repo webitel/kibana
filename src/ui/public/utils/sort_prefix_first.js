@@ -1,16 +1,12 @@
+import { partition } from 'lodash';
+
 export function sortPrefixFirst(array, prefix, property) {
   if (!prefix) return array;
-  return [...array].sort(sortPrefixFirstComparator);
+  const lowerCasePrefix = ('' + prefix).toLowerCase();
 
-  function sortPrefixFirstComparator(a, b) {
-    const aValue = '' + (property ? a[property] : a);
-    const bValue = '' + (property ? b[property] : b);
-
-    const bothStartWith = aValue.startsWith(prefix) && bValue.startsWith(prefix);
-    const neitherStartWith = !aValue.startsWith(prefix) && !bValue.startsWith(prefix);
-
-    if (bothStartWith || neitherStartWith) return 0;
-    if (aValue.startsWith(prefix)) return -1;
-    else return 1;
-  }
+  const partitions = partition(array, entry => {
+    const value = ('' + (property ? entry[property] : entry)).toLowerCase();
+    return value.startsWith(lowerCasePrefix);
+  });
+  return [ ...partitions[0], ...partitions[1] ];
 }

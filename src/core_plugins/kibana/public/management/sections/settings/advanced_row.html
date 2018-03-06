@@ -53,6 +53,7 @@
           ng-model="conf.unsavedValue"
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
+          data-test-subj="unsavedValueMarkdownTextArea"
         ></textarea>
 
         <textarea
@@ -63,6 +64,7 @@
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
           validate-json
+          data-test-subj="unsavedValueJsonTextArea"
         ></textarea>
 
         <p
@@ -97,6 +99,25 @@
           ng-options="option as option for option in conf.options"
           class="kuiSelect"
         ></select>
+
+        <input
+          ng-if="conf.image"
+          ng-model="conf.unsavedValue"
+          input-base-sixty-four
+          max="{{conf.options.maxSize && conf.options.maxSize.length}}"
+          accept=".jpg,.jpeg,.png"
+          type="file"
+          class="fullWidth"
+          on-change="onImageChange"
+        >
+
+        <p
+          class="kuiSubText"
+          ng-show="forms.configEdit.$error.maxSize"
+        >
+          Image is too large, maximum size is {{conf.options.maxSize.description}}
+        </p>
+
       </form>
 
       <!-- Setting display formats -->
@@ -117,6 +138,12 @@
           ng-if="conf.markdown"
           ng-bind-html="conf.value | markdown"
         ></span>
+        <img
+          alt="Image"
+          ng-if="conf.image && conf.value"
+          ng-src="{{ conf.value }}"
+          class="advancedSettingsTableRowImage"
+        ></img>
       </span>
     </div>
   </td>
@@ -131,6 +158,7 @@
           ng-click="edit(conf)"
           class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
           ng-disabled="conf.tooComplex"
+          aria-label="Edit {{conf.ariaName}}"
           data-test-subj="advancedSetting-{{conf.name}}-editButton"
         >
           <span
@@ -146,6 +174,7 @@
           ng-click="save(conf)"
           class="kuiMenuButton kuiMenuButton--primary kuiMenuButton--iconText"
           ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+          aria-label="Save edit"
           data-test-subj="advancedSetting-{{conf.name}}-saveButton"
         >
           <span
@@ -166,7 +195,9 @@
           ng-if="!conf.editing"
           ng-click="clear(conf)"
           ng-hide="isDefaultValue(conf)"
+          aria-label="Clear {{conf.ariaName}}"
           class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+          data-test-subj="advancedSetting-{{conf.name}}-clearButton"
         >
           <span
             aria-hidden="true"

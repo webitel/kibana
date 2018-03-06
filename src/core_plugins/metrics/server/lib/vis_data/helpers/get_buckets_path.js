@@ -1,25 +1,21 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = (id, metrics) => {
-  const metric = _lodash2.default.find(metrics, { id });
+import { startsWith } from 'lodash';
+const percentileTest = /\[[0-9\.]+\]$/;
+const percentileNumberTest = /\d+\.\d+/;
+export default (id, metrics) => {
+  const metric = metrics.find(m => startsWith(id, m.id));
   let bucketsPath = String(id);
 
   switch (metric.type) {
     case 'derivative':
       bucketsPath += '[normalized_value]';
       break;
+    // For percentiles we need to breakout the percentile key that the user
+    // specified. This information is stored in the key using the following pattern
+    // {metric.id}[{percentile}]
     case 'percentile':
-      const percentileKey = /\./.test(`${metric.percent}`) ? `${metric.percent}` : `${metric.percent}.0`;
+      if (percentileTest.test(bucketsPath)) break;
+      const percent = metric.percentiles[0];
+      const percentileKey = percentileNumberTest.test(`${percent.value}`) ? `${percent.value}` : `${percent.value}.0`;
       bucketsPath += `[${percentileKey}]`;
       break;
     case 'percentile_rank':
@@ -36,7 +32,7 @@ exports.default = (id, metrics) => {
       break;
   }
 
+
   return bucketsPath;
 };
 
-module.exports = exports['default'];

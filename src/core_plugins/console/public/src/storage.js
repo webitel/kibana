@@ -1,4 +1,4 @@
-import { transform, keys, startsWith } from 'lodash';
+const { transform, keys, startsWith } = require('lodash');
 
 class Storage {
   constructor(engine, prefix) {
@@ -55,4 +55,6 @@ class Storage {
   }
 }
 
-module.exports = new Storage(localStorage, 'sense:');
+const instance = new Storage(localStorage, 'sense:');
+
+export default instance;

@@ -1,12 +1,13 @@
 @import (reference) "~ui/styles/variables";
 
-visualize {
+visualization {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
   width: 100%;
   overflow: auto;
   position: relative;
+  padding: 8px 8px 8px 8px;
 
   .k4tip {
     white-space: pre-line;
@@ -81,7 +82,7 @@ visualize {
 
 visualize-spy {
   background-color: #ffffff;
-  z-index: 1;
+  z-index: 1000;
 
   // this element should flex
   flex: 0 1 auto;
@@ -126,14 +127,10 @@ visualize-spy {
  */
 .visualize-spy-container {
   flex: 1 1 auto;
-
   display: flex;
   flex-direction: column;
   height: 482px; /* 1 */
   overflow-y: auto; /* 1 */
-
-  height: 482px;
-  overflow-y: auto;
 
   header {
     padding: 0 0 15px;
@@ -185,9 +182,22 @@ visualize-spy {
   flex: 0 0 auto;
 }
 
-  .visualize-show-spy-tab {
-    position: absolute;
-    z-index: 100;
-    left: 5px;
-    bottom: 0px;
-  }
+.visualize-show-spy-tab {
+  position: absolute;
+  z-index: 1000;
+  left: 5px;
+  bottom: 0px;
+}
+
+.visualize-spy__content-container {
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.visualize-spy__tab-container {
+  flex: 0 0 auto;
+}
+
+.visualize-spy__tabs {
+  flex: 1 1 auto;
+}

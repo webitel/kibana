@@ -2,6 +2,7 @@ import _ from 'lodash';
 import template from 'ui/filter_bar/filter_bar.html';
 import 'ui/directives/json_input';
 import '../filter_editor';
+import './filter_pill/filter_pill';
 import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
@@ -83,7 +84,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.saveEdit = (filter, newFilter, isPinned) => {
-        if (!filter.isNew) $scope.removeFilter(filter);
+        if (!filter.meta.isNew) $scope.removeFilter(filter);
         delete $scope.editingFilter;
         $scope.addFilters([newFilter], isPinned);
       };
@@ -111,29 +112,29 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         // users to decide what they want to apply.
         if (filters.length > 1) {
           return mapFlattenAndWrapFilters(filters)
-          .then(function (results) {
-            extractTimeFilter(results).then(function (filter) {
-              $scope.changeTimeFilter = filter;
+            .then(function (results) {
+              extractTimeFilter(results).then(function (filter) {
+                $scope.changeTimeFilter = filter;
+              });
+              return results;
+            })
+            .then(filterOutTimeBasedFilter)
+            .then(function (results) {
+              $scope.newFilters = results;
             });
-            return results;
-          })
-          .then(filterOutTimeBasedFilter)
-          .then(function (results) {
-            $scope.newFilters = results;
-          });
         }
 
         // Just add single filters to the state.
         if (filters.length === 1) {
           Promise.resolve(filters).then(function (filters) {
             extractTimeFilter(filters)
-            .then(function (timeFilter) {
-              if (timeFilter) changeTimeFilter(timeFilter);
-            });
+              .then(function (timeFilter) {
+                if (timeFilter) changeTimeFilter(timeFilter);
+              });
             return filters;
           })
-          .then(filterOutTimeBasedFilter)
-          .then(addAndInvertFilters);
+            .then(filterOutTimeBasedFilter)
+            .then(addAndInvertFilters);
         }
       });
 

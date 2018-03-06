@@ -1,10 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
@@ -15,6 +9,4 @@ exports.default = function (kibana) {
       }
     }
   });
-};
-
-module.exports = exports['default'];
+}

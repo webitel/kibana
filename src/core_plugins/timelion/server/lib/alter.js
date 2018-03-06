@@ -1,14 +1,5 @@
-'use strict';
-
-var _bluebird = require('bluebird');
-
-var _bluebird2 = _interopRequireDefault(_bluebird);
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import Promise from 'bluebird';
+import _ from 'lodash';
 
 /* @param {Array} args
  * - args[0] must be a seriesList
@@ -17,17 +8,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @return {seriesList}
  */
 
-module.exports = function alter(args, fn) {
+export default function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
-  return _bluebird2.default.all(args).then(function (args) {
+  return Promise.all(args).then(function (args) {
 
     const seriesList = args.shift();
 
     if (seriesList.type !== 'seriesList') {
-      throw new Error('args[0] must be a seriesList');
+      throw new Error ('args[0] must be a seriesList');
     }
 
-    const list = _lodash2.default.chain(seriesList.list).map(function (series) {
+    const list = _.chain(seriesList.list).map(function (series) {
       return fn.apply(this, [series].concat(args));
     }).flatten().value();
 
@@ -36,4 +27,4 @@ module.exports = function alter(args, fn) {
   }).catch(function (e) {
     throw e;
   });
-};
+}

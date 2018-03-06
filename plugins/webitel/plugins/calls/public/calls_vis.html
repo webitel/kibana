@@ -11,7 +11,7 @@
                 <th>
                     Time
                 </th>
-                <th ng-repeat="(key, item) in vis.params.columns | orderBy:'-pos'" ng-if="item.visible">
+                <th ng-repeat="(key, item) in vis.params.columns" ng-if="item.visible">
                     {{item.title}}
                 </th>
                 <th>
@@ -23,7 +23,7 @@
                 <td>
                     <timer start-time="row.createdOn" interval="1000">{{millis | date:'mm:ss'}}</timer>
                 </td>
-                <td ng-repeat="(key, item) in vis.params.columns | orderBy:'-pos'" ng-if="item.visible">
+                <td ng-repeat="(key, item) in vis.params.columns" ng-if="item.visible">
                     <span ng-class="item['class']">{{row[key]}}</span>
                 </td>
                 <td>

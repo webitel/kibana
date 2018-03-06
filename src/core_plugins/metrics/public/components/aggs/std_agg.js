@@ -1,9 +1,11 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator } from '@elastic/eui';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -12,10 +14,11 @@ function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   let restrict = 'numeric';
   if (model.type === 'cardinality') {
-    restrict = 'string';
+    restrict = 'none';
   }
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -23,24 +26,34 @@ function StandardAgg(props) {
       model={props.model}
       onAdd={props.onAdd}
       onDelete={props.onDelete}
-      siblings={props.siblings}>
+      siblings={props.siblings}
+    >
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
-          onChange={handleSelectChange('type')}/>
+          onChange={handleSelectChange('type')}
+        />
       </div>
-      { model.type !== 'count' ? (<div className="vis_editor__item">
-        <div className="vis_editor__label">Field</div>
-        <FieldSelect
-          fields={fields}
-          type={model.type}
-          restrict={restrict}
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}/>
-      </div>) : null }
+      {
+        model.type !== 'count'
+          ? (
+            <div className="vis_editor__item">
+              <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+              <FieldSelect
+                id={htmlId('field')}
+                fields={fields}
+                type={model.type}
+                restrict={restrict}
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+              />
+            </div>
+          ) : null
+      }
     </AggRow>
   );
 

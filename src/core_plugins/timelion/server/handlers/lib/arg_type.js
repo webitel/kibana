@@ -1,21 +1,18 @@
-'use strict';
+import _ from 'lodash';
 
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function argType(arg) {
-  if (_lodash2.default.isArray(arg)) {
-    return _lodash2.default.chain(arg).map(argType).flattenDeep().value();
+export default function argType(arg) {
+  if (Array.isArray(arg)) {
+    return _.chain(arg)
+      .map(argType)
+      .flattenDeep()
+      .value();
   }
 
-  if (_lodash2.default.isObject(arg) && arg) {
+  if (_.isObject(arg) && arg) {
     return arg.type;
   }
   if (arg == null) {
     return 'null';
   }
   return typeof arg;
-};
+}

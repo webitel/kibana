@@ -1,15 +1,9 @@
-'use strict';
-
-var _moment = require('moment');
-
-var _moment2 = _interopRequireDefault(_moment);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import moment from 'moment';
 
 // usually reverse = false on the request, true on the response
-module.exports = function offsetTime(milliseconds, offset, reverse) {
+export default function offsetTime(milliseconds, offset, reverse) {
   if (!offset.match(/[-+][0-9]+[mshdwMy]/g)) {
-    throw new Error('Malformed `offset` at ' + offset);
+    throw new Error ('Malformed `offset` at ' + offset);
   }
   const parts = offset.match(/[-+]|[0-9]+|[mshdwMy]/g);
 
@@ -18,6 +12,6 @@ module.exports = function offsetTime(milliseconds, offset, reverse) {
 
   const mode = add ? 'add' : 'subtract';
 
-  const momentObj = (0, _moment2.default)(milliseconds)[mode](parts[1], parts[2]);
+  const momentObj = moment(milliseconds)[mode](parts[1], parts[2]);
   return momentObj.valueOf();
-};
+}

@@ -6,7 +6,7 @@
  * similar to how Backbone Models work.
  *
  * This class seems to interface with ES primarily through the es Angular
- * service and a DocSource instance.
+ * service and the saved object api.
  */
 
 import angular from 'angular';
@@ -17,6 +17,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -105,6 +106,10 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
+
+      if (!_.isUndefined(this.searchSource.getOwn('query'))) {
+        this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      }
     };
 
     /**
@@ -113,7 +118,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      *
      * @return {Promise<IndexPattern | null>}
      */
-    const hydrateIndexPattern = () => {
+    this.hydrateIndexPattern = (id) => {
       if (!this.searchSource) {
         return Promise.resolve(null);
       }
@@ -123,7 +128,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         return Promise.resolve(null);
       }
 
-      let index = config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwn('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -158,7 +163,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (!this.id) {
             // just assign the defaults and be done
             _.assign(this, this.defaults);
-            return hydrateIndexPattern().then(() => {
+            return this.hydrateIndexPattern().then(() => {
               return afterESResp.call(this);
             });
           }
@@ -212,7 +217,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
-        return hydrateIndexPattern();
+        return this.hydrateIndexPattern();
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
       });

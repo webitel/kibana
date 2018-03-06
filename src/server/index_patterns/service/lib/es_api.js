@@ -1,9 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.callFieldCapsApi = exports.callIndexAliasApi = undefined;
+import { convertEsError } from './errors';
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -19,23 +14,17 @@ exports.callFieldCapsApi = exports.callIndexAliasApi = undefined;
  *  @param  {Array<String>|String} indices
  *  @return {Promise<IndexAliasResponse>}
  */
-let callIndexAliasApi = exports.callIndexAliasApi = (() => {
-  var _ref = _asyncToGenerator(function* (callCluster, indices) {
-    try {
-      return yield callCluster('indices.getAlias', {
-        index: indices,
-        ignoreUnavailable: true,
-        allowNoIndices: false
-      });
-    } catch (error) {
-      throw (0, _errors.convertEsError)(indices, error);
-    }
-  });
-
-  return function callIndexAliasApi(_x, _x2) {
-    return _ref.apply(this, arguments);
-  };
-})();
+export async function callIndexAliasApi(callCluster, indices) {
+  try {
+    return await callCluster('indices.getAlias', {
+      index: indices,
+      ignoreUnavailable: true,
+      allowNoIndices: false
+    });
+  } catch (error) {
+    throw convertEsError(indices, error);
+  }
+}
 
 /**
  *  Call the fieldCaps API for a list of indices.
@@ -48,27 +37,15 @@ let callIndexAliasApi = exports.callIndexAliasApi = (() => {
  *  @param  {Array<String>|String} indices
  *  @return {Promise<FieldCapsResponse>}
  */
-
-
-let callFieldCapsApi = exports.callFieldCapsApi = (() => {
-  var _ref2 = _asyncToGenerator(function* (callCluster, indices) {
-    try {
-      return yield callCluster('fieldCaps', {
-        index: indices,
-        fields: '*',
-        ignoreUnavailable: true,
-        allowNoIndices: false
-      });
-    } catch (error) {
-      throw (0, _errors.convertEsError)(indices, error);
-    }
-  });
-
-  return function callFieldCapsApi(_x3, _x4) {
-    return _ref2.apply(this, arguments);
-  };
-})();
-
-var _errors = require('./errors');
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+export async function callFieldCapsApi(callCluster, indices) {
+  try {
+    return await callCluster('fieldCaps', {
+      index: indices,
+      fields: '*',
+      ignoreUnavailable: true,
+      allowNoIndices: false
+    });
+  } catch (error) {
+    throw convertEsError(indices, error);
+  }
+}

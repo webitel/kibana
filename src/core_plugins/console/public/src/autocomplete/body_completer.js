@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import engine from './engine';
+const _ = require('lodash');
+const engine = require('./engine');
 
 function CompilingContext(endpoint_id, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;
@@ -20,7 +20,7 @@ function getTemplate(description) {
     // assume an object for now.
     return {};
   }
-  else if (_.isArray(description)) {
+  else if (Array.isArray(description)) {
     if (description.length == 1) {
       if (_.isObject(description[0])) {
         // shortcut to save typing
@@ -57,7 +57,7 @@ function getOptions(description) {
  * @param compilingContext
  */
 function compileDescription(description, compilingContext) {
-  if (_.isArray(description)) {
+  if (Array.isArray(description)) {
     return [compileList(description, compilingContext)];
   }
   else if (_.isObject(description)) {
@@ -378,9 +378,9 @@ GlobalOnlyComponent.prototype = _.create(
 
 
 // a list of component that match anything but give auto complete suggestions based on global API entries.
-module.exports.globalsOnlyAutocompleteComponents = function () {
+export function globalsOnlyAutocompleteComponents() {
   return [new GlobalOnlyComponent("__global__")];
-};
+}
 
 /**
  * @param endpoint_id id of the endpoint being compiled.
@@ -395,6 +395,6 @@ module.exports.globalsOnlyAutocompleteComponents = function () {
    *   }
    * }
  */
-module.exports.compileBodyDescription = function (endpoint_id, description, parametrizedComponentFactories) {
+export function compileBodyDescription(endpoint_id, description, parametrizedComponentFactories) {
   return compileDescription(description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
-};
+}

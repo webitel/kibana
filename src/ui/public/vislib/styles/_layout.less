@@ -19,6 +19,27 @@
   overflow: visible;
 }
 
+/* SVG Element Default Styling */
+.vis-wrapper {
+  rect {
+    opacity: 1;
+
+    &:hover {
+      opacity: @vis-hover-opacity;
+    }
+  }
+
+  circle {
+    opacity: 0;
+
+    &:hover {
+      opacity: 1;
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
+  }
+}
+
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
@@ -198,4 +219,16 @@
 .chart-last {
   margin-bottom: 0px;
   margin-right: 0px;
+}
+
+.label-line {
+  opacity: .3;
+  stroke: black;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.label-text {
+  font-size: 130%;
+  font-weight: normal;
 }

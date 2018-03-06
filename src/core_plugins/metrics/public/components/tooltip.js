@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
-import { Tooltip } from 'pui-react-tooltip';
-import { OverlayTrigger } from 'pui-react-overlay-trigger';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Tooltip } from 'pivotal-ui/react/tooltip';
+import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
 
 function TooltipComponent(props) {
   const tooltip = (

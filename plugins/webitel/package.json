@@ -1,6 +1,9 @@
 {
   "name": "Webitel",
-  "version": "5.6.2",
+  "version": "6.2.2",
+  "kibana": {
+    "version": "6.2.2"
+  },
   "dependencies": {
     "async": "^2.1.2",
     "cron-parser": "^2.4.0",

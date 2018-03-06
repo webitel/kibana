@@ -55,15 +55,13 @@ import _ from 'lodash';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
 import { AbstractDataSourceProvider } from './_abstract';
-import { SearchRequestProvider } from '../fetch/request/search';
+import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
-import { SearchStrategyProvider } from '../fetch/strategy/search';
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
-  const searchStrategy = Private(SearchStrategyProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   const forIp = Symbol('for which index pattern?');
@@ -74,7 +72,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
-    SearchSource.Super.call(this, initialState, searchStrategy);
+    SearchSource.Super.call(this, initialState);
   }
 
   /*****
@@ -100,6 +98,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
+    'fields'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -172,13 +171,26 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
     const self = this;
-    return Promise.try(function addRequest() {
-      const req = new SegmentedRequest(self, Promise.defer(), initFunction);
+    return new Promise((resolve, reject) => {
+      function addRequest() {
+        const defer = Promise.defer();
+        const req = new SegmentedRequest(self, defer, initFunction);
 
-      // return promises created by the completion handler so that
-      // errors will bubble properly
-      return req.getCompletePromise().then(addRequest);
+        req.setErrorHandler((request, error) => {
+          reject(error);
+          request.abort();
+        });
+
+        // Return promises created by the completion handler so that
+        // errors will bubble properly
+        return req.getCompletePromise().then(addRequest);
+      }
+      addRequest();
     });
+  };
+
+  SearchSource.prototype.addFilterPredicate = function (predicate) {
+    this._filterPredicates.push(predicate);
   };
 
   /******
@@ -219,34 +231,22 @@ export function SearchSourceProvider(Promise, Private, config) {
     if (typeof val === 'function') {
       const source = this;
       return Promise.cast(val(this))
-      .then(function (newVal) {
-        return source._mergeProp(state, newVal, key);
-      });
+        .then(function (newVal) {
+          return source._mergeProp(state, newVal, key);
+        });
     }
 
     if (val == null || !key || !_.isString(key)) return;
 
     switch (key) {
       case 'filter':
-        let verifiedFilters = val;
-        if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-          if (!_.isArray(val)) val = [val];
-          verifiedFilters = val.filter(function (el) {
-            if ('meta' in el && 'index' in state) {
-              const field = state.index.fields.byName[el.meta.key];
-              if (!field) return false;
-            }
-            return true;
-          });
-        }
-        // user a shallow flatten to detect if val is an array, and pull the values out if it is
-        state.filters = _([ state.filters || [], verifiedFilters ])
-        .flatten()
-        // Yo Dawg! I heard you needed to filter out your filters
-        .reject(function (filter) {
-          return !filter || _.get(filter, 'meta.disabled');
-        })
-        .value();
+        let filters = Array.isArray(val) ? val : [val];
+
+        filters = filters.filter(filter => {
+          return this._filterPredicates.every(predicate => predicate(filter, state));
+        });
+
+        state.filters = [ ...state.filters || [], ...filters];
         return;
       case 'index':
       case 'type':
@@ -268,6 +268,12 @@ export function SearchSourceProvider(Promise, Private, config) {
         val = normalizeSortRequest(val, this.get('index'));
         addToBody();
         break;
+      case 'query':
+        state.query = (state.query || []).concat(val);
+        break;
+      case 'fields':
+        state[key] = _.uniq([...(state[key] || []), ...val]);
+        break;
       default:
         addToBody();
     }
@@ -279,13 +285,45 @@ export function SearchSourceProvider(Promise, Private, config) {
       state.body = state.body || {};
       // ignore if we already have a value
       if (state.body[key] == null) {
-        if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val } };
-        }
-
         state.body[key] = val;
       }
     }
+  };
+
+  SearchSource.prototype._filterPredicates = [
+    (filter) => {
+      // remove null/undefined filters
+      return filter;
+    },
+    (filter) => {
+      const disabled = _.get(filter, 'meta.disabled');
+      return disabled === undefined || disabled === false;
+    },
+    (filter, state) => {
+      if (!config.get('courier:ignoreFilterIfFieldNotInIndex')) {
+        return true;
+      }
+
+      if ('meta' in filter && 'index' in state) {
+        const field = state.index.fields.byName[filter.meta.key];
+        if (!field) return false;
+      }
+      return true;
+    }
+  ];
+
+  SearchSource.prototype.clone = function () {
+    const clone = new SearchSource(this.toString());
+    // when serializing the internal state with .toString() we lose the internal classes used in the index
+    // pattern, so we have to set it again to workaround this behavior
+    clone.set('index', this.get('index'));
+    clone.inherits(this.getParent());
+    return clone;
+  };
+
+  SearchSource.prototype.getSearchRequestBody = async function () {
+    const searchRequest = await this._flatten();
+    return searchRequest.body;
   };
 
   return SearchSource;

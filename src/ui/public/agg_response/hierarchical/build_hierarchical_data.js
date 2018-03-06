@@ -17,11 +17,11 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
 
   return function (vis, resp) {
     // Create a refrenece to the buckets
-    let buckets = vis.aggs.bySchemaGroup.buckets;
+    let buckets = vis.getAggConfig().bySchemaGroup.buckets;
 
     // Find the metric so it's easier to reference.
     // TODO: Change this to support multiple metrics.
-    const metric = vis.aggs.bySchemaGroup.metrics[0];
+    const metric = vis.getAggConfig().bySchemaGroup.metrics[0];
 
     // Link each agg to the next agg. This will be
     // to identify the next bucket aggregation
@@ -77,7 +77,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
 
       split.tooltipFormatter = tooltipFormatter(raw.columns);
-      const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket));
+      const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket), bucket.filters);
       split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
       _.each(split.slices.children, function (child) {
         child.aggConfigResult.$parent = aggConfigResult;

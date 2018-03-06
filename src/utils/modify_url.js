@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.modifyUrl = modifyUrl;
-
-var _url = require('url');
+import { parse as parseUrl, format as formatUrl } from 'url';
 
 /**
  *  Takes a URL and a function that takes the meaningful parts
@@ -36,12 +29,12 @@ var _url = require('url');
  *  @param  {Function<Object|undefined>} block - a function that will modify the parsed url, or return a new one
  *  @return {String} the modified and reformatted url
  */
-function modifyUrl(url, block) {
+export function modifyUrl(url, block) {
   if (typeof block !== 'function') {
     throw new TypeError('You must pass a block to define the modifications desired');
   }
 
-  const parsed = (0, _url.parse)(url, true);
+  const parsed = parseUrl(url, true);
 
   // copy over the most specific version of each
   // property. By default, the parsed url includes
@@ -57,14 +50,14 @@ function modifyUrl(url, block) {
     port: parsed.port,
     pathname: parsed.pathname,
     query: parsed.query || {},
-    hash: parsed.hash
+    hash: parsed.hash,
   };
 
   // the block modifies the meaningfulParts object, or returns a new one
   const modifiedParts = block(meaningfulParts) || meaningfulParts;
 
   // format the modified/replaced meaningfulParts back into a url
-  return (0, _url.format)({
+  return formatUrl({
     protocol: modifiedParts.protocol,
     slashes: modifiedParts.slashes,
     auth: modifiedParts.auth,
@@ -72,6 +65,6 @@ function modifyUrl(url, block) {
     port: modifiedParts.port,
     pathname: modifiedParts.pathname,
     query: modifiedParts.query,
-    hash: modifiedParts.hash
+    hash: modifiedParts.hash,
   });
 }

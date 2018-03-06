@@ -1,102 +1,93 @@
-'use strict';
+import elasticsearch from 'elasticsearch';
+import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
+import toPath from 'lodash/internal/toPath';
+import Boom from 'boom';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Cluster = undefined;
+import filterHeaders from './filter_headers';
+import { parseConfig } from './parse_config';
 
-var _elasticsearch = require('elasticsearch');
-
-var _elasticsearch2 = _interopRequireDefault(_elasticsearch);
-
-var _lodash = require('lodash');
-
-var _toPath = require('lodash/internal/toPath');
-
-var _toPath2 = _interopRequireDefault(_toPath);
-
-var _boom = require('boom');
-
-var _boom2 = _interopRequireDefault(_boom);
-
-var _filter_headers = require('./filter_headers');
-
-var _filter_headers2 = _interopRequireDefault(_filter_headers);
-
-var _parse_config = require('./parse_config');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-class Cluster {
+export class Cluster {
   constructor(config) {
-    _initialiseProps.call(this);
+    this._config = {
+      ...config
+    };
+    this.errors = elasticsearch.errors;
 
-    this._config = Object.assign({}, config);
-    this.errors = _elasticsearch2.default.errors;
-
+    this._clients = new Set();
     this._client = this.createClient();
     this._noAuthClient = this.createClient({ auth: false });
 
     return this;
   }
 
-  close() {
-    if (this._client) {
-      this._client.close();
-    }
-
-    if (this._noAuthClient) {
-      this._noAuthClient.close();
-    }
-  }
-
-}
-
-exports.Cluster = Cluster;
-
-var _initialiseProps = function _initialiseProps() {
-  this.callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
+  callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
     if (req.headers) {
-      const filteredHeaders = (0, _filter_headers2.default)(req.headers, this.getRequestHeadersWhitelist());
-      (0, _lodash.set)(clientParams, 'headers', filteredHeaders);
+      const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
+      set(clientParams, 'headers', filteredHeaders);
     }
 
     return callAPI(this._noAuthClient, endpoint, clientParams, options);
-  };
+  }
 
-  this.callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
+  callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
     return callAPI(this._client, endpoint, clientParams, options);
-  };
+  }
 
-  this.getRequestHeadersWhitelist = () => getClonedProperty(this._config, 'requestHeadersWhitelist');
+  getRequestHeadersWhitelist = () => getClonedProperty(this._config, 'requestHeadersWhitelist');
 
-  this.getCustomHeaders = () => getClonedProperty(this._config, 'customHeaders');
+  getCustomHeaders = () => getClonedProperty(this._config, 'customHeaders');
 
-  this.getRequestTimeout = () => getClonedProperty(this._config, 'requestTimeout');
+  getRequestTimeout = () => getClonedProperty(this._config, 'requestTimeout');
 
-  this.getUrl = () => getClonedProperty(this._config, 'url');
+  getUrl = () => getClonedProperty(this._config, 'url');
 
-  this.getSsl = () => getClonedProperty(this._config, 'ssl');
+  getSsl = () => getClonedProperty(this._config, 'ssl');
 
-  this.getClient = () => this._client;
+  getClient = () => this._client;
 
-  this.createClient = configOverrides => {
-    const config = Object.assign({}, this._getClientConfig(), configOverrides);
-    return new _elasticsearch2.default.Client((0, _parse_config.parseConfig)(config));
-  };
+  close() {
+    for (const client of this._clients) {
+      client.close();
+    }
 
-  this._getClientConfig = () => {
-    return getClonedProperties(this._config, ['url', 'ssl', 'username', 'password', 'customHeaders', 'plugins', 'apiVersion', 'keepAlive', 'pingTimeout', 'requestTimeout', 'log']);
-  };
-};
+    this._clients.clear();
+  }
+
+  createClient = configOverrides => {
+    const config = {
+      ...this._getClientConfig(),
+      ...configOverrides
+    };
+
+    const client = new elasticsearch.Client(parseConfig(config));
+    this._clients.add(client);
+    return client;
+  }
+
+  _getClientConfig = () => {
+    return getClonedProperties(this._config, [
+      'url',
+      'ssl',
+      'username',
+      'password',
+      'customHeaders',
+      'plugins',
+      'apiVersion',
+      'keepAlive',
+      'pingTimeout',
+      'requestTimeout',
+      'log'
+    ]);
+  }
+}
 
 function callAPI(client, endpoint, clientParams = {}, options = {}) {
   const wrap401Errors = options.wrap401Errors !== false;
-  const clientPath = (0, _toPath2.default)(endpoint);
-  const api = (0, _lodash.get)(client, clientPath);
+  const clientPath = toPath(endpoint);
+  const api = get(client, clientPath);
 
-  let apiContext = (0, _lodash.get)(client, clientPath.slice(0, -1));
-  if ((0, _lodash.isEmpty)(apiContext)) {
+  let apiContext = get(client, clientPath.slice(0, -1));
+  if (isEmpty(apiContext)) {
     apiContext = client;
   }
 
@@ -104,13 +95,13 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  return api.call(apiContext, clientParams).catch(err => {
+  return api.call(apiContext, clientParams).catch((err) => {
     if (!wrap401Errors || err.statusCode !== 401) {
       return Promise.reject(err);
     }
 
-    const boomError = _boom2.default.wrap(err, err.statusCode);
-    const wwwAuthHeader = (0, _lodash.get)(err, 'body.error.header[WWW-Authenticate]');
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
+    const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
     boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 
     throw boomError;
@@ -118,9 +109,9 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
 }
 
 function getClonedProperties(config, paths) {
-  return (0, _lodash.cloneDeep)(paths ? (0, _lodash.pick)(config, paths) : config);
+  return cloneDeep(paths ? pick(config, paths) : config);
 }
 
 function getClonedProperty(config, path) {
-  return (0, _lodash.cloneDeep)(path ? (0, _lodash.get)(config, path) : config);
+  return cloneDeep(path ? get(config, path) : config);
 }

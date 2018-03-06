@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-export function VisAggConfigProvider(Private, fieldTypeFilter) {
+export function VisAggConfigProvider(Private, Promise) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -19,12 +19,16 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
     self._opts = opts = (opts || {});
     self.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
+    // start with empty params so that checks in type/schema setters don't freak
+    // because self.params is undefined
+    self.params = {};
+
     // setters
     self.type = opts.type;
     self.schema = opts.schema;
 
-    // resolve the params
-    self.fillDefaults(opts.params);
+    // set the params to the values from opts, or just to the defaults
+    self.setParams(opts.params || {});
   }
 
   /**
@@ -82,6 +86,15 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
         }
 
         this.__type = type;
+
+        // clear out the previous params except for a few special ones
+        this.setParams({
+          // split row/columns is "outside" of the agg, so don't reset it
+          row: this.params.row,
+
+          // almost every agg has fields, so we try to persist that when type changes
+          field: _.get(this.getFieldOptions(), ['byName', this.getField()])
+        });
       }
     },
     schema: {
@@ -105,7 +118,7 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
    *                         used when initializing
    * @return {undefined}
    */
-  AggConfig.prototype.fillDefaults = function (from) {
+  AggConfig.prototype.setParams = function (from) {
     const self = this;
     from = from || self.params || {};
     const to = self.params = {};
@@ -143,28 +156,6 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
     });
   };
 
-  /**
-   * Clear the parameters for this aggConfig
-   *
-   * @return {object} the new params object
-   */
-  AggConfig.prototype.resetParams = function () {
-    let field;
-    const fieldOptions = this.getFieldOptions();
-
-    if (fieldOptions) {
-      const prevField = fieldOptions.byName[this.fieldName()] || null;
-      let filters = fieldOptions.filterFieldTypes;
-      if (_.isFunction(fieldOptions.filterFieldTypes)) {
-        filters = fieldOptions.filterFieldTypes.bind(this, this.vis);
-      }
-      const fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, filters);
-      field = _.contains(fieldOpts, prevField) ? prevField : null;
-    }
-
-    return this.fillDefaults({ row: this.params.row, field: field });
-  };
-
   AggConfig.prototype.write = function () {
     return this.type.params.write(this);
   };
@@ -192,16 +183,20 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
   };
 
   /**
-   * Hook into param onRequest handling, and tell the aggConfig that it
-   * is being sent to elasticsearch.
-   *
-   * @return {[type]} [description]
+   *  Hook for pre-flight logic, see AggType#onSearchRequestStart
+   *  @param {Courier.SearchSource} searchSource
+   *  @param {Courier.SearchRequest} searchRequest
+   *  @return {Promise<undefined>}
    */
-  AggConfig.prototype.requesting = function () {
-    const self = this;
-    self.type && self.type.params.forEach(function (param) {
-      if (param.onRequest) param.onRequest(self);
-    });
+  AggConfig.prototype.onSearchRequestStart = function (searchSource, searchRequest) {
+    if (!this.type) {
+      return Promise.resolve();
+    }
+
+    return Promise.map(
+      this.type.params,
+      param => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest)
+    );
   };
 
   /**
@@ -267,7 +262,7 @@ export function VisAggConfigProvider(Private, fieldTypeFilter) {
   AggConfig.prototype.getAggParams = function () {
     return [].concat(
       (this.type) ? this.type.params.raw : [],
-      (this.schema) ? this.schema.params.raw : []
+      (_.has(this, 'schema.params')) ? this.schema.params.raw : []
     );
   };
 

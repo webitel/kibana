@@ -1,36 +1,20 @@
-'use strict';
+import { flatten } from 'lodash';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.importDashboards = undefined;
+export async function importDashboards(req) {
+  const { payload } = req;
+  const overwrite = 'force' in req.query && req.query.force !== false;
+  const exclude = flatten([req.query.exclude]);
 
-let importDashboards = exports.importDashboards = (() => {
-  var _ref = _asyncToGenerator(function* (req) {
-    const payload = req.payload;
+  const savedObjectsClient = req.getSavedObjectsClient();
 
-    const overwrite = 'force' in req.query && req.query.force !== false;
-    const exclude = (0, _lodash.flatten)([req.query.exclude]);
+  const docs = payload.objects
+    .filter(item => !exclude.includes(item.type));
 
-    const savedObjectsClient = req.getSavedObjectsClient();
+  /*WEBITEL*/
+  if (!req.auth.credentials) {
+    return new Error('Session unauthorized');
+  }
 
-    const docs = payload.objects.filter(function (item) {
-      return !exclude.includes(item.type);
-    });
-
-    /*WEBITEL*/
-    if (!req.auth.credentials)
-        return reply(new Error('Session unauthorized'));
-
-    const objects = yield savedObjectsClient.bulkCreate(docs, { overwrite }, req.auth.credentials.domain);
-    return { objects };
-  });
-
-  return function importDashboards(_x) {
-    return _ref.apply(this, arguments);
-  };
-})();
-
-var _lodash = require('lodash');
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+  const objects = await savedObjectsClient.bulkCreate(docs, { overwrite });
+  return { objects };
+}

@@ -1,12 +1,23 @@
 import _ from 'lodash';
 import { uiRegistry } from 'ui/registry/_registry';
+import { FieldFormat } from '../../field_formats/field_format';
 
 export const RegistryFieldFormatsProvider = uiRegistry({
   name: 'fieldFormats',
   index: ['id'],
   group: ['fieldType'],
 
+  invokeProviders(providers) {
+    // in order to ensure that FieldFormats can be instantiated on the
+    // server and the browser we don't provide them access to the Angular
+    // injector, just the FieldFormat class.
+    return providers.map(createSomeFormat => (
+      createSomeFormat(FieldFormat)
+    ));
+  },
+
   constructor: function (config) {
+    const getConfig = (...args) => config.get(...args);
     const self = this;
     let defaultMap;
 
@@ -55,7 +66,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      */
     self.getInstance = _.memoize(function (formatId) {
       const FieldFormat = self.byId[formatId];
-      return new FieldFormat();
+      return new FieldFormat(null, getConfig);
     });
 
     /**
@@ -67,7 +78,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
     self.getDefaultInstance = _.memoize(function (fieldType) {
       const conf = self.getDefaultConfig(fieldType);
       const FieldFormat = self.byId[conf.id];
-      return new FieldFormat(conf.params);
+      return new FieldFormat(conf.params, getConfig);
     });
 
 

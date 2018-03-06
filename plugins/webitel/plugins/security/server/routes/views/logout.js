@@ -4,8 +4,8 @@
 
 "use strict";
 
-export default (server, uiExports) => {
-    const logout = uiExports.apps.byId.logout;
+export default (server) => {
+    const logout = server.getHiddenUiAppById('logout');
 
     server.route({
         method: 'GET',

@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.deepCloneWithBuffers = deepCloneWithBuffers;
-
-var _lodash = require('lodash');
+import { cloneDeep } from 'lodash';
 
 function cloneBuffersCustomizer(val) {
   if (Buffer.isBuffer(val)) {
@@ -13,6 +6,6 @@ function cloneBuffersCustomizer(val) {
   }
 }
 
-function deepCloneWithBuffers(vals) {
-  return (0, _lodash.cloneDeep)(vals, cloneBuffersCustomizer);
+export function deepCloneWithBuffers(vals) {
+  return cloneDeep(vals, cloneBuffersCustomizer);
 }

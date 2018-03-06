@@ -1,19 +1,6 @@
-'use strict';
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _alter = require('../lib/alter.js');
-
-var _alter2 = _interopRequireDefault(_alter);
-
-var _chainable = require('../lib/classes/chainable');
-
-var _chainable2 = _interopRequireDefault(_chainable);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+import _ from 'lodash';
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
 const tickFormatters = {
   'bits': 'bits',
   'bits/s': 'bits/s',
@@ -23,42 +10,60 @@ const tickFormatters = {
   'percent': 'percent',
   'custom': 'custom(:prefix:suffix)'
 };
-module.exports = new _chainable2.default('yaxis', {
-  args: [{
-    name: 'inputSeries',
-    types: ['seriesList']
-  }, {
-    name: 'yaxis',
-    types: ['number', 'null'],
-    help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
-  }, {
-    name: 'min',
-    types: ['number', 'null'],
-    help: 'Min value'
-  }, {
-    name: 'max',
-    types: ['number', 'null'],
-    help: 'Max value'
-  }, {
-    name: 'position',
-    types: ['string', 'null'],
-    help: 'left or right'
-  }, {
-    name: 'label',
-    types: ['string', 'null'],
-    help: 'Label for axis'
-  }, {
-    name: 'color',
-    types: ['string', 'null'],
-    help: 'Color of axis label'
-  }, {
-    name: 'units',
-    types: ['string', 'null'],
-    help: 'The function to use for formatting y-axis labels. One of: ' + _lodash2.default.values(tickFormatters).join(', ')
-  }],
+
+export default new Chainable('yaxis', {
+  args: [
+    {
+      name: 'inputSeries',
+      types: ['seriesList']
+    },
+    {
+      name: 'yaxis',
+      types: ['number', 'null'],
+      help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
+    },
+    {
+      name: 'min',
+      types: ['number', 'null'],
+      help: 'Min value'
+    },
+    {
+      name: 'max',
+      types: ['number', 'null'],
+      help: 'Max value'
+    },
+    {
+      name: 'position',
+      types: ['string', 'null'],
+      help: 'left or right'
+    },
+    {
+      name: 'label',
+      types: ['string', 'null'],
+      help: 'Label for axis'
+    },
+    {
+      name: 'color',
+      types: ['string', 'null'],
+      help: 'Color of axis label'
+    },
+    {
+      name: 'units',
+      types: ['string', 'null'],
+      help: `The function to use for formatting y-axis labels. One of: ${_.values(tickFormatters).join(', ')}`,
+      suggestions: _.keys(tickFormatters).map(key => {
+        return { name: key, help: tickFormatters[key] };
+      })
+    },
+    {
+      name: 'tickDecimals',
+      types: ['number', 'null'],
+      help: 'tick decimal precision'
+    },
+  ],
   help: 'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   fn: function yaxisFn(args) {
-    return (0, _alter2.default)(args, function (eachSeries, yaxis, min, max, position, label, color, units) {
+    return alter(args, function (eachSeries, yaxis, min, max, position, label, color, units, tickDecimals) {
       yaxis = yaxis || 1;
 
       eachSeries.yaxis = yaxis;
@@ -76,12 +81,17 @@ module.exports = new _chainable2.default('yaxis', {
       myAxis.axisLabelColour = color;
       myAxis.axisLabelUseCanvas = true;
 
+      if (tickDecimals) {
+        myAxis.tickDecimals = tickDecimals < 0 ? 0 : tickDecimals;
+      }
+
       if (units) {
         const unitTokens = units.split(':');
-        if (!tickFormatters[unitTokens[0]]) {
-          throw new Error(`${units} is not a supported unit type.`);
+        const unitType = unitTokens[0];
+        if (!tickFormatters[unitType]) {
+          throw new Error (`${units} is not a supported unit type.`);
         }
-        if (unitTokens[0] === 'currency') {
+        if (unitType === 'currency') {
           const threeLetterCode = /^[A-Za-z]{3}$/;
           const currency = unitTokens[1];
           if (currency && !threeLetterCode.test(currency)) {
@@ -90,10 +100,21 @@ module.exports = new _chainable2.default('yaxis', {
         }
 
         myAxis.units = {
-          type: unitTokens[0],
+          type: unitType,
           prefix: unitTokens[1] || '',
           suffix: unitTokens[2] || ''
         };
+
+        if (unitType === 'percent') {
+          // jquery.flot uses axis.tickDecimals to generate tick values
+          // need 2 extra decimal places to perserve percision when percent shifts value to left
+          myAxis.units.tickDecimalsShift = 2;
+          if (tickDecimals) {
+            myAxis.tickDecimals += myAxis.units.tickDecimalsShift;
+          } else {
+            myAxis.tickDecimals = myAxis.units.tickDecimalsShift;
+          }
+        }
       }
 
       return eachSeries;

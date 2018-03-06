@@ -2,35 +2,37 @@
  * Created by i.navrotskyj on 11.11.2015.
  */
 
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CATEGORY } from 'ui/vis/vis_category';
+
 import 'plugins/members/members_vis.css';
 import 'plugins/members/members_controller';
-
-import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
-
 import visTemplate from 'plugins/members/members_vis.html';
 import visParamTemplate from 'plugins/members/members_vis_params.html';
-import {VisVisTypeProvider} from 'ui/vis/vis_type';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+
 
 // register the provider with the visTypes registry
-VisTypesRegistryProvider.register(MembersListProvider);
+VisTypesRegistryProvider.register(function MembersListProvider(Private) {
+  const VisFactory = Private(VisFactoryProvider);
 
-function MembersListProvider(Private) {
-    var TemplateVisType = Private(TemplateVisTypeProvider);
-    const VisType = Private(VisVisTypeProvider);
-
-    return new TemplateVisType({
-        name: 'WebitelMembersList',
-        title: "Member list",
-        icon: 'fa-phone-square',
-        description: 'List callers present in the queues.',
-        category: VisType.CATEGORY.ONLINE,
-        template: visTemplate,
-        params: {
-            editor: visParamTemplate
-        },
-        requiresSearch: false
-    });
-}
-
-export default MembersListProvider;
+  return VisFactory.createAngularVisualization({
+    name: 'WebitelMembersList',
+    title: "Member list",
+    icon: 'fa-phone-square',
+    description: 'List callers present in the queues.',
+    category: CATEGORY.OTHER,
+    visConfig: {
+      template: visTemplate,
+    },
+    editorConfig: {
+      optionsTemplate: visParamTemplate
+    },
+    requiresSearch: false,
+    requestHandler: 'none',
+    responseHandler: 'none',
+    options: {
+      showIndexSelection: false
+    }
+  })
+});

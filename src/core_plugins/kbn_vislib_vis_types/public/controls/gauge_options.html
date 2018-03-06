@@ -1,4 +1,4 @@
-<div>
+<div class="kuiSideBarSection">
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="gaugeType">
       Gauge Type
@@ -8,7 +8,7 @@
         id="gaugeType"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.gauge.gaugeType"
-        ng-options="mode for mode in vis.type.params.gaugeTypes"
+        ng-options="mode for mode in collections.gaugeTypes"
       ></select>
     </div>
   </div>
@@ -32,6 +32,17 @@
     </label>
     <div class="kuiSideBarFormRow__control">
       <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="displayWarnings">
+      Display warnings &nbsp;
+      <kbn-info info="Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed."></kbn-info>
+    </label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
     </div>
   </div>
 
@@ -87,6 +98,10 @@
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="gaugeOptionsRanges"
+        aria-label="Toggle range options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorRange = !showColorRange"
       >
@@ -101,21 +116,22 @@
       </div>
     </div>
 
-    <div ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsRanges" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
           <tr>
-            <th>
-              <label>From</label>
+            <th scope="col">
+              <label id="gaugeOptionsCustomRangeFrom">From</label>
             </th>
-            <th colspan="2">
-              <label>To</label>
+            <th scope="col" colspan="2">
+              <label id="gaugeOptionsCustomRangeTo">To</label>
             </th>
           </tr>
 
           <tr ng-repeat="range in vis.params.gauge.colorsRange track by $index">
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeFrom"
                 ng-model="range.from"
                 type="number"
                 class="form-control"
@@ -126,6 +142,7 @@
             </td>
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeTo"
                 ng-model="range.to"
                 type="number"
                 class="form-control"
@@ -158,6 +175,7 @@
           class="kuiButton kuiButton--primary kuiButton--fullWidth">
           Add Range
         </div>
+        <div class="euiSpacer euiSpacer--s"></div>
         <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
     </div>
@@ -165,6 +183,10 @@
   <div ng-show="vis.params.gauge.colorsRange.length > 1">
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorOptions}}"
+        aria-controls="gaugeOptionsColors"
+        aria-label="Toggle color options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorOptions = !showColorOptions"
       >
@@ -181,7 +203,7 @@
       </span>
       </div>
     </div>
-    <div ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsColors" ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="colorSchema">
@@ -192,7 +214,7 @@
               id="colorSchema"
               class="kuiSelect kuiSideBarSelect"
               ng-model="vis.params.gauge.colorSchema"
-              ng-options="mode for mode in vis.type.params.colorSchemas"
+              ng-options="mode for mode in collections.colorSchemas"
             ></select>
           </div>
           <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
@@ -210,13 +232,13 @@
     </div>
   </div>
 
-
-
-
-
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showStyle}}"
+        aria-controls="gaugeOptionsStyle"
+        aria-label="Toggle style options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showStyle = !showStyle"
       >
@@ -233,7 +255,7 @@
         </span>
       </div>
     </div>
-    <div ng-if="showStyle" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
 
       <div class="kuiSideBarSection">
         <div ng-hide="vis.params.gauge.type === 'simple'">
@@ -264,7 +286,7 @@
                 id="gaugeColorMode"
                 class="kuiSelect kuiSideBarSelect"
                 ng-model="vis.params.gauge.gaugeColorMode"
-                ng-options="mode for mode in vis.type.params.gaugeColorMode"
+                ng-options="mode for mode in collections.gaugeColorMode"
               ></select>
             </div>
           </div>

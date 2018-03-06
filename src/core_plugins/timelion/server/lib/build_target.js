@@ -1,20 +1,11 @@
-'use strict';
+import moment from 'moment';
+import splitInterval from './split_interval.js';
 
-var _moment = require('moment');
+export default function (tlConfig) {
+  const min = moment(tlConfig.time.from);
+  const max = moment(tlConfig.time.to);
 
-var _moment2 = _interopRequireDefault(_moment);
-
-var _split_interval = require('./split_interval.js');
-
-var _split_interval2 = _interopRequireDefault(_split_interval);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function (tlConfig) {
-  const min = (0, _moment2.default)(tlConfig.time.from);
-  const max = (0, _moment2.default)(tlConfig.time.to);
-
-  const intervalParts = (0, _split_interval2.default)(tlConfig.time.interval);
+  const intervalParts = splitInterval(tlConfig.time.interval);
 
   let current = min.startOf(intervalParts.unit);
 
@@ -26,4 +17,4 @@ module.exports = function (tlConfig) {
   }
 
   return targetSeries;
-};
+}

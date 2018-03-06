@@ -1,19 +1,23 @@
-'use strict';
-
 var filters = {};
 
 filters.and = {
   __template: {
-    filters: [{}]
+    filters: [
+      {}
+    ]
   },
-  filters: [{
-    __scope_link: '.'
-  }]
+  filters: [
+    {
+      __scope_link: '.'
+    }
+  ],
 };
+
 
 filters.bool = {
   __scope_link: 'GLOBAL.query'
 };
+
 
 filters.exists = {
   __template: {
@@ -21,6 +25,7 @@ filters.exists = {
   },
   'field': '{field}'
 };
+
 
 filters.ids = {
   __template: {
@@ -30,6 +35,7 @@ filters.ids = {
   'values': ['']
 };
 
+
 filters.limit = {
   __template: {
     value: 100
@@ -37,12 +43,14 @@ filters.limit = {
   value: 100
 };
 
+
 filters.type = {
   __template: {
     value: 'TYPE'
   },
   value: '{type}'
 };
+
 
 filters.geo_bounding_box = {
   __template: {
@@ -70,8 +78,9 @@ filters.geo_bounding_box = {
   },
   type: {
     __one_of: ['memory', 'indexed']
-  }
+  },
 };
+
 
 filters.geo_distance = {
   __template: {
@@ -95,8 +104,9 @@ filters.geo_distance = {
   '{field}': {
     lat: 40.73,
     lon: -74.1
-  }
+  },
 };
+
 
 filters.geo_distance_range = {
   __template: {
@@ -130,32 +140,42 @@ filters.geo_distance_range = {
   }
 };
 
+
 filters.geo_polygon = {
   __template: {
     'FIELD': {
-      'points': [{
-        lat: 40.73,
-        lon: -74.1
-      }, {
-        lat: 40.83,
-        lon: -75.1
-      }]
+      'points': [
+        {
+          lat: 40.73,
+          lon: -74.1
+        },
+        {
+          lat: 40.83,
+          lon: -75.1
+        }
+      ]
     }
   },
   '{field}': {
-    points: [{
-      lat: 40.73,
-      lon: -74.1
-    }]
+    points: [
+      {
+        lat: 40.73,
+        lon: -74.1
+      }
+    ]
   }
 };
+
 
 filters.geo_shape = {
   __template: {
     'FIELD': {
       shape: {
         type: 'envelope',
-        coordinates: [[-45, 45], [45, -45]]
+        coordinates: [
+          [-45, 45],
+          [45, -45]
+        ]
       },
       'relation': 'within'
     }
@@ -177,6 +197,7 @@ filters.geo_shape = {
   }
 };
 
+
 filters.has_child = {
   __template: {
     type: 'TYPE',
@@ -190,6 +211,7 @@ filters.has_child = {
   max_children: 10
 };
 
+
 filters.has_parent = {
   __template: {
     parent_type: 'TYPE',
@@ -200,6 +222,7 @@ filters.has_parent = {
   filter: {},
   _scope: ''
 };
+
 
 filters.m = filters.missing = {
   __template: {
@@ -214,12 +237,14 @@ filters.m = filters.missing = {
   field: '{field}'
 };
 
+
 filters.not = {
   __template: {
     filter: {}
   },
   filter: {}
 };
+
 
 filters.range = {
   __template: {
@@ -239,14 +264,20 @@ filters.range = {
   }
 };
 
+
 filters.or = {
   __template: {
-    filters: [{}]
+    filters: [
+      {}
+    ]
   },
-  filters: [{
-    __scope_link: '.'
-  }]
+  filters: [
+    {
+      __scope_link: '.'
+    }
+  ]
 };
+
 
 filters.prefix = {
   __template: {
@@ -254,6 +285,7 @@ filters.prefix = {
   },
   '{field}': ''
 };
+
 
 filters.query = {
   // global query
@@ -268,12 +300,14 @@ filters.script = {
   }
 };
 
+
 filters.term = {
   __template: {
     'FIELD': 'VALUE'
   },
   '{field}': ''
 };
+
 
 filters.terms = {
   __template: {
@@ -285,6 +319,7 @@ filters.terms = {
   }
 };
 
+
 filters.nested = {
   __template: {
     path: 'path_to_nested_doc',
@@ -295,6 +330,7 @@ filters.nested = {
   _name: ''
 };
 
-module.exports = function (api) {
+export default function (api) {
   api.addGlobalAutocompleteRules('filter', filters);
-};
+}
+

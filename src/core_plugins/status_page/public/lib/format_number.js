@@ -2,7 +2,7 @@
 import moment from 'moment';
 import numeral from 'numeral';
 
-module.exports = function formatNumber(num, which) {
+export default function formatNumber(num, which) {
   let format = '0.00';
   let postfix = '';
   switch (which) {
@@ -14,6 +14,9 @@ module.exports = function formatNumber(num, which) {
     case 'ms':
       postfix = ' ms';
       break;
+    case 'integer':
+      format = '0';
+      break;
   }
   return numeral(num).format(format) + postfix;
-};
+}

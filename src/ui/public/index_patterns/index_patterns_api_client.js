@@ -31,20 +31,20 @@ export function createIndexPatternsApiClient($http, basePath) {
       url,
       data: body,
     })
-    .then(resp => resp.data)
-    .catch((resp) => {
+      .then(resp => resp.data)
+      .catch((resp) => {
       // convert $http errors into actual error objects
-      const respBody = resp.data;
+        const respBody = resp.data;
 
-      if (resp.status === 404 && respBody.code === 'no_matching_indices') {
-        throw new IndexPatternMissingIndices(respBody.message);
-      }
+        if (resp.status === 404 && respBody.code === 'no_matching_indices') {
+          throw new IndexPatternMissingIndices(respBody.message);
+        }
 
-      const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
-      err.status = resp.status;
-      err.body = respBody;
-      throw err;
-    });
+        const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
+        err.status = resp.status;
+        err.body = respBody;
+        throw err;
+      });
   }
 
   class IndexPatternsApiClient {
@@ -79,20 +79,6 @@ export function createIndexPatternsApiClient($http, basePath) {
 
       return notify.event(`getFieldsForWildcard(${pattern})`, () => (
         request('GET', url).then(resp => resp.fields)
-      ));
-    }
-
-    testTimePattern(options = {}) {
-      const {
-        pattern
-      } = options;
-
-      const url = getUrl(['_test_time_pattern'], {
-        pattern,
-      });
-
-      return notify.event(`testTimePattern(${pattern})`, () => (
-        request('GET', url)
       ));
     }
   }

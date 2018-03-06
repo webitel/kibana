@@ -1,16 +1,8 @@
-'use strict';
+import _ from 'lodash';
+import { buildAggBody } from './agg_body';
+import createDateAgg from './create_date_agg';
 
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _create_date_agg = require('./create_date_agg');
-
-var _create_date_agg2 = _interopRequireDefault(_create_date_agg);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function buildRequest(config, tlConfig) {
+export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const bool = { must: [] };
 
@@ -20,16 +12,16 @@ module.exports = function buildRequest(config, tlConfig) {
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _lodash2.default.get(tlConfig, 'request.payload.extended.es.filter');
+    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
   }
 
   const aggs = {
     'q': {
       meta: { type: 'split' },
       filters: {
-        filters: _lodash2.default.chain(config.q).map(function (q) {
+        filters: _.chain(config.q).map(function (q) {
           return [q, { query_string: { query: q } }];
-        }).zipObject().value()
+        }).zipObject().value(),
       },
       aggs: {}
     }
@@ -37,24 +29,24 @@ module.exports = function buildRequest(config, tlConfig) {
 
   let aggCursor = aggs.q.aggs;
 
-  _lodash2.default.each(config.split, function (clause) {
+  _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
+      const termsAgg = buildAggBody(clause[0], scriptedFields);
+      termsAgg.size = parseInt(clause[1], 10);
       aggCursor[clause[0]] = {
         meta: { type: 'split' },
-        terms: {
-          field: clause[0],
-          size: parseInt(clause[1], 10)
-        },
+        terms: termsAgg,
         aggs: {}
       };
       aggCursor = aggCursor[clause[0]].aggs;
     } else {
-      throw new Error('`split` requires field:limit');
+      throw new Error ('`split` requires field:limit');
     }
   });
 
-  _lodash2.default.assign(aggCursor, (0, _create_date_agg2.default)(config, tlConfig));
+  _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
+
 
   return {
     index: config.index,
@@ -66,4 +58,4 @@ module.exports = function buildRequest(config, tlConfig) {
       size: 0
     }
   };
-};
+}

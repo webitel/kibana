@@ -2,10 +2,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortableProperties } from 'ui_framework/services';
+import { SortableProperties } from '@elastic/eui';
 import { ConfirmationButtonTypes } from 'ui/modals';
 
-export function DashboardListingController($injector, $scope) {
+export function DashboardListingController($injector, $scope, $location) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
   const Notifier = $injector.get('Notifier');
@@ -13,8 +13,10 @@ export function DashboardListingController($injector, $scope) {
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
+  const dashboardConfig = $injector.get('dashboardConfig');
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
@@ -26,12 +28,12 @@ export function DashboardListingController($injector, $scope) {
   const sortableProperties = new SortableProperties([
     {
       name: 'title',
-      getValue: item => item.title,
+      getValue: item => item.title.toLowerCase(),
       isAscending: true,
     },
     {
       name: 'description',
-      getValue: item => item.description,
+      getValue: item => item.description.toLowerCase(),
       isAscending: true
     }
   ],
@@ -68,13 +70,16 @@ export function DashboardListingController($injector, $scope) {
   this.isFetchingItems = false;
   this.items = [];
   this.pageOfItems = [];
-  this.filter = '';
+  this.filter = ($location.search()).filter || '';
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
+
+  this.hideWriteControls = dashboardConfig.getHideWriteControls();
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();
     fetchItems();
+    $location.search('filter', this.filter);
   });
   this.isAscending = (name) => sortableProperties.isAscendingByName(name);
   this.getSortedProperty = () => sortableProperties.getSortedProperty();
@@ -127,11 +132,12 @@ export function DashboardListingController($injector, $scope) {
     };
 
     confirmModal(
-      'Are you sure you want to delete the selected dashboards? This action is irreversible!',
+      `You can't recover deleted dashboards.`,
       {
         confirmButtonText: 'Delete',
         onConfirm: doDelete,
-        defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+        defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+        title: 'Delete selected dashboards?'
       });
   };
 
@@ -149,6 +155,10 @@ export function DashboardListingController($injector, $scope) {
 
   this.getUrlForItem = function getUrlForItem(item) {
     return `#${createDashboardEditUrl(item.id)}`;
+  };
+
+  this.getEditUrlForItem = function getEditUrlForItem(item) {
+    return `#${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`;
   };
 
   this.getCreateDashboardHref = function getCreateDashboardHref() {

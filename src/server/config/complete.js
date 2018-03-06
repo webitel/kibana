@@ -1,47 +1,49 @@
-'use strict';
+import { difference } from 'lodash';
+import { transformDeprecations } from './transform_deprecations';
+import { formatListAsProse, getFlattenedObject } from '../../utils';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+const getFlattenedKeys = object => (
+  Object.keys(getFlattenedObject(object))
+);
 
-exports.default = function (kbnServer, server, config) {
+const getUnusedConfigKeys = (settings, configValues) => {
+  const inputKeys = getFlattenedKeys(transformDeprecations(settings));
+  const appliedKeys = getFlattenedKeys(configValues);
+
+  if (inputKeys.includes('env')) {
+    // env is a special case key, see https://github.com/elastic/kibana/blob/848bf17b/src/server/config/config.js#L74
+    // where it is deleted from the settings before being injected into the schema via context and
+    // then renamed to `env.name` https://github.com/elastic/kibana/blob/848bf17/src/server/config/schema.js#L17
+    inputKeys[inputKeys.indexOf('env')] = 'env.name';
+  }
+
+  return difference(inputKeys, appliedKeys);
+};
+
+export default function (kbnServer, server, config) {
 
   server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
 
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
+  const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get())
+    .map(key => `"${key}"`);
 
-  try {
-    for (var _iterator = getUnusedSettings(kbnServer.settings, config.get())[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      const key = _step.value;
-
-      server.log(['warning', 'config'], `Settings for "${key}" were not applied, check for spelling errors and ensure the plugin is loaded.`);
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
+  if (!unusedKeys.length) {
+    return;
   }
-};
 
-var _lodash = require('lodash');
+  const desc = unusedKeys.length === 1
+    ? 'setting was'
+    : 'settings were';
 
-var _transform_deprecations = require('./transform_deprecations');
+  const error = new Error(
+    `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
+    'Check for spelling errors and ensure that expected ' +
+    'plugins are installed and enabled.'
+  );
 
-const getUnusedSettings = (settings, configValues) => {
-  return (0, _lodash.difference)((0, _lodash.keys)((0, _transform_deprecations.transformDeprecations)(settings)), (0, _lodash.keys)(configValues));
-};
-
-module.exports = exports['default'];
+  error.code = 'InvalidConfig';
+  error.processExitCode = 64;
+  throw error;
+}

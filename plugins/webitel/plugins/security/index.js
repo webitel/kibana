@@ -11,89 +11,91 @@ import initAuthenticateApi from './server/routes/api/v1/authenticate';
 import createScheme from './server/lib/login_scheme';
 import hapiAuthCookie from 'hapi-auth-cookie';
 
-export default (kibana) => new kibana.Plugin({
+export default (kibana) => {
+  return new kibana.Plugin({
     id: "security",
     require: ['webitel_main', 'kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     configPrefix: 'webitel.security',
     config(Joi) {
-        return Joi.object({
-            enabled: Joi.boolean().default(true),
-            cookieName: Joi.string().default('sid'),
-            encryptionKey: Joi.string().default('blablablablablablablablablablablablablablablablablablablablabla'),
-            sessionTimeout: Joi.number().default(2147483647),
-            secureCookies: Joi.boolean().default(false),
-            userName: Joi.string(),
-            password: Joi.string()
-        }).default();
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        cookieName: Joi.string().default('sid'),
+        encryptionKey: Joi.string().default('blablablablablablablablablablablablablablablablablablablablabla'),
+        sessionTimeout: Joi.number().default(2147483647),
+        secureCookies: Joi.boolean().default(false),
+        userName: Joi.string(),
+        password: Joi.string()
+      }).default();
     },
 
     uiExports: {
-        chromeNavControls: ['plugins/security/views/logout_button'],
-        apps: [
-            {
-                id: 'login',
-                title: 'Login',
-                main: 'plugins/security/views/login',
-                hidden: true
-            },
-            {
-                id: 'logout',
-                title: 'Logout',
-                main: 'plugins/security/views/logout',
-                hidden: true
-            }
-        ]
+      chromeNavControls: ['plugins/security/views/logout_button/logout_button'],
+      apps: [
+        {
+          id: 'login',
+          title: 'Login',
+          main: 'plugins/security/views/login/login',
+          hidden: true
+        },
+        {
+          id: 'logout',
+          title: 'Logout',
+          main: 'plugins/security/views/logout/logout',
+          hidden: true
+        }
+      ]
     },
 
     injectDefaultVars(server) {
-        return {}
+      return {}
     },
-    init (server) {
-        const plugin = this;
-        const config = server.config();
-        
-        server.register(hapiAuthCookie, (error) => {
-            if (error != null) throw error;
+    init(server) {
+      const plugin = this;
+      const config = server.config();
 
-            const cache = server.cache({ segment: 'sessions', expiresIn: config.get('webitel.security.sessionTimeout') });
-            server.app.cache = cache;
+      server.register(hapiAuthCookie, (error) => {
+        if (error != null) throw error;
 
-            server.auth.scheme('login', createScheme({
-                redirectUrl: (path) => loginUrl(config.get('server.basePath'), path),
-                strategy: 'webitel'
-            }));
-            server.auth.strategy('session', 'login', 'required');
+        const cache = server.cache({segment: 'sessions', expiresIn: config.get('webitel.security.sessionTimeout')});
+        server.app.cache = cache;
 
-            server.auth.strategy('webitel', 'cookie', false, {
-                password: config.get('webitel.security.encryptionKey'),
-                cookie: config.get('webitel.security.cookieName'),
-                redirectTo: '/login',
-                isSecure: false,
-                validateFunc: function (request, session, callback) {
-                    cache.get(session.sid, (err, cached) => {
+        server.auth.scheme('login', createScheme({
+          redirectUrl: (path) => loginUrl(config.get('server.basePath'), path),
+          strategy: 'webitel'
+        }));
+        server.auth.strategy('session', 'login', 'required');
 
-                        if (err) {
-                            server.log(['status', 'error', 'security'], err.message);
-                            return callback(err, false);
-                        }
+        server.auth.strategy('webitel', 'cookie', false, {
+          password: config.get('webitel.security.encryptionKey'),
+          cookie: config.get('webitel.security.cookieName'),
+          redirectTo: '/login',
+          isSecure: false,
+          validateFunc: function (request, session, callback) {
+            cache.get(session.sid, (err, cached) => {
 
-                        if (!cached) {
-                            return callback(null, false);
-                        }
+              if (err) {
+                server.log(['status', 'error', 'security'], err.message);
+                return callback(err, false);
+              }
 
-                        return callback(null, true, cached);
-                    });
-                }
+              if (!cached) {
+                return callback(null, false);
+              }
+
+              return callback(null, true, cached);
             });
-
+          }
         });
-        
-        initAuthenticateApi(server);
-        initLoginView(server, plugin);
-        initLogoutView(server, plugin);
+
+      });
+
+      initAuthenticateApi(server);
+      initLoginView(server, plugin);
+      initLogoutView(server, plugin);
     }
-})
+  });
+}
 
 function loginUrl(baseUrl, requestedPath) {
     const next = encodeURIComponent(requestedPath);

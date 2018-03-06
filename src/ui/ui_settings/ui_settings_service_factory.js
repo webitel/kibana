@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.uiSettingsServiceFactory = uiSettingsServiceFactory;
-
-var _ui_settings_service = require('./ui_settings_service');
+import { UiSettingsService } from './ui_settings_service';
 
 /**
  *  Create an instance of UiSettingsService that will use the
@@ -17,24 +10,22 @@ var _ui_settings_service = require('./ui_settings_service');
  *                            param object which causes a request via some elasticsearch client
  *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
  *                            the uiSettings.
- *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() an has an oportunity to intercept the
- *                            request and return an alternate `_source` value to use.
  *  @return {UiSettingsService}
  */
-function uiSettingsServiceFactory(server, options) {
+export function uiSettingsServiceFactory(server, options) {
   const config = server.config();
 
-  const savedObjectsClient = options.savedObjectsClient,
-        readInterceptor = options.readInterceptor,
-        getDefaults = options.getDefaults;
+  const {
+    savedObjectsClient,
+    getDefaults,
+  } = options;
 
-
-  return new _ui_settings_service.UiSettingsService({
+  return new UiSettingsService({
     type: 'config',
     id: config.get('pkg.version'),
+    buildNum: config.get('pkg.buildNum'),
     savedObjectsClient,
-    readInterceptor,
-    getDefaults
+    getDefaults,
+    log: (...args) => server.log(...args),
   });
 }

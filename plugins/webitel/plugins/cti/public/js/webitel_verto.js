@@ -4607,5 +4607,5 @@
     })(jQuery);
 
 
-    return WebitelVerto = jQuery.verto;
+    return window.WebitelVerto = jQuery.verto;
 });

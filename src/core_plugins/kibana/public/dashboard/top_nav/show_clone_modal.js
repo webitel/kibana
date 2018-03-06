@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 export function showCloneModal(onClone, title) {
   const container = document.createElement('div');
   const closeModal = () => {
+    ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
 
@@ -17,7 +18,7 @@ export function showCloneModal(onClone, title) {
   };
   document.body.appendChild(container);
   const element = (
-    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title + ' Copy'}></DashboardCloneModal>
+    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title + ' Copy'} />
   );
   ReactDOM.render(element, container);
 }

@@ -12,8 +12,24 @@ define(function (require) {
     require('plugins/cti/css/jquery.jscrollpane.css');
     require('plugins/cti/css/jquery.selectBox.css');
 
+    //TODO
+    var WebitelUserAwayCauseTypes = {
+      OnBreak: 'ONBREAK',
+      CallForwarding: 'CALLFORWARD',
+      VoiceMail: 'VOICEMAIL',
+      DoNotDisturb: 'DND',
+      None: 'NONE'
+  //        OnHook: '"ONHOOK"'
+    };
+
+    var WebitelAccountStatusTypes = {
+      Ready: 'ONHOOK',
+      Busy: 'ISBUSY',
+      Unregistered: 'NONREG'
+    };
+
     var module = require('ui/modules').get('kibana/webitel/cti', ['kibana']);
-    
+
     module.directive('ctiPanel', function () {
         return {
             link: function () {
@@ -23,9 +39,9 @@ define(function (require) {
         }
     });
 
-//WebitelSessionController.$inject = ['$scope','$injector'];
+    WebitelSessionController.$inject = ['$scope','$injector'];
 
-    function WebitelSessionController($scope) {
+    function WebitelSessionController($scope, $injector) {
         var webitelPanel;
         $scope.useWebphone = localStorage.getItem("useWebPhone") == 'true';
         $scope.useWebrtc = localStorage.getItem("useWebRTC") == 'true';
@@ -41,8 +57,8 @@ define(function (require) {
 
         function startWebphone() {
             if (webitelPanel ) return;
-            var injector = angular.element(document).injector();
-            injector.get('webitel').then(function(w) {
+
+            $injector.get('webitel').then(function(w) {
                 var webitelSession = w.getSession();
                 if (!webitelSession.domain) return;
                 w.useWebPhone = true;
@@ -74,7 +90,7 @@ define(function (require) {
 
         var webitel = {};
 
-        webrtcSession = [];
+        var webrtcSession = [];
 
         var jQuery = $;
 
@@ -193,12 +209,12 @@ define(function (require) {
         var OnAcceptCall = new WebitelPanelEvents();
         // EVENTS
 
-        MicControlStatus = {
+        var MicControlStatus = {
             On: 1,
             Off: 0
         };
 
-        VideoControlStatus = {
+        var VideoControlStatus = {
             On: true,
             Off: false
         };

@@ -20,6 +20,7 @@ routes.when('/management/kibana/reporting', {
                     response.data.hits.hits.forEach( i => {
                         var j = i._source;
                         j.name = i._id;
+                        j.encodeName = encodeURIComponent(j.name);
                         $scope.jobs.push(j);
                     })
                 },
@@ -30,10 +31,12 @@ routes.when('/management/kibana/reporting', {
             );
         }
 
+        $scope.encodeName = name = encodeURIComponent(name);
+
         $scope.removeJob = function (name) {
             // TODO add notifycation;
 
-            $http.delete('../api/reporting/v1/jobs/' + name, {}).then(
+            $http.delete('../api/reporting/v1/jobs/' + encodeURIComponent(name), {}).then(
                 (response) => {
                     setTimeout(function () {
                         reloadData();

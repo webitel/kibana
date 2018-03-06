@@ -1,5 +1,5 @@
-import SenseEditor from '../sense_editor/editor';
-const exampleText = require('raw!./helpExample.txt').trim();
+const SenseEditor = require('../sense_editor/editor');
+const exampleText = require('raw-loader!./helpExample.txt').trim();
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 
 require('ui/modules')

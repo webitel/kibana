@@ -8,7 +8,7 @@ export default function (kibana) {
         configPrefix: 'webitel.reporting',
         publicDir: resolve(__dirname, 'public'),
         uiExports: {
-            managementSections: ['plugins/reporting/views/management'],
+            managementSections: ['plugins/reporting/views/management/management'],
             spyModes: [
               'plugins/reporting/spy_report/spy_report'
             ]

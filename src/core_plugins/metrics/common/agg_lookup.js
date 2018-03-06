@@ -1,17 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isBasicAgg = isBasicAgg;
-exports.createOptions = createOptions;
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+import _ from 'lodash';
 const lookup = {
   'count': 'Count',
   'calculation': 'Calculation',
@@ -43,32 +30,57 @@ const lookup = {
   'static': 'Static Value'
 };
 
-const pipeline = ['calculation', 'derivative', 'cumulative_sum', 'moving_average', 'avg_bucket', 'min_bucket', 'max_bucket', 'sum_bucket', 'variance_bucket', 'sum_of_squares_bucket', 'std_deviation_bucket', 'series_agg', 'serial_diff', 'positive_only'];
+const pipeline = [
+  'calculation',
+  'derivative',
+  'cumulative_sum',
+  'moving_average',
+  'avg_bucket',
+  'min_bucket',
+  'max_bucket',
+  'sum_bucket',
+  'variance_bucket',
+  'sum_of_squares_bucket',
+  'std_deviation_bucket',
+  'series_agg',
+  'serial_diff',
+  'positive_only'
+];
 
 const byType = {
   _all: lookup,
   pipeline: pipeline,
-  basic: _lodash2.default.omit(lookup, pipeline),
-  metrics: _lodash2.default.pick(lookup, ['count', 'avg', 'min', 'max', 'sum', 'cardinality', 'value_count'])
+  basic: _.omit(lookup, pipeline),
+  metrics: _.pick(lookup, [
+    'count',
+    'avg',
+    'min',
+    'max',
+    'sum',
+    'cardinality',
+    'value_count'
+  ])
 };
 
-function isBasicAgg(item) {
-  return _lodash2.default.includes(Object.keys(byType.basic), item.type);
+export function isBasicAgg(item) {
+  return _.includes(Object.keys(byType.basic), item.type);
 }
 
-function createOptions(type = '_all', siblings = []) {
+export function createOptions(type = '_all', siblings = []) {
   let aggs = byType[type];
-  if (!aggs) aggs = byType._all;
+  if (!aggs)  aggs = byType._all;
   let enablePipelines = siblings.some(isBasicAgg);
   if (siblings.length <= 1) enablePipelines = false;
-  return (0, _lodash2.default)(aggs).map((label, value) => {
-    const disabled = _lodash2.default.includes(pipeline, value) ? !enablePipelines : false;
-    return {
-      label: disabled ? `${label} (use the "+" button to add this pipeline agg)` : label,
-      value,
-      disabled
-    };
-  }).value();
+  return _(aggs)
+    .map((label, value) => {
+      const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
+      return {
+        label: disabled ? `${label} (use the "+" button to add this pipeline agg)` : label,
+        value,
+        disabled
+      };
+    })
+    .value();
 }
 
-exports.default = lookup;
+export default lookup;

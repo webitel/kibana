@@ -1,9 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.timePatternToWildcard = timePatternToWildcard;
 /**
  *  Convert a moment time pattern to an index wildcard
  *  by extracting all of the "plain text" component and
@@ -12,7 +6,7 @@ exports.timePatternToWildcard = timePatternToWildcard;
  *  @param  {String} timePattern
  *  @return {String}
  */
-function timePatternToWildcard(timePattern) {
+export function timePatternToWildcard(timePattern) {
   let wildcard = '';
   let inEscape = false;
   let inPattern = false;

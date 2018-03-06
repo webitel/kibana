@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { InvalidLogScaleValues } from 'ui/errors';
 
 export function VislibVisualizationsPointSeriesProvider() {
 
@@ -10,21 +9,6 @@ export function VislibVisualizationsPointSeriesProvider() {
       this.chartEl = seriesEl;
       this.chartData = seriesData;
       this.seriesConfig = seriesConfig;
-
-      this.validateDataCompliesWithScalingMethod(this.chartData);
-    }
-
-    validateDataCompliesWithScalingMethod(data) {
-      const invalidLogScale = data.values && data.values.some(d => d.y < 1);
-      if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
-        throw new InvalidLogScaleValues();
-      }
-    }
-
-    getStackedCount() {
-      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
-        return series.mode === 'stacked' ? sum + 1 : sum;
-      }, 0);
     }
 
     getGroupedCount() {
@@ -38,15 +22,6 @@ export function VislibVisualizationsPointSeriesProvider() {
         if (isStacked) stacks.push(valueAxis);
         return sum + 1;
       }, 0);
-    }
-
-    getStackedNum(data) {
-      let i = 0;
-      for (const seri of this.baseChart.chartConfig.series) {
-        if (seri.data === data) return i;
-        if (seri.mode === 'stacked') i++;
-      }
-      return 0;
     }
 
     getGroupedNum(data) {

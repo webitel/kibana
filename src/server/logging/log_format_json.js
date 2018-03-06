@@ -1,22 +1,14 @@
-'use strict';
+import LogFormat from './log_format';
+import stringify from 'json-stringify-safe';
 
-var _log_format = require('./log_format');
-
-var _log_format2 = _interopRequireDefault(_log_format);
-
-var _jsonStringifySafe = require('json-stringify-safe');
-
-var _jsonStringifySafe2 = _interopRequireDefault(_jsonStringifySafe);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const stripColors = function stripColors(string) {
+const stripColors = function (string) {
   return string.replace(/\u001b[^m]+m/g, '');
 };
 
-module.exports = class KbnLoggerJsonFormat extends _log_format2.default {
+export default class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
     data.message = stripColors(data.message);
-    return (0, _jsonStringifySafe2.default)(data);
+    data['@timestamp'] = this.extractAndFormatTimestamp(data);
+    return stringify(data);
   }
-};
+}

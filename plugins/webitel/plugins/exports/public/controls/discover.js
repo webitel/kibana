@@ -4,7 +4,7 @@
 
 "use strict";
 
-require('plugins/exports/directives/export_data_config');
+require('plugins/exports/directives/export_data_config/export_data_config');
 import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
 
 function discoverExportProvider() {

@@ -3,7 +3,7 @@
 @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
 @vis-editor-sidebar-min-width: 350px;
 @vis-editor-nesting-width: 8px;
-@vis-editor-agg-editor-spacing: 5px;
+@vis-editor-agg-editor-spacing: 10px;
 
 .vis-editor {
   .flex-parent();
@@ -14,13 +14,76 @@
     height: 100%;
   }
 
+  @media (max-width: @screen-sm-max) {
+    visualization {
+      // While we are on a small screen the visualization is below the
+      // editor. In this cases it needs a minimum height, since it would otherwise
+      // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+      min-height: 400px;
+    }
+  }
+
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
+    flex-direction: row;
+    min-width: @vis-editor-sidebar-min-width;
+    max-width: 100%;
+    width: @vis-editor-sidebar-min-width;
+
+    @media (max-width: @screen-sm-max) {
+      // If we are on a small screen we force the editor to take 100% width.
+      // We cannot use a min-width: @screen-md-min query here, since we
+      // would otherwise break the manual resizing on large screens.
+      width: 100% !important;
+
+      vis-editor-resizer {
+        display: none;
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      max-width: 75%;
+    }
+  }
+
+  .collapsible-sidebar.closed {
+    min-width: 0;
+  }
+
+  .collapsible-sidebar--small {
+    width: 15%;
+  }
+
+  .collapsible-sidebar--medium {
+    width: 30%;
+  }
+
+  .collapsible-sidebar--large {
+    width: 50%;
+  }
+
+
+  .default-editor__resizer {
+    display: flex;
+    flex: 0 0 13px;
+    cursor: ew-resize;
+    background-color: @globalColorLightestGray;
+    align-items: center;
+    margin: 0;
+    user-select: none;
+
+    &:hover {
+      background-color: lighten(@globalColorBlue, 50%);
+    }
+
+    &.active {
+      background-color: @globalColorBlue;
+      color: white;
+    }
   }
 
   .visualization-options {
-    padding: @vis-editor-agg-editor-spacing;
 
     .form-group {
       margin-bottom: @vis-editor-agg-editor-spacing;
@@ -48,7 +111,11 @@
     .flex-parent(0, 1, auto);
   }
 
-
+  > visualize {
+    height: 100%;
+    flex: 1 1 auto;
+    display: flex;
+  }
 }
 
 
@@ -58,6 +125,7 @@
 
   .vis-editor-content {
     .flex-parent();
+    width: 100%;
     z-index: 0;
 
     // overrides for tablet and desktop
@@ -66,24 +134,32 @@
     }
   }
 
+  .vis-editor-content-fullEditor {
+    .flex-parent();
+    z-index: 0;
+  }
+
   .vis-editor-sidebar {
     .flex-parent(1, 0, auto);
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
-      min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
     }
 
     .index-pattern,
     nav {
-      min-height: @app-icon-height;
+      min-height: auto;
       border-radius: 0px;
     }
 
     .sidebar-item {
       border-top: 0 !important;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      background: @globalColorWhite;
+
     }
 
     .sidebar-container {
@@ -94,6 +170,7 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
+          padding: 10px;
           @media (min-width: @screen-md-min) {
             .flex-parent(1, 1, 1px);
             overflow: auto;
@@ -115,11 +192,11 @@
     }
 
     .sidebar-item-title {
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 18px;
       border: inherit !important;
-      margin-bottom: @vis-editor-agg-editor-spacing;
-      padding: 2px 5px !important;
+      margin-bottom: 10px !important;
+      padding: 0px !important;
+      text-transform: capitalize;
     }
 
     .hintbox {
@@ -127,12 +204,10 @@
       margin-bottom: @vis-editor-agg-editor-spacing;
     }
 
-    label {
+    .kuiSideBarFormRow__label {
       flex: 2 0 0;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
       margin-bottom: 0;
+      font-size: 12px;
     }
   }
 
@@ -148,7 +223,6 @@
 
     //IE10/11 - prevent flex item from overflowing
     flex-basis: 100%;
-    padding: @vis-editor-agg-editor-spacing;
   }
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
@@ -171,6 +245,9 @@
       .vis-editor-agg-header-toggle {
         flex: 0 0 auto;
         margin-right: @vis-editor-agg-editor-spacing;
+        min-width: 22px;
+        min-height: 22px;
+        text-align: center;
       }
 
       .vis-editor-agg-header-subagg-icon {
@@ -204,6 +281,7 @@
       text-align: center;
       background: @vis-editor-agg-error-bg;
       color: @vis-editor-agg-error-color;
+      line-height: 1.5;
     }
 
     .vis-editor-agg-editor-ranges {
@@ -265,14 +343,8 @@
       .flex-parent();
     }
 
-      .vis-editor-agg-add-subagg {
-        margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
-        margin-right: -@vis-editor-agg-editor-spacing;
-        margin-left: -@vis-editor-agg-editor-spacing;
-      }
-
       .vis-editor-agg-add-schemas {
-        margin: @vis-editor-agg-editor-spacing * 3;
+        margin-bottom: 10px;
       }
 
     .vis-editor-agg-order-agg {
@@ -285,42 +357,28 @@
     }
 
   /**
-  * 1. Make ui-select input match other inputs.
-  * 2. Show invalid state if the user has interacted with the input without selecting an option.
+  * 1. Show invalid state if the user has interacted with the input without selecting an option.
   */
   .vis-editor-field-ui-select {
-    .ui-select-match {
-      .btn {
-        border: 2px solid #ecf0f1; /* 1 */
-        background-color: white; /* 1 */
-        color: black; /* 1 */
-      }
-    }
-
     &.ng-invalid.ng-dirty,
     &.ng-invalid.ng-touched {
       .ui-select-match {
         .btn {
-          border-color: red; /* 2 */
+          border-color: @globalColorRed; /* 1 */
         }
       }
     }
   }
 
   .vis-editor-canvas {
-    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     overflow: auto;
     padding-left: @collapser-width;
+    flex-shrink: 1;
+    flex-basis: 100%;
 
     &.embedded {
-      flex-shrink: 1;
-      flex-basis: 100%;
-    }
-
-    // overrided for tablet and desktop
-    @media (min-width: @screen-md-min) {
       flex-shrink: 1;
       flex-basis: 100%;
     }
@@ -355,12 +413,12 @@ vis-editor-vis-options > * {
    */
 .vis-editor-subnav-link {
   padding: 4px 10px 5px 10px !important; /* 1 */
-  color: @kibanaGray2 !important; /* 1 */
+  color: @globalColorDarkGray !important; /* 1 */
 
   &.is-vis-editor-sub-nav-link-selected {
-    border-bottom: 2px solid @kibanaGray2;
-    color: @kibanaGray1;
-    background-color: #f6f6f6;
+    border-bottom: 2px solid @globalColorBlue;
+    border-color: @globalColorBlue !important;
+    color: @globalColorBlue !important;
 
     &:before {
       display: none;

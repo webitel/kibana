@@ -1,17 +1,16 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import 'ui/highlight';
-import 'ui/highlight/highlight_tags';
 import 'ui/doc_viewer';
 import 'ui/filters/trust_as_html';
 import 'ui/filters/short_dots';
 import './table_row.less';
-import { noWhiteSpace } from 'ui/utils/no_white_space';
+import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from 'ui/filter_bar';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const module = uiModules.get('app/discover');
 
@@ -44,7 +43,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onRemoveColumn: '=?',
     },
     link: function ($scope, $el) {
-      $el.after('<tr>');
+      $el.after('<tr data-test-subj="docTableDetailsRow">');
       $el.empty();
 
       // when we compile the details, we use this $scope
@@ -161,7 +160,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           const $target = reuse ? $(reuse).detach() : $(html);
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
-          if ($before.size()) {
+          if ($before.length) {
             $before.after($target);
           } else {
             $el.append($target);
@@ -182,7 +181,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
-        $el.trigger('renderComplete');
+        dispatchRenderComplete($el[0]);
       }
 
       /**

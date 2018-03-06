@@ -1,35 +1,25 @@
-'use strict';
+/**
+ * Let's weed out the ES versions that won't work with a given Kibana version.
+ * 1. Major version differences will never work together.
+ * 2. Older versions of ES won't work with newer versions of Kibana.
+ */
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = isEsCompatibleWithKibana;
+import semver from 'semver';
 
-var _semver = require('semver');
-
-var _semver2 = _interopRequireDefault(_semver);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
+export default function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
   const esVersionNumbers = {
-    major: _semver2.default.major(esVersion),
-    minor: _semver2.default.minor(esVersion),
-    patch: _semver2.default.patch(esVersion)
+    major: semver.major(esVersion),
+    minor: semver.minor(esVersion),
+    patch: semver.patch(esVersion),
   };
 
   const kibanaVersionNumbers = {
-    major: _semver2.default.major(kibanaVersion),
-    minor: _semver2.default.minor(kibanaVersion),
-    patch: _semver2.default.patch(kibanaVersion)
+    major: semver.major(kibanaVersion),
+    minor: semver.minor(kibanaVersion),
+    patch: semver.patch(kibanaVersion),
   };
 
-  // Accept the next major version of ES.
-  if (esVersionNumbers.major === kibanaVersionNumbers.major + 1) {
-    return true;
-  }
-
-  // Reject any other major version mismatches with ES.
+  // Reject mismatching major version numbers.
   if (esVersionNumbers.major !== kibanaVersionNumbers.major) {
     return false;
   }
@@ -40,11 +30,4 @@ function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
   }
 
   return true;
-} /**
-   * Determines whether the version of Kibana is compatible with the version of
-   * Elasticsearch. Compatibility means that the versions are expected to behave
-   * at least satisfactorily together. Incompatible versions likely won't work at
-   * all.
-   */
-
-module.exports = exports['default'];
+}

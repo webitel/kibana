@@ -1,30 +1,10 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createProxyRoute = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _joi = require('joi');
-
-var _joi2 = _interopRequireDefault(_joi);
-
-var _boom = require('boom');
-
-var _boom2 = _interopRequireDefault(_boom);
-
-var _wreck = require('wreck');
-
-var _wreck2 = _interopRequireDefault(_wreck);
-
-var _lodash = require('lodash');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import Joi from 'joi';
+import Boom from 'boom';
+import Wreck from 'wreck';
+import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
-  return `${(0, _lodash.trimRight)(base, '/')}/${(0, _lodash.trimLeft)(path, '/')}`;
+  return `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
 }
 
 function extendCommaList(obj, property, value) {
@@ -50,10 +30,10 @@ function getProxyHeaders(req) {
   return headers;
 }
 
-const createProxyRoute = exports.createProxyRoute = ({
+export const createProxyRoute = ({
   baseUrl = '/',
   pathFilters = [/.*/],
-  getConfigForReq = () => ({})
+  getConfigForReq = () => ({}),
 }) => ({
   path: '/api/console/proxy',
   method: 'POST',
@@ -64,61 +44,69 @@ const createProxyRoute = exports.createProxyRoute = ({
     },
 
     validate: {
-      query: _joi2.default.object().keys({
-        method: _joi2.default.string().valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE').insensitive().required(),
-        path: _joi2.default.string().required()
-      }).unknown(true)
+      query: Joi.object().keys({
+        method: Joi.string()
+          .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
+          .insensitive()
+          .required(),
+        path: Joi.string().required()
+      }).unknown(true),
     },
 
-    pre: [function filterPath(req, reply) {
-      const path = req.query.path;
+    pre: [
+      function filterPath(req, reply) {
+        const { path } = req.query;
 
-
-      if (!pathFilters.some(re => re.test(path))) {
-        const err = _boom2.default.forbidden();
-        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
-        err.output.headers['content-type'] = 'text/plain';
-        reply(err);
-      } else {
-        reply();
-      }
-    }],
+        if (!pathFilters.some(re => re.test(path))) {
+          const err = Boom.forbidden();
+          err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
+          err.output.headers['content-type'] = 'text/plain';
+          reply(err);
+        } else {
+          reply();
+        }
+      },
+    ],
 
     handler(req, reply) {
-      const payload = req.payload,
-            query = req.query;
-      const path = query.path,
-            method = query.method;
-
+      const { payload, query } = req;
+      const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
 
-      var _getConfigForReq = getConfigForReq(req, uri);
-
-      const timeout = _getConfigForReq.timeout,
-            rejectUnauthorized = _getConfigForReq.rejectUnauthorized,
-            agent = _getConfigForReq.agent,
-            headers = _getConfigForReq.headers;
-
+      const {
+        timeout,
+        rejectUnauthorized,
+        agent,
+        headers,
+      } = getConfigForReq(req, uri);
 
       const wreckOptions = {
         payload,
         timeout,
         rejectUnauthorized,
         agent,
-        headers: _extends({}, headers, getProxyHeaders(req))
+        headers: {
+          ...headers,
+          ...getProxyHeaders(req)
+        },
       };
 
-      _wreck2.default.request(method, uri, wreckOptions, (err, esResponse) => {
+      Wreck.request(method, uri, wreckOptions, (err, esResponse) => {
         if (err) {
           return reply(err);
         }
 
         if (method.toUpperCase() !== 'HEAD') {
-          reply(esResponse).code(esResponse.statusCode).header('warning', esResponse.headers.warning);
+          reply(esResponse)
+            .code(esResponse.statusCode)
+            .header('warning', esResponse.headers.warning);
           return;
         }
 
-        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`).code(esResponse.statusCode).type('text/plain').header('warning', esResponse.headers.warning);
+        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+          .code(esResponse.statusCode)
+          .type('text/plain')
+          .header('warning', esResponse.headers.warning);
       });
     }
   }

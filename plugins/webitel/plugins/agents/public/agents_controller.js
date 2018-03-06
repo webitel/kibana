@@ -5,7 +5,7 @@
 
 define(function (require) {
     require('plugins/webitel_main/lib/webitel');
-    
+
     var module = require('ui/modules').get('kibana/webitel/agents', ['kibana']);
 
     module
@@ -35,6 +35,7 @@ define(function (require) {
                     if (_user) {
                         _user['state'] = e['CC-Agent-State'];
                         _user['line_status'] = getLineStatusFS(_user['state'], _user['status']);
+                        $scope.$apply();
                     }
                 };
 
@@ -43,6 +44,7 @@ define(function (require) {
                     if (_user) {
                         _user['status'] = e['CC-Agent-Status'];
                         _user['line_status'] = getLineStatusFS(_user['state'], _user['status']);
+                        $scope.$apply();
                     }
                 };
                 webitel.onServerEvent("CC::AGENT-STATE-CHANGE", onAgentStateChange,  {all: true});
@@ -61,9 +63,10 @@ define(function (require) {
                 };
 
                 function onChange (e) {
-                    var queue = e['CC-Queue'];
-                    if (queueName == queue)
-                        $scope.members = e['CC-Count'];
+                    if (queueName === e['CC-Queue']) {
+                      $scope.members = e['CC-Count'];
+                      $scope.$apply();
+                    }
                 };
 
                 webitel.onServerEvent("CC::MEMBERS-COUNT", onChange,  {all: true});

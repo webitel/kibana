@@ -2,11 +2,10 @@
  * Created by igor on 04.11.16.
  */
 
-"use strict";
 import { get } from 'lodash';
 
-export default (server, uiExports) => {
-    const login = uiExports.apps.byId.login;
+export default (server) => {
+    const login = server.getHiddenUiAppById('login');
     const config = server.config();
 
     server.route({

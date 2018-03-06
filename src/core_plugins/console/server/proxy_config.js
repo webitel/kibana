@@ -1,29 +1,23 @@
-'use strict';
+import { values } from 'lodash';
+import { format as formatUrl } from 'url';
+import { Agent as HttpsAgent } from 'https';
+import { readFileSync } from 'fs';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ProxyConfig = undefined;
+import { WildcardMatcher } from './wildcard_matcher';
 
-var _lodash = require('lodash');
-
-var _url = require('url');
-
-var _https = require('https');
-
-var _fs = require('fs');
-
-var _wildcard_matcher = require('./wildcard_matcher');
-
-class ProxyConfig {
+export class ProxyConfig {
   constructor(config) {
-    config = Object.assign({}, config);
+    config = {
+      ...config
+    };
 
     // -----
     // read "match" info
     // -----
-    const rawMatches = Object.assign({}, config.match);
-    this.id = (0, _url.format)({
+    const rawMatches = {
+      ...config.match
+    };
+    this.id = formatUrl({
       protocol: rawMatches.protocol,
       hostname: rawMatches.host,
       port: rawMatches.port,
@@ -31,10 +25,10 @@ class ProxyConfig {
     }) || '*';
 
     this.matchers = {
-      protocol: new _wildcard_matcher.WildcardMatcher(rawMatches.protocol),
-      host: new _wildcard_matcher.WildcardMatcher(rawMatches.host),
-      port: new _wildcard_matcher.WildcardMatcher(rawMatches.port),
-      path: new _wildcard_matcher.WildcardMatcher(rawMatches.path, '/')
+      protocol: new WildcardMatcher(rawMatches.protocol),
+      host: new WildcardMatcher(rawMatches.host),
+      port: new WildcardMatcher(rawMatches.port),
+      path: new WildcardMatcher(rawMatches.path, '/'),
     };
 
     // -----
@@ -49,14 +43,14 @@ class ProxyConfig {
     this.verifySsl = ssl.verify;
 
     const sslAgentOpts = {
-      ca: ssl.ca && ssl.ca.map(ca => (0, _fs.readFileSync)(ca)),
-      cert: ssl.cert && (0, _fs.readFileSync)(ssl.cert),
-      key: ssl.key && (0, _fs.readFileSync)(ssl.key)
+      ca: ssl.ca && ssl.ca.map(ca => readFileSync(ca)),
+      cert: ssl.cert && readFileSync(ssl.cert),
+      key: ssl.key && readFileSync(ssl.key),
     };
 
-    if ((0, _lodash.values)(sslAgentOpts).filter(Boolean).length) {
+    if (values(sslAgentOpts).filter(Boolean).length) {
       sslAgentOpts.rejectUnauthorized = this.verifySsl == null ? true : this.verifySsl;
-      return new _https.Agent(sslAgentOpts);
+      return new HttpsAgent(sslAgentOpts);
     }
   }
 
@@ -74,4 +68,3 @@ class ProxyConfig {
     };
   }
 }
-exports.ProxyConfig = ProxyConfig;

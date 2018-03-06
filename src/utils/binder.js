@@ -1,9 +1,4 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-class BinderBase {
+export class BinderBase {
   constructor() {
     this.disposal = [];
   }
@@ -22,4 +17,3 @@ class BinderBase {
     destroyers.forEach(fn => fn());
   }
 }
-exports.BinderBase = BinderBase;

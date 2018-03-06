@@ -1,15 +1,17 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import _ from 'lodash';
 import color from 'color';
 import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';
 import convertSeriesToVars from '../../lib/convert_series_to_vars';
+import ErrorComponent from '../../error';
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
-  const variables = convertSeriesToVars(series, model);
-  const style = { };
+  const variables = convertSeriesToVars(series, model, dateFormat);
+  const style = {};
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
@@ -18,23 +20,25 @@ function MarkdownVisualization(props) {
   }
   let markdown;
   if (model.markdown) {
-    const markdownSource = replaceVars(model.markdown, {}, {
-      _all: variables,
-      ...variables
-    });
+    const markdownSource = replaceVars(
+      model.markdown,
+      {},
+      {
+        _all: variables,
+        ...variables
+      }
+    );
     let className = 'thorMarkdown';
     let contentClassName = `thorMarkdown__content ${model.markdown_vertical_align}`;
     if (model.markdown_scrollbars) contentClassName += ' scrolling';
     if (reversed) className += ' reversed';
+    const markdownError = markdownSource instanceof Error ? markdownSource : null;
     markdown = (
       <div className={className}>
-        <style type="text/css">
-          {model.markdown_css}
-        </style>
+        {markdownError && <ErrorComponent error={markdownError} />}
+        <style type="text/css">{model.markdown_css}</style>
         <div className={contentClassName}>
-          <div id={`markdown-${model.id}`}>
-            <Markdown escapeHtml={true} source={markdownSource}/>
-          </div>
+          <div id={`markdown-${model.id}`}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
         </div>
       </div>
     );
@@ -53,7 +57,8 @@ MarkdownVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownVisualization;

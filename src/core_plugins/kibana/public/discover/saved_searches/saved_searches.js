@@ -14,14 +14,15 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Promise, config, kbnIndex, esAdmin, createNotifier, SavedSearch, kbnUrl, $http) {
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, esAdmin, kbnUrl, $http);
+module.service('savedSearches', function (Promise, config, kbnIndex, createNotifier, SavedSearch, kbnUrl, $http, chrome) {
+  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, kbnUrl, $http, chrome);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
     noun: 'Saved Search',
     nouns: 'saved searches'
   };
+
   savedSearchLoader.urlFor = function (id) {
     return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };

@@ -48,9 +48,9 @@ module.directive('vislibValueAxes', function () {
 
       $scope.getSeries = function (axis) {
         const isFirst = $scope.vis.params.valueAxes[0] === axis;
-        const series = _.filter($scope.vis.params.seriesParams, series => {
-          return series.valueAxis === axis.id || (isFirst && !series.valueAxis);
-        });
+        const series = $scope.vis.params.seriesParams.filter(series =>
+          (series.valueAxis === axis.id || (isFirst && !series.valueAxis))
+        );
         return series.map(series => series.data.label).join(', ');
       };
 
@@ -127,7 +127,7 @@ module.directive('vislibValueAxes', function () {
             const isMatchingSeries = (isFirst && !series.valueAxis) || (series.valueAxis === axis.id);
             if (isMatchingSeries) {
               let seriesNumber = 0;
-              $scope.vis.aggs.forEach(agg => {
+              $scope.vis.getAggConfig().forEach(agg => {
                 if (agg.schema.name === 'metric') {
                   if (seriesNumber === i) matchingSeries.push(agg);
                   seriesNumber++;
@@ -146,12 +146,8 @@ module.directive('vislibValueAxes', function () {
       };
 
       $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return '';
-          }
+        return $scope.vis.getAggConfig().map(agg => {
+          return agg.makeLabel();
         }).join();
       }, () => {
         $scope.updateAxisTitle();

@@ -30,11 +30,7 @@ module.directive('vislibSeries', function () {
       $scope.series = $scope.vis.params.seriesParams;
       $scope.$watch(() => {
         return $scope.vis.aggs.map(agg => {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return '';
-          }
+          return agg.makeLabel();
         }).join();
       }, () => {
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;
@@ -61,7 +57,7 @@ module.directive('vislibSeries', function () {
         return $scope.vis.params.seriesParams.map(series => series.type).join();
       }, () => {
         const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
-        $scope.savedVis.type = types.length === 1 ? types[0] : 'histogram';
+        $scope.vis.type.type = types.length === 1 ? types[0] : 'histogram';
       });
 
       $scope.$watch('vis.params.valueAxes.length', () => {

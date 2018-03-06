@@ -26,7 +26,8 @@ export function VislibTypesPointSeries() {
 
     return {
       ...matchingSeriesParams,
-      data: seri
+      data: seri,
+      radiusRatio: cfg.radiusRatio
     };
   };
 
@@ -84,9 +85,9 @@ export function VislibTypesPointSeries() {
               type: config.scale,
               setYExtents: config.setYExtents,
               defaultYExtents: config.defaultYExtents,
-              min : isUserDefinedYAxis ? config.yAxis.min : undefined,
-              max : isUserDefinedYAxis ? config.yAxis.max : undefined,
-              mode : mode
+              min: isUserDefinedYAxis ? config.yAxis.min : undefined,
+              max: isUserDefinedYAxis ? config.yAxis.max : undefined,
+              mode: mode
             },
             labels: {
               axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
@@ -177,7 +178,7 @@ export function VislibTypesPointSeries() {
       const defaults = create()(cfg, data);
       const seriesLimit = 25;
       const hasCharts = defaults.charts.length;
-      const tooManySeries = defaults.charts[0].series.length > seriesLimit;
+      const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
       if (hasCharts && tooManySeries) {
         defaults.error = 'There are too many series defined.';
       }
@@ -196,7 +197,7 @@ export function VislibTypesPointSeries() {
         },
         labels: {
           filter: false,
-          axisFormatter:  function (val) { return val; }
+          axisFormatter: function (val) { return val; }
         },
         style: {
           rangePadding: 0,

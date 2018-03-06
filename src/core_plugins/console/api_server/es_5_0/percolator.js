@@ -1,10 +1,10 @@
-'use strict';
-
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_put_percolator', {
     priority: 10, // to override doc
     methods: ['PUT', 'POST'],
-    patterns: ["{index}/.percolator/{id}"],
+    patterns: [
+      "{index}/.percolator/{id}"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["external", "internal"],
@@ -24,7 +24,9 @@ module.exports = function (api) {
   api.addEndpointDescription('_percolate', {
     methods: ['GET', 'POST'],
     priority: 10, // to override doc
-    patterns: ["{indices}/{type}/_percolate"],
+    patterns: [
+      "{indices}/{type}/_percolate"
+    ],
     url_params: {
       preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
       routing: "",
@@ -44,7 +46,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('_percolate_id', {
     methods: ['GET', 'POST'],
-    patterns: ["{indices}/{type}/{id}/_percolate"],
+    patterns: [
+      "{indices}/{type}/{id}/_percolate"
+    ],
     url_params: {
       routing: "",
       ignore_unavailable: ["true", "false"],
@@ -68,7 +72,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('_percolate_count', {
     methods: ['GET', 'POST'],
-    patterns: ["{indices}/{type}/_percolate/count"],
+    patterns: [
+      "{indices}/{type}/_percolate/count"
+    ],
     url_params: {
       preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
       routing: "",
@@ -81,4 +87,4 @@ module.exports = function (api) {
       filter: {}
     }
   });
-};
+}

@@ -10,8 +10,8 @@ export default function (kibana) {
             hacks: [
                 'plugins/cti/cti'
             ],
-            chromeNavControls: ['plugins/cti/views/anchor'],
-            managementSections: ['plugins/cti/views/management']
+            chromeNavControls: ['plugins/cti/views/anchor/anchor'],
+            managementSections: ['plugins/cti/views/management/management']
         },
         config(Joi) {
             return Joi.object({

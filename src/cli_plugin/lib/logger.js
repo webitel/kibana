@@ -1,14 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 /**
  * Logs messages and errors
  */
-class Logger {
+export default class Logger {
 
-  constructor(settings) {
+  constructor(settings = {}) {
     this.previousLineEnded = true;
     this.silent = !!settings.silent;
     this.quiet = !!settings.quiet;
@@ -49,5 +44,3 @@ class Logger {
   }
 
 }
-exports.default = Logger;
-module.exports = exports['default'];

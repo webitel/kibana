@@ -1,23 +1,15 @@
-'use strict';
+import { get, isUndefined, noop, set } from 'lodash';
+import { unset } from '../../utils';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.rename = rename;
-
-var _lodash = require('lodash');
-
-var _utils = require('../../utils');
-
-function rename(oldKey, newKey) {
-  return (settings, log = _lodash.noop) => {
-    const value = (0, _lodash.get)(settings, oldKey);
-    if ((0, _lodash.isUndefined)(value)) {
+export function rename(oldKey, newKey) {
+  return (settings, log = noop) => {
+    const value = get(settings, oldKey);
+    if (isUndefined(value)) {
       return;
     }
 
-    (0, _utils.unset)(settings, oldKey);
-    (0, _lodash.set)(settings, newKey, value);
+    unset(settings, oldKey);
+    set(settings, newKey, value);
 
     log(`Config key "${oldKey}" is deprecated. It has been replaced with "${newKey}"`);
   };

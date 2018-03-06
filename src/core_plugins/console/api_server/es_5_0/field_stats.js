@@ -1,9 +1,10 @@
-'use strict';
-
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_field_stats', {
     methods: ['GET', 'POST'],
-    patterns: ["_field_stats", "{indices}/_field_stats"],
+    patterns: [
+      "_field_stats",
+      "{indices}/_field_stats"
+    ],
     url_params: {
       fields: [],
       level: ["cluster", "indices"],
@@ -12,7 +13,9 @@ module.exports = function (api) {
       expand_wildcards: ["open", "closed", "none", "all"]
     },
     data_autocomplete_rules: {
-      fields: ["{field}"],
+      fields: [
+        "{field}",
+      ],
       index_constraints: {
         "{field}": {
           min_value: {
@@ -41,4 +44,4 @@ module.exports = function (api) {
       }
     }
   });
-};
+}

@@ -1,31 +1,20 @@
-'use strict';
+import { Squeeze } from 'good-squeeze';
+import { createWriteStream as writeStr } from 'fs';
 
-var _goodSqueeze = require('good-squeeze');
+import LogFormatJson from './log_format_json';
+import LogFormatString from './log_format_string';
+import { LogInterceptor } from './log_interceptor';
 
-var _fs = require('fs');
-
-var _log_format_json = require('./log_format_json');
-
-var _log_format_json2 = _interopRequireDefault(_log_format_json);
-
-var _log_format_string = require('./log_format_string');
-
-var _log_format_string2 = _interopRequireDefault(_log_format_string);
-
-var _log_interceptor = require('./log_interceptor');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = class KbnLogger {
+export default class KbnLogger {
   constructor(events, config) {
-    this.squeeze = new _goodSqueeze.Squeeze(events);
-    this.format = config.json ? new _log_format_json2.default(config) : new _log_format_string2.default(config);
-    this.logInterceptor = new _log_interceptor.LogInterceptor();
+    this.squeeze = new Squeeze(events);
+    this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
+    this.logInterceptor = new LogInterceptor();
 
     if (config.dest === 'stdout') {
       this.dest = process.stdout;
     } else {
-      this.dest = (0, _fs.createWriteStream)(config.dest, {
+      this.dest = writeStr(config.dest, {
         flags: 'a',
         encoding: 'utf8'
       });
@@ -34,7 +23,10 @@ module.exports = class KbnLogger {
 
   init(readstream, emitter, callback) {
 
-    this.output = readstream.pipe(this.logInterceptor).pipe(this.squeeze).pipe(this.format);
+    this.output = readstream
+      .pipe(this.logInterceptor)
+      .pipe(this.squeeze)
+      .pipe(this.format);
 
     this.output.pipe(this.dest);
 
@@ -47,4 +39,4 @@ module.exports = class KbnLogger {
 
     callback();
   }
-};
+}

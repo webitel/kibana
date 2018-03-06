@@ -1,36 +1,24 @@
-'use strict';
+import Joi from 'joi';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createGetRoute = undefined;
-
-var _joi = require('joi');
-
-var _joi2 = _interopRequireDefault(_joi);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const createGetRoute = exports.createGetRoute = prereqs => ({
+export const createGetRoute = (prereqs) => ({
   path: '/api/saved_objects/{type}/{id}',
   method: 'GET',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      params: _joi2.default.object().keys({
-        type: _joi2.default.string().required(),
-        id: _joi2.default.string().required()
+      params: Joi.object().keys({
+        type: Joi.string().required(),
+        id: Joi.string().required(),
       }).required()
     },
     handler(request, reply) {
-      const savedObjectsClient = request.pre.savedObjectsClient;
-      var _request$params = request.params;
-      const type = _request$params.type,
-            id = _request$params.id;
+      const { savedObjectsClient } = request.pre;
+      const { type, id } = request.params;
 
       /*WEBITEL*/
-      if (!request.auth.credentials)
-          return reply(new Error('Session unauthorized'));
+      if (!request.auth.credentials) {
+        return reply(new Error('Session unauthorized'));
+      }
 
       reply(savedObjectsClient.get(type, id, request.auth.credentials.domain));
     }

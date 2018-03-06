@@ -16,7 +16,7 @@ define(function (require) {
 
     var HashCollection = require('plugins/webitel_main/lib/hashCollection');
     var module = require('ui/modules').get('kibana/webitel/calls', ['kibana', 'ngTable', 'timer']);
-    
+
     module
         .controller('KbnWebitelCallsVisController', function ($scope, $filter, NgTableParams, webitel) {
             webitel.then(function (webitel) {
@@ -41,7 +41,7 @@ define(function (require) {
                     data.push(item);
                     $scope.tableParams && $scope.tableParams.reload()
                 });
-                
+
                 hashListChannels.onRemoved.subscribe(function (item, key) {
                     var id = data.indexOf(item);
                     if (~id) {
@@ -49,7 +49,7 @@ define(function (require) {
                     }
                     $scope.tableParams && $scope.tableParams.reload()
                 });
-                
+
                 var mapColl = {
                     "callstate": "Channel-Call-State", //+
                     "cid_name": "Caller-Caller-ID-Name", //+
@@ -81,8 +81,9 @@ define(function (require) {
                     } else {
                         if (e["Channel-Call-State"] && e["Channel-Call-State"].toLowerCase() == 'hangup') {
                             if(hashListChannels.get(e["Other-Leg-Unique-ID"])) {
-                                hashListChannels.remove(e["Other-Leg-Unique-ID"])
+                                hashListChannels.remove(e["Other-Leg-Unique-ID"]);
                             }
+                            $scope.$apply();
                             return;
                         }
                         call = {};
@@ -93,6 +94,7 @@ define(function (require) {
                             console.warn(e)
                         }
                     }
+                    $scope.$apply();
 
                 };
 
@@ -100,14 +102,16 @@ define(function (require) {
                     var call = hashListChannels.get(e["Channel-Call-UUID"]);
                     if (call) {
                         updateCallParametersFromEvent(e, call);
-                        var leg = hashListChannels.remove(e["Bridge-A-Unique-ID"] == call.uuid ? e["Bridge-B-Unique-ID"] : e["Bridge-A-Unique-ID"])
+                        var leg = hashListChannels.remove(e["Bridge-A-Unique-ID"] == call.uuid ? e["Bridge-B-Unique-ID"] : e["Bridge-A-Unique-ID"]);
+                      $scope.$apply();
                     }
                 };
-                
+
                 var onDTMF = function (e) {
                     var call = hashListChannels.get(e["Channel-Call-UUID"]);
                     if (call) {
-                        call.dtmf += e['DTMF-Digit']
+                        call.dtmf += e['DTMF-Digit'];
+                        $scope.$apply();
                     }
                 };
 
@@ -117,7 +121,7 @@ define(function (require) {
                         "display": call.cid_num
                     })
                 };
-                
+
                 $scope.getClass = function (state) {
                     switch (state) {
                         case "ACTIVE":
@@ -128,20 +132,20 @@ define(function (require) {
                             return 'call-ring'
                     }
                 };
-                
+
                 $scope.useWebPhone = function () {
                     return !!webitel.domainSession
                 };
 
                 var activeDomain = null;
-                
+
                 var subscribeDomain = function (domainName) {
                     webitel.onServerEvent('SE:CHANNEL_CALLSTATE', onCallState, {all:true, domain: domainName});
                     webitel.onServerEvent('SE:CHANNEL_BRIDGE', onCallBridge, {all:true, domain: domainName});
                     webitel.onServerEvent('SE:DTMF', onDTMF, {all:true, domain: domainName});
                     activeDomain = domainName;
                 };
-                
+
                 var unSubscribeDomain = function () {
                     webitel.unServerEvent('SE:CHANNEL_CALLSTATE', {all:true, domain: activeDomain}, onCallState);
                     webitel.unServerEvent('SE:CHANNEL_BRIDGE', {all:true, domain: activeDomain}, onCallBridge);

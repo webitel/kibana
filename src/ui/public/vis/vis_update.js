@@ -1,10 +1,8 @@
+// TODO: this should be moved to vis_update_state
+// Currently the migration takes place in Vis when calling setCurrentState.
+// It should rather convert the raw saved object before starting to instantiate
+// any JavaScript classes from it.
 const updateVisualizationConfig = (stateConfig, config) => {
-
-  if (config.type === 'gauge' && config.fontSize) {
-    config.gauge.style.fontSize = config.fontSize;
-    delete config.fontSize;
-  }
-
   if (!stateConfig || stateConfig.seriesParams) return;
   if (!['line', 'area', 'histogram'].includes(config.type)) return;
 
@@ -22,16 +20,16 @@ const updateVisualizationConfig = (stateConfig, config) => {
   };
 
   // update series options
-  const interpolate = config.smoothLines ? 'cardinal' : config.interpolate || 'linear';
-  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(config.mode || 'stacked');
+  const interpolate = config.smoothLines ? 'cardinal' : config.interpolate;
+  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(config.mode);
   config.seriesParams[0] = {
     ...config.seriesParams[0],
-    type: config.type || config.seriesParams[0].type,
+    type: config.type || 'line',
     mode: stacked ? 'stacked' : 'normal',
     interpolate: interpolate,
-    drawLinesBetweenPoints: config.drawLinesBetweenPoints || config.seriesParams[0].drawLinesBetweenPoints,
-    showCircles: config.showCircles || config.seriesParams[0].showCircles,
-    radiusRatio: config.radiusRatio || config.seriesParams[0].radiusRatio
+    drawLinesBetweenPoints: config.drawLinesBetweenPoints,
+    showCircles: config.showCircles,
+    radiusRatio: config.radiusRatio
   };
 };
 

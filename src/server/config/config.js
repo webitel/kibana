@@ -1,32 +1,16 @@
-'use strict';
-
-var _joi = require('joi');
-
-var _joi2 = _interopRequireDefault(_joi);
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _override = require('./override');
-
-var _override2 = _interopRequireDefault(_override);
-
-var _schema = require('./schema');
-
-var _schema2 = _interopRequireDefault(_schema);
-
-var _utils = require('../../utils');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import Joi from 'joi';
+import _ from 'lodash';
+import override from './override';
+import createDefaultSchema from './schema';
+import { pkg, unset, deepCloneWithBuffers as clone } from '../../utils';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
-module.exports = class Config {
+export class Config {
   static withDefaultSchema(settings = {}) {
-    return new Config((0, _schema2.default)(), settings);
+    return new Config(createDefaultSchema(), settings);
   }
 
   constructor(initialSchema, initialSettings) {
@@ -42,8 +26,8 @@ module.exports = class Config {
     }
 
     if (!key) {
-      return _lodash2.default.each(extension._inner.children, child => {
-        this.extendSchema(child.schema, _lodash2.default.get(settings, child.key), child.key);
+      return _.each(extension._inner.children, (child) => {
+        this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }
 
@@ -51,20 +35,20 @@ module.exports = class Config {
       throw new Error(`Config schema already has key: ${key}`);
     }
 
-    _lodash2.default.set(this[schemaExts], key, extension);
+    _.set(this[schemaExts], key, extension);
     this[schema] = null;
 
     this.set(key, settings);
   }
 
   removeSchema(key) {
-    if (!_lodash2.default.has(this[schemaExts], key)) {
+    if (!_.has(this[schemaExts], key)) {
       throw new TypeError(`Unknown schema key: ${key}`);
     }
 
     this[schema] = null;
-    (0, _utils.unset)(this[schemaExts], key);
-    (0, _utils.unset)(this[vals], key);
+    unset(this[schemaExts], key);
+    unset(this[vals], key);
   }
 
   resetTo(obj) {
@@ -73,11 +57,11 @@ module.exports = class Config {
 
   set(key, value) {
     // clone and modify the config
-    let config = (0, _utils.deepCloneWithBuffers)(this[vals]);
-    if (_lodash2.default.isPlainObject(key)) {
-      config = (0, _override2.default)(config, key);
+    let config = clone(this[vals]);
+    if (_.isPlainObject(key)) {
+      config = override(config, key);
     } else {
-      _lodash2.default.set(config, key, value);
+      _.set(config, key, value);
     }
 
     // attempt to validate the config value
@@ -88,8 +72,8 @@ module.exports = class Config {
     // resolve the current environment
     let env = newVals.env;
     delete newVals.env;
-    if (_lodash2.default.isObject(env)) env = env.name;
-    if (!env) env = process.env.NODE_ENV || 'production';
+    if (_.isObject(env)) env = env.name;
+    if (!env) env = 'production';
 
     const dev = env === 'development';
     const prod = env === 'production';
@@ -101,17 +85,19 @@ module.exports = class Config {
       dev: dev,
       notProd: !prod,
       notDev: !dev,
-      version: _lodash2.default.get(_utils.pkg, 'version'),
-      branch: _lodash2.default.get(_utils.pkg, 'branch'),
-      buildNum: dev ? Math.pow(2, 53) - 1 : _lodash2.default.get(_utils.pkg, 'build.number', NaN),
-      buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _lodash2.default.get(_utils.pkg, 'build.sha', '')
+      version: _.get(pkg, 'version'),
+      branch: _.get(pkg, 'branch'),
+      buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
+      buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
     };
 
     if (!context.dev && !context.prod) {
-      throw new TypeError(`Unexpected environment "${env}", expected one of "development" or "production"`);
+      throw new TypeError(
+        `Unexpected environment "${env}", expected one of "development" or "production"`
+      );
     }
 
-    const results = _joi2.default.validate(newVals, this.getSchema(), {
+    const results = Joi.validate(newVals, this.getSchema(), {
       context,
       abortEarly: false
     });
@@ -125,16 +111,16 @@ module.exports = class Config {
 
   get(key) {
     if (!key) {
-      return (0, _utils.deepCloneWithBuffers)(this[vals]);
+      return clone(this[vals]);
     }
 
-    const value = _lodash2.default.get(this[vals], key);
+    const value = _.get(this[vals], key);
     if (value === undefined) {
       if (!this.has(key)) {
         throw new Error('Unknown config key: ' + key);
       }
     }
-    return (0, _utils.deepCloneWithBuffers)(value);
+    return clone(value);
   }
 
   has(key) {
@@ -143,14 +129,14 @@ module.exports = class Config {
       // Catch the partial paths
       if (path.join('.') === key) return true;
       // Only go deep on inner objects with children
-      if (_lodash2.default.size(schema._inner.children)) {
+      if (_.size(schema._inner.children)) {
         for (let i = 0; i < schema._inner.children.length; i++) {
           const child = schema._inner.children[i];
           // If the child is an object recurse through it's children and return
           // true if there's a match
           if (child.schema._type === 'object') {
             if (has(key, child.schema, path.concat([child.key]))) return true;
-            // if the child matches, return true
+          // if the child matches, return true
           } else if (path.concat([child.key]).join('.') === key) {
             return true;
           }
@@ -158,7 +144,7 @@ module.exports = class Config {
       }
     }
 
-    if (_lodash2.default.isArray(key)) {
+    if (Array.isArray(key)) {
       // TODO: add .has() support for array keys
       key = key.join('.');
     }
@@ -168,45 +154,24 @@ module.exports = class Config {
 
   getSchema() {
     if (!this[schema]) {
-      this[schema] = function convertToSchema(children) {
-        let schema = _joi2.default.object().keys({}).default();
+      this[schema] = (function convertToSchema(children) {
+        let schema = Joi.object().keys({}).default();
 
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+        for (const key of Object.keys(children)) {
+          const child = children[key];
+          const childSchema = _.isPlainObject(child) ? convertToSchema(child) : child;
 
-        try {
-          for (var _iterator = Object.keys(children)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            const key = _step.value;
-
-            const child = children[key];
-            const childSchema = _lodash2.default.isPlainObject(child) ? convertToSchema(child) : child;
-
-            if (!childSchema || !childSchema.isJoi) {
-              throw new TypeError('Unable to convert configuration definition value to Joi schema: ' + childSchema);
-            }
-
-            schema = schema.keys({ [key]: childSchema });
+          if (!childSchema || !childSchema.isJoi) {
+            throw new TypeError('Unable to convert configuration definition value to Joi schema: ' + childSchema);
           }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
+
+          schema = schema.keys({ [key]: childSchema });
         }
 
         return schema;
-      }(this[schemaExts]);
+      }(this[schemaExts]));
     }
 
     return this[schema];
   }
-};
+}

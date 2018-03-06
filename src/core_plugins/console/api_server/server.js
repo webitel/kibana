@@ -1,8 +1,6 @@
-"use strict";
-
 let _ = require("lodash");
 
-module.exports.resolveApi = function (sense_version, apis, reply) {
+export function resolveApi(sense_version, apis, reply) {
   let result = {};
   _.each(apis, function (name) {
     {
@@ -13,4 +11,4 @@ module.exports.resolveApi = function (sense_version, apis, reply) {
   });
 
   return reply(result).type("application/json");
-};
+}

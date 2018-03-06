@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
@@ -59,7 +60,7 @@ class Timeseries extends Component {
     const values = {};
     if (pos) {
       this.props.series.forEach((row) => {
-        if (row.data && _.isArray(row.data)) {
+        if (row.data && Array.isArray(row.data)) {
           if (item && row.data[item.dataIndex] && row.data[item.dataIndex][0] === item.datapoint[0]) {
             values[row.id] = row.data[item.dataIndex][1];
           } else {
@@ -121,18 +122,21 @@ class Timeseries extends Component {
         <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
+              dateFormat={this.props.dateFormat}
               crosshair={this.props.crosshair}
               onBrush={this.props.onBrush}
-              plothover={ this.plothover}
+              plothover={this.plothover}
               reversed={this.props.reversed}
               series={this.props.series}
               annotations={this.props.annotations}
-              show={ this.state.show }
-              showGrid={ this.props.showGrid }
+              show={this.state.show}
+              showGrid={this.props.showGrid}
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
-              yaxes={this.props.yaxes} />
+              yaxes={this.props.yaxes}
+              xAxisFormatter={this.props.xAxisFormatter}
+            />
           </div>
           <Legend
             legendPosition={this.props.legendPosition}
@@ -142,7 +146,8 @@ class Timeseries extends Component {
             showLegend={this.state.showLegend}
             seriesValues={this.state.values}
             seriesFilter={this.state.show}
-            tickFormatter={this.props.tickFormatter} />
+            tickFormatter={this.props.tickFormatter}
+          />
         </div>
       </div>
     );
@@ -167,7 +172,8 @@ Timeseries.propTypes = {
   options: PropTypes.object,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
 };
 
 export default Timeseries;

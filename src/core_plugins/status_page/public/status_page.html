@@ -10,8 +10,8 @@
   </header>
 
   <div class="row metrics_wrapper">
-    <div ng-repeat="(name, data) in ui.metrics">
-      <status-page-metric name="{{name}}" data="data"></status-page-metric>
+    <div ng-repeat="metric in ui.metrics">
+      <status-page-metric metric="metric"></status-page-metric>
     </div>
   </div>
 
@@ -28,8 +28,8 @@
 
     <table class="statuses" data-test-subj="statusBreakdown" ng-if="ui.statuses">
       <tr class="row">
-        <th class="col-xs-4">ID</th>
-        <th class="col-xs-8">Status</th>
+        <th class="col-xs-4" scope="col">ID</th>
+        <th class="col-xs-8" scope="col">Status</th>
       </tr>
       <tr
         ng-repeat="status in ui.statuses"
@@ -43,4 +43,10 @@
       </tr>
     </table>
   </div>
+
+  <footer class="row">
+    <div class="col-xs-12 text-right build-info">
+      Build {{::ui.buildInfo.num}}, Commit SHA {{::ui.buildInfo.sha}}
+    </div>
+  </footer>
 </div>

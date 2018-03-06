@@ -1,4 +1,7 @@
 import html from 'ui/timepicker/timepicker.html';
+import './quick_panel';
+import './relative_panel';
+import './absolute_panel';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
@@ -8,7 +11,6 @@ import { Notifier } from 'ui/notify/notifier';
 import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
-import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
@@ -18,7 +20,7 @@ const notify = new Notifier({
   location: 'timepicker',
 });
 
-module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
   return {
     restrict: 'E',
     scope: {
@@ -38,7 +40,6 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
-      $scope.quickLists = _(quickRanges).groupBy('section').values().value();
       $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
       $scope.relative = {
@@ -133,7 +134,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
             break;
           case 'absolute':
             $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
-            $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
+            $scope.absolute.to = dateMath.parse($scope.to || moment(), { roundUp: true });
             break;
         }
 
@@ -157,7 +158,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.checkRelative = function () {
         if ($scope.relative.from.count != null && $scope.relative.to.count != null) {
           const from = dateMath.parse(getRelativeString('from'));
-          const to = dateMath.parse(getRelativeString('to'), true);
+          const to = dateMath.parse(getRelativeString('to'), { roundUp: true });
           if (to && from) return to.isBefore(from);
           return true;
         }
@@ -165,7 +166,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       $scope.formatRelative = function (key) {
         const relativeString = getRelativeString(key);
-        const parsed = dateMath.parse(relativeString, key === 'to');
+        const parsed = dateMath.parse(relativeString, { roundUp: key === 'to' });
         let preview;
         if (relativeString === 'now') {
           preview = 'Now';
@@ -179,7 +180,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.applyRelative = function () {
         $scope.onFilterSelect({
           from: getRelativeString('from'),
-          to:  getRelativeString('to')
+          to: getRelativeString('to')
         });
       };
 

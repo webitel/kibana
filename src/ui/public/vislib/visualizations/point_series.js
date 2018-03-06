@@ -49,13 +49,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const startY = 0;
 
       return svg
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'transparent')
-      .attr('class', 'background');
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'transparent')
+        .attr('class', 'background');
     }
 
     addGrid(svg) {
@@ -74,13 +74,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
 
       // Creating clipPath
       return svg
-      .append('clipPath')
-      .attr('id', this.clipPathId)
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height);
+        .append('clipPath')
+        .attr('id', this.clipPathId)
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height);
     }
 
     addEvents(svg) {
@@ -206,7 +206,6 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const xScale = this.handler.categoryAxes[0].getScale();
       const addTimeMarker = this.chartConfig.addTimeMarker;
       const times = this.chartConfig.times || [];
-      let timeMarker;
       let div;
       let svg;
 
@@ -214,15 +213,11 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
         selection.each(function (data) {
           const el = this;
 
-          if (addTimeMarker) {
-            timeMarker = new TimeMarker(times, xScale, height);
-          }
-
           div = d3.select(el);
 
           svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+            .attr('width', width)
+            .attr('height', height);
 
           self.addBackground(svg, width, height);
           self.addGrid(svg);
@@ -242,7 +237,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           });
 
           if (addTimeMarker) {
-            timeMarker.render(svg);
+            //Domain end of 'now' will be milliseconds behind current time
+            //Extend toTime by 1 minute to ensure those cases have a TimeMarker
+            const toTime = new Date(xScale.domain()[1].getTime() + 60000);
+            const currentTime = new Date();
+            if (toTime > currentTime) {
+              new TimeMarker(times, xScale, height).render(svg);
+            }
           }
 
           return svg;

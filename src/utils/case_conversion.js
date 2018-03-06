@@ -1,21 +1,13 @@
-'use strict';
+import _ from 'lodash';
 
-var _lodash = require('lodash');
+export function keysToSnakeCaseShallow(object) {
+  return _.mapKeys(object, (value, key) => {
+    return _.snakeCase(key);
+  });
+}
 
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = {
-  keysToSnakeCaseShallow: function keysToSnakeCaseShallow(object) {
-    return _lodash2.default.mapKeys(object, (value, key) => {
-      return _lodash2.default.snakeCase(key);
-    });
-  },
-
-  keysToCamelCaseShallow: function keysToCamelCaseShallow(object) {
-    return _lodash2.default.mapKeys(object, (value, key) => {
-      return _lodash2.default.camelCase(key);
-    });
-  }
-};
+export function keysToCamelCaseShallow(object) {
+  return _.mapKeys(object, (value, key) => {
+    return _.camelCase(key);
+  });
+}

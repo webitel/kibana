@@ -15,9 +15,12 @@ function fetchAnchorProvider(courier, Private) {
       .set('version', true)
       .set('size', 1)
       .set('query', {
-        terms: {
-          _uid: [uid],
+        query: {
+          terms: {
+            _uid: [uid],
+          }
         },
+        language: 'lucene'
       })
       .set('sort', sort);
 
@@ -27,13 +30,10 @@ function fetchAnchorProvider(courier, Private) {
       throw new Error('Failed to load anchor document.');
     }
 
-    return Object.assign(
-      {},
-      _.get(response, ['hits', 'hits', 0]),
-      {
-        $$_isAnchor: true,
-      },
-    );
+    return {
+      ..._.get(response, ['hits', 'hits', 0]),
+      $$_isAnchor: true,
+    };
   };
 }
 

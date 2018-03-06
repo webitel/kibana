@@ -7,7 +7,7 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
-import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import intervalTemplate from 'ui/agg_types/controls/time_interval.html';
 
 export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -26,10 +26,20 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     return interval;
   }
 
+  function getBounds(vis) {
+    if (!vis.getTimeRange) {
+      return timefilter.getActiveBounds();
+    }
+
+    const timeRange = vis.getTimeRange();
+    return timefilter.calculateBounds(timeRange);
+  }
+
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
+    const bounds = getBounds(agg.vis);
+    agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
   }
 
 
@@ -62,6 +72,9 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         }
       };
     },
+    getFormat: function (agg) {
+      return agg.buckets.getScaledDateFormatter();
+    },
     params: [
       {
         name: 'field',
@@ -92,7 +105,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         default: 'auto',
         options: intervalOptions,
         editor: intervalTemplate,
-        onRequest: function (agg) {
+        modifyAggConfigOnSearchRequestStart: function (agg) {
           setBounds(agg, true);
         },
         write: function (agg, output) {
@@ -112,8 +125,8 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
 
           const scaleMetrics = interval.scaled && interval.scale < 1;
           if (scaleMetrics) {
-            const all = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
-              return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
+            const all = _.every(agg.vis.getAggConfig().bySchemaGroup.metrics, function (agg) {
+              return agg.type && agg.type.isScalable();
             });
             if (all) {
               output.metricScale = interval.scale;

@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Select from 'react-select';
 
 const metricAggs = [
@@ -67,6 +68,10 @@ class AggSelectOption extends Component {
     const style = {
       paddingLeft: heading ? 0 : 10
     };
+    // We can ignore that the <div> does not have keyboard handlers even though
+    // it has mouse handlers, since react-select still takes care, that this works
+    // well with keyboard.
+    /* eslint-disable jsx-a11y/no-static-element-interactions */
     if (heading) {
       let note;
       if (pipeline) {
@@ -78,7 +83,7 @@ class AggSelectOption extends Component {
           onMouseEnter={this.handleMouseEnter}
           onMouseDown={this.handleMouseDown}
           onMouseMove={this.handleMouseMove}
-          ariaLabel={label}
+          aria-label={label}
         >
           <span className="Select-value-label" style={style}>
             <strong>{label}</strong>
@@ -93,13 +98,14 @@ class AggSelectOption extends Component {
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        ariaLabel={label}
+        aria-label={label}
       >
         <span className="Select-value-label" style={style}>
           { this.props.children }
         </span>
       </div>
     );
+    /* eslint-enable jsx-a11y/no-static-element-interactions */
   }
 
 }
@@ -115,6 +121,13 @@ AggSelectOption.props = {
   option: PropTypes.object.isRequired,
 };
 
+function filterByPanelType(panelType) {
+  return agg => {
+    if (panelType === 'table') return agg.value !== 'series_agg';
+    return true;
+  };
+}
+
 function AggSelect(props) {
   const { siblings, panelType } = props;
 
@@ -129,7 +142,7 @@ function AggSelect(props) {
       { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
       ...metricAggs,
       { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...pipelineAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
+      ...pipelineAggs.filter(filterByPanelType(panelType)).map(agg => ({ ...agg, disabled: !enablePipelines })),
       { label: 'Sibling Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
       ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
     ];
@@ -143,11 +156,13 @@ function AggSelect(props) {
   return (
     <div className="vis_editor__row_item">
       <Select
+        aria-label="Select aggregation"
         clearable={false}
         options={options}
         value={props.value}
         optionComponent={AggSelectOption}
-        onChange={handleChange}/>
+        onChange={handleChange}
+      />
     </div>
   );
 }

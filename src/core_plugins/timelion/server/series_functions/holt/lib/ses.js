@@ -1,16 +1,14 @@
-'use strict';
+/*
+  Single exponential smoothing. Assuming even interval
+*/
 
-var _lodash = require('lodash');
+import _ from 'lodash';
 
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function ses(points, alpha) {
+export default function ses(points, alpha) {
   let origin;
   let level;
 
-  const smoothedPoints = _lodash2.default.reduce(points, (result, point, i) => {
+  const smoothedPoints = _.reduce(points, (result, point, i) => {
     if (i === 0) {
       origin = point;
       level = point;
@@ -33,6 +31,4 @@ module.exports = function ses(points, alpha) {
   }, []);
 
   return smoothedPoints;
-}; /*
-     Single exponential smoothing. Assuming even interval
-   */
+}

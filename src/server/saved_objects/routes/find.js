@@ -1,49 +1,37 @@
-'use strict';
+import Joi from 'joi';
+import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createFindRoute = undefined;
-
-var _joi = require('joi');
-
-var _joi2 = _interopRequireDefault(_joi);
-
-var _case_conversion = require('../../../utils/case_conversion');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const createFindRoute = exports.createFindRoute = prereqs => ({
+export const createFindRoute = (prereqs) => ({
   path: '/api/saved_objects/{type?}',
   method: 'GET',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      params: _joi2.default.object().keys({
-        type: _joi2.default.string()
-      }),
-      query: _joi2.default.object().keys({
-        per_page: _joi2.default.number().min(0).default(20),
-        page: _joi2.default.number().min(0).default(1),
-        type: _joi2.default.string(),
-        search: _joi2.default.string().allow('').optional(),
-        search_fields: [_joi2.default.string(), _joi2.default.array().items(_joi2.default.string())],
-        fields: [_joi2.default.string(), _joi2.default.array().items(_joi2.default.string())]
-      })
+      params: Joi.object().keys({
+        type: Joi.string()
+      }).default(),
+      query: Joi.object().keys({
+        per_page: Joi.number().min(0).default(20),
+        page: Joi.number().min(0).default(1),
+        type: Joi.string(),
+        search: Joi.string().allow('').optional(),
+        search_fields: Joi.array().items(Joi.string()).single(),
+        fields: Joi.array().items(Joi.string()).single()
+      }).default()
     },
     handler(request, reply) {
-      const options = (0, _case_conversion.keysToCamelCaseShallow)(request.query);
+      const options = keysToCamelCaseShallow(request.query);
 
       if (request.params.type) {
         options.type = request.params.type;
       }
 
       /*WEBITEL*/
-      if (!request.auth.credentials)
+      if (!request.auth.credentials) {
         return reply(new Error('Session unauthorized'));
+      }
 
       reply(request.pre.savedObjectsClient.find(options, request.auth.credentials.domain));
-      /*WEBITEL*/
     }
   }
 });

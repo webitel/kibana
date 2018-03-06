@@ -37,10 +37,6 @@ kbn-management-landing {
 
   }
 
-  .management-panel__body {
-    padding-bottom: 30px;
-  }
-
   .management-panel__link {
     font-size: 17px;
     line-height: 32px;
@@ -52,20 +48,6 @@ kbn-management-landing {
       &:hover, &:visited {
         color: @kibanaBlue2;
       }
-    }
-  }
-
-  .management-section-info {
-    bottom: 10px;
-    display: none;
-    color: @kibanaPink1;
-    font-size: 0.8em;
-    position: absolute;
-  }
-
-  .management-section-info-expanded {
-    .management-section-info {
-      display: block;
     }
   }
 
@@ -102,10 +84,6 @@ kbn-management-landing {
     background-image: url("~ui/icons/logstash-gray.svg");
   }
 
-  .management-panel__heading-icon--secondary {
-    font-size: 0.9em;
-    padding: 5px;
-  }
 }
 
 kbn-management-objects {
@@ -143,6 +121,10 @@ kbn-management-objects {
   }
 }
 
+.managementChangeIndexModal {
+  width: 800px;
+}
+
 kbn-management-advanced {
   // super specific rule to override bootstrap's equally specific rule
   // https://github.com/twbs/bootstrap/blob/1f329f8f17aa989eabc6e94bdcab93e69ef0e463/less/tables.less#L35
@@ -152,6 +134,11 @@ kbn-management-advanced {
     tbody > tr > td {
       vertical-align: middle;
     }
+  }
+
+  .advancedSettingsTableRowImage {
+    height: 3em;
+    width: auto;
   }
 
   .advancedSettingsTableRowActionsCell {

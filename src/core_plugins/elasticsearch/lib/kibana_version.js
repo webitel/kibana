@@ -1,15 +1,10 @@
-'use strict';
+import {
+  version as kibanaVersion,
+} from '../../../../package.json';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _package = require('../../../../package.json');
-
-exports.default = {
+export default {
   // Make the version stubbable to improve testability.
   get() {
-    return _package.version;
-  }
+    return kibanaVersion;
+  },
 };
-module.exports = exports['default'];

@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createSplitStream = createSplitStream;
-
-var _stream = require('stream');
+import { Transform } from 'stream';
 
 /**
  *  Creates a Transform stream that consumes a stream of Buffers
@@ -26,10 +19,10 @@ var _stream = require('stream');
  *  @param  {String} splitChunk
  *  @return {Transform}
  */
-function createSplitStream(splitChunk) {
+export function createSplitStream(splitChunk) {
   let unsplitBuffer = Buffer.alloc(0);
 
-  return new _stream.Transform({
+  return new Transform({
     writableObjectMode: false,
     readableObjectMode: true,
     transform(chunk, enc, callback) {

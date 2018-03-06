@@ -1,6 +1,6 @@
 <div ng-controller="KbnWebitelPluginMemberListVisController" class="webitel-plugin-vis table-vis">
 
-    <table ng-table="tableParams" class="member-list kbn-table table" ng-init="$groupRow.show=false">
+    <table ng-table="tableParams" class="member-list table table-condensed" ng-init="$groupRow.show=false">
         <!--<colgroup>-->
             <!--<col width="60%" />-->
             <!--<col width="20%" />-->
@@ -18,8 +18,7 @@
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="item in group.data" ng-class="{ 'in-queue': item['status'] == 'In queue', 'receiving': item['status'] == 'Receiving', 'in-call': item['status'] == 'In queue Call'}">
 
-            <td sortable="'Time'" data-title="vis.params.columns['Time'].title||'Time'"
-                    >
+            <td sortable="'Time'" data-title="vis.params.columns['Time'].title||'Time'">
                 {{item['Time']}}
             </td>
 
@@ -34,11 +33,11 @@
             <td sortable="'Caller_Destination_Number'" data-title="vis.params.columns['Caller_Destination_Number'].title||'Destination number'">
                 {{item['Caller_Destination_Number']}}
             </td>
-
+<!---->
             <td sortable="'CC_Queue'" data-title="vis.params.columns['CC_Queue'].title||'Queue'" groupable="'CC_Queue'">
                 {{item['CC_Queue']}}
             </td>
-
+<!---->
             <td sortable="'cc_start_position'" data-title="vis.params.columns['cc_start_position'].title||'Join position'">
                 {{item['cc_start_position']}}
             </td>

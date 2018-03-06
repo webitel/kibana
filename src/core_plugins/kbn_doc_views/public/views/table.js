@@ -38,9 +38,13 @@ DocViewsRegistryProvider.register(function () {
           }
         };
 
+        $scope.isColumnActive = function isColumnActive(columnName) {
+          return $scope.columns.includes(columnName);
+        };
+
         $scope.showArrayInObjectsWarning = function (row, field) {
           const value = $scope.flattened[field];
-          return _.isArray(value) && typeof value[0] === 'object';
+          return Array.isArray(value) && typeof value[0] === 'object';
         };
       }
     }

@@ -1,8 +1,6 @@
-'use strict';
-
-module.exports = function splitInterval(interval) {
+export default function splitInterval(interval) {
   if (!interval.match(/[0-9]+[mshdwMy]+/g)) {
-    throw new Error('Malformed `interval`: ' + interval);
+    throw new Error ('Malformed `interval`: ' + interval);
   }
   const parts = interval.match(/[0-9]+|[mshdwMy]+/g);
 
@@ -10,4 +8,4 @@ module.exports = function splitInterval(interval) {
     count: parts[0],
     unit: parts[1]
   };
-};
+}

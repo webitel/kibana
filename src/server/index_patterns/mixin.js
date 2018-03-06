@@ -1,15 +1,11 @@
-'use strict';
+import { IndexPatternsService } from './service';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.indexPatternsMixin = indexPatternsMixin;
+import {
+  createFieldsForWildcardRoute,
+  createFieldsForTimePatternRoute,
+} from './routes';
 
-var _service = require('./service');
-
-var _routes = require('./routes');
-
-function indexPatternsMixin(kbnServer, server) {
+export function indexPatternsMixin(kbnServer, server) {
   const pre = {
     /**
     *  Create an instance of the `indexPatterns` service
@@ -17,16 +13,35 @@ function indexPatternsMixin(kbnServer, server) {
     */
     getIndexPatternsService: {
       assign: 'indexPatterns',
-      method(req, reply) {
-        const dataCluster = req.server.plugins.elasticsearch.getCluster('data');
-        const callDataCluster = (...args) => dataCluster.callWithRequest(req, ...args);
-
-        reply(new _service.IndexPatternsService(callDataCluster));
+      method(request, reply) {
+        reply(request.getIndexPatternsService());
       }
     }
   };
 
-  server.route((0, _routes.createTestTimePatternRoute)(pre));
-  server.route((0, _routes.createFieldsForWildcardRoute)(pre));
-  server.route((0, _routes.createFieldsForTimePatternRoute)(pre));
+  /**
+   *  Create an instance of the IndexPatternsService
+   *
+   *  @method server.indexPatternsServiceFactory
+   *  @type {IndexPatternsService}
+   */
+  server.decorate('server', 'indexPatternsServiceFactory', ({ callCluster }) => {
+    return new IndexPatternsService(callCluster);
+  });
+
+  /**
+   *  Get an instance of the IndexPatternsService configured for use
+   *  the current request
+   *
+   *  @method request.getIndexPatternsService
+   *  @type {IndexPatternsService}
+   */
+  server.addMemoizedFactoryToRequest('getIndexPatternsService', request => {
+    const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+    const callCluster = (...args) => callWithRequest(request, ...args);
+    return server.indexPatternsServiceFactory({ callCluster });
+  });
+
+  server.route(createFieldsForWildcardRoute(pre));
+  server.route(createFieldsForTimePatternRoute(pre));
 }

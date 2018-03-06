@@ -1,4 +1,4 @@
-import 'ui/agg_table';
+// import 'ui/agg_table';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
@@ -12,19 +12,18 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     display: 'Table',
     order: 1,
     template: tableSpyModeTemplate,
+    showMode: vis => vis.type.requestHandler === 'courier' && vis.type.requiresSearch,
     link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
-        'esResp'
+        'searchSource.rawResponse'
       ], function () {
-        if (!$scope.vis || !$scope.esResp) {
+        if (!$scope.vis || !$scope.searchSource.rawResponse) {
           $scope.table = null;
         } else {
-          if (!$scope.spy.params.spyPerPage) {
-            $scope.spy.params.spyPerPage = PER_PAGE_DEFAULT;
-          }
+          $scope.rowsPerPage = PER_PAGE_DEFAULT;
 
-          $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
+          $scope.table = tabifyAggResponse($scope.vis, $scope.searchSource.rawResponse, {
             canSplit: false,
             asAggConfigResults: true,
             partialRows: true

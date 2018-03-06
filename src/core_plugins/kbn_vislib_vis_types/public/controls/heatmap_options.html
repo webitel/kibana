@@ -8,7 +8,7 @@
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.colorSchema"
-        ng-options="mode for mode in vis.type.params.colorSchemas"
+        ng-options="mode for mode in collections.colorSchemas"
       ></select>
     </div>
     <div
@@ -39,7 +39,7 @@
         id="axisScale"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.valueAxes[0].scale.type"
-        ng-options="mode for mode in vis.type.params.scales"
+        ng-options="mode for mode in collections.scales"
       ></select>
     </div>
   </div>
@@ -84,6 +84,9 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleColorRangeSection()"
         kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="heatmapOptionsRanges"
+        aria-label="Toggle custom ranges options"
       >
         <span
           aria-hidden="true"
@@ -104,21 +107,27 @@
       >
     </div>
 
-    <div ng-if="vis.params.setColorRange" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+    <div
+      id="heatmapOptionsRanges"
+      ng-if="vis.params.setColorRange"
+      ng-show="showColorRange"
+      class="kuiSideBarCollapsibleSection"
+    >
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
           <tr>
-            <th>
-              <label>From</label>
+            <th scope="col">
+              <label id="heatmapCustomRangeFrom">From</label>
             </th>
-            <th colspan="2">
-              <label>To</label>
+            <th scope="col" colspan="2">
+              <label id="heatmapCustomRangeTo">To</label>
             </th>
           </tr>
 
           <tr ng-repeat="range in vis.params.colorsRange track by $index">
             <td>
               <input
+                aria-labelledby="heatmapCustomRangeFrom"
                 ng-model="range.from"
                 type="number"
                 class="form-control"
@@ -128,6 +137,7 @@
             </td>
             <td>
               <input
+                aria-labelledby="heatmapCustomRangeTo"
                 ng-model="range.to"
                 type="number"
                 class="form-control"
@@ -141,7 +151,7 @@
                 ng-click="removeRange($index)"
                 class="kuiButton kuiButton--danger kuiButton--small"
               >
-                <span class="kuiIcon fa-times"><span>
+                <span class="kuiIcon fa-times"></span>
               </button>
             </td>
           </tr>
@@ -149,7 +159,7 @@
 
         <div class="hintbox" ng-show="!vis.params.colorsRange.length">
           <p>
-            <span class="kuiIcon fa-danger text-danger"><span>
+            <span class="kuiIcon fa-danger text-danger"></span>
             <strong>Required:</strong> You must specify at least one range.
           </p>
         </div>
@@ -160,6 +170,7 @@
         >
           Add Range
         </button>
+        <div class="euiSpacer euiSpacer--s"></div>
         <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
     </div>
@@ -170,6 +181,8 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleLabelSection()"
         kbn-accessible-click
+        aria-expanded="{{!!showLabels}}"
+        aria-controls="heatmapOptionsLabels"
       >
         <span
           aria-hidden="true"
@@ -190,7 +203,12 @@
         class="kuiSideBarSectionTitle__action"
       >
     </div>
-    <div ng-if="vis.params.valueAxes[0].labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">
+    <div
+      id="heatmapOptionsLabels"
+      ng-if="vis.params.valueAxes[0].labels.show"
+      ng-show="showLabels"
+      class="kuiSideBarCollapsibleSection"
+    >
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="rotateLabels">

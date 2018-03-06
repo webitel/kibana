@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
@@ -28,7 +29,7 @@ const module = uiModules.get('apps/context', [
 module.directive('contextApp', function ContextApp() {
   return {
     bindToController: true,
-    controller: ContextAppController,
+    controller: callAfterBindingsWorkaround(ContextAppController),
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
@@ -49,8 +50,8 @@ function ContextAppController($scope, config, Private, timefilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
-  // this is apparently the "canonical" way to disable the time picker
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
@@ -58,11 +59,10 @@ function ContextAppController($scope, config, Private, timefilter) {
     this.discoverUrl,
   );
 
-  this.actions = _.mapValues(Object.assign(
-    {},
-    queryParameterActions,
-    queryActions,
-  ), (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues({
+    ...queryParameterActions,
+    ...queryActions,
+  }, (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
     FAILURE_REASONS,

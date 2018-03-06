@@ -1,27 +1,18 @@
-'use strict';
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _moment = require('moment');
-
-var _moment2 = _interopRequireDefault(_moment);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import _ from 'lodash';
+import moment from 'moment';
 
 const units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
 
 /* This is a simplified version of elasticsearch's date parser */
-function parse(text, roundUp) {
+export default function parse(text, roundUp) {
   if (!text) {
     return undefined;
   }
-  if (_moment2.default.isMoment(text)) {
+  if (moment.isMoment(text)) {
     return text;
   }
-  if (_lodash2.default.isDate(text)) {
-    return (0, _moment2.default)(text);
+  if (_.isDate(text)) {
+    return moment(text);
   }
 
   let time;
@@ -30,7 +21,7 @@ function parse(text, roundUp) {
   let parseString;
 
   if (text.substring(0, 3) === 'now') {
-    time = (0, _moment2.default)();
+    time = moment();
     mathString = text.substring('now'.length);
   } else {
     index = text.indexOf('||');
@@ -42,7 +33,7 @@ function parse(text, roundUp) {
       mathString = text.substring(index + 2);
     }
     // We're going to just require ISO8601 timestamps, k?
-    time = (0, _moment2.default)(parseString);
+    time = moment(parseString);
   }
 
   if (!mathString.length) {
@@ -93,7 +84,7 @@ function parseDateMath(mathString, time, roundUp) {
     }
     const unit = mathString.charAt(i++);
 
-    if (!_lodash2.default.contains(units, unit)) {
+    if (!_.contains(units, unit)) {
       return undefined;
     } else {
       if (type === 0) {
@@ -111,5 +102,3 @@ function parseDateMath(mathString, time, roundUp) {
   }
   return dateTime;
 }
-
-module.exports = parse;

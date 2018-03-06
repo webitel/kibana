@@ -1,7 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import $ from 'jquery';
-import marked from '../../../../forked/marked';
+import MarkdownIt from 'markdown-it';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';
@@ -10,6 +9,12 @@ import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
+import { dispatchRenderComplete } from 'ui/render_complete';
+
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 export function VisHandlerProvider(Private) {
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
@@ -62,7 +67,8 @@ export function VisHandlerProvider(Private) {
 
       this.renderArray = this.renderArray
         .concat(this.valueAxes)
-        .concat(this.categoryAxes);
+        // category axes need to render in reverse order https://github.com/elastic/kibana/issues/13551
+        .concat(this.categoryAxes.slice().reverse());
 
       // memoize so that the same function is returned every time,
       // allowing us to remove/re-add the same function
@@ -146,7 +152,7 @@ export function VisHandlerProvider(Private) {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
             // events from all charts are propagated to vis, we only need to fire renderComplete once they all finish
-            $(self.el).trigger('renderComplete');
+            self.vis.emit('renderComplete');
           }
         });
 
@@ -189,25 +195,25 @@ export function VisHandlerProvider(Private) {
       this.removeAll(this.el);
 
       const div = d3.select(this.el)
-      .append('div')
-      // class name needs `chart` in it for the polling checkSize function
-      // to continuously call render on resize
-      .attr('class', 'visualize-error chart error');
+        .append('div')
+        // class name needs `chart` in it for the polling checkSize function
+        // to continuously call render on resize
+        .attr('class', 'visualize-error chart error');
 
       if (message === 'No results found') {
         div.append('div')
-        .attr('class', 'text-center visualize-error visualize-chart')
-        .append('div').attr('class', 'item top')
-        .append('div').attr('class', 'item')
-        .append('h2').html('<i class="fa fa-meh-o"></i>')
-        .append('h4').text(message);
+          .attr('class', 'text-center visualize-error visualize-chart')
+          .append('div').attr('class', 'item top')
+          .append('div').attr('class', 'item')
+          .append('h2').html('<i class="fa fa-meh-o"></i>')
+          .append('h4').text(message);
 
         div.append('div').attr('class', 'item bottom');
       } else {
-        div.append('h4').text(marked.inlineLexer(message, []));
+        div.append('h4').text(markdownIt.renderInline(message));
       }
 
-      $(this.el).trigger('renderComplete');
+      dispatchRenderComplete(this.el);
       return div;
     }
 

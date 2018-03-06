@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.mergeOverrides = mergeOverrides;
-
-var _lodash = require('lodash');
+import { merge } from 'lodash';
 
 const OVERRIDES = {
   _source: { type: '_source' },
@@ -21,7 +14,7 @@ const OVERRIDES = {
     type: 'number',
     searchable: false,
     aggregatable: false
-  }
+  },
 };
 
 /**
@@ -30,9 +23,9 @@ const OVERRIDES = {
  *  @param  {FieldInfo} field
  *  @return {FieldInfo}
  */
-function mergeOverrides(field) {
+export function mergeOverrides(field) {
   if (OVERRIDES.hasOwnProperty(field.name)) {
-    return (0, _lodash.merge)(field, OVERRIDES[field.name]);
+    return merge(field, OVERRIDES[field.name]);
   } else {
     return field;
   }

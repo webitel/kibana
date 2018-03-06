@@ -1,12 +1,7 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 /**
  * Generates file transfer progress messages
  */
-class Progress {
+export default class Progress {
 
   constructor(logger) {
     const self = this;
@@ -30,7 +25,7 @@ class Progress {
     this.runningTotal += size;
     let newDotCount = Math.round(this.runningTotal / this.totalSize * 100 / 5);
     if (newDotCount > 20) newDotCount = 20;
-    for (let i = 0; i < newDotCount - this.dotCount; i++) {
+    for (let i = 0; i < (newDotCount - this.dotCount); i++) {
       this.logger.log('.', true);
     }
     this.dotCount = newDotCount;
@@ -41,5 +36,3 @@ class Progress {
   }
 
 }
-exports.default = Progress;
-module.exports = exports['default'];

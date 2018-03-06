@@ -1,40 +1,14 @@
-'use strict';
 
-var _lodash = require('lodash');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import parseSheet from './lib/parse_sheet.js';
+import parseDateMath from '../lib/date_math.js';
+import repositionArguments from './lib/reposition_arguments.js';
+import indexArguments from './lib/index_arguments.js';
+import validateTime from './lib/validate_time.js';
+import { calculateInterval } from '../../common/lib';
 
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _bluebird = require('bluebird');
-
-var _bluebird2 = _interopRequireDefault(_bluebird);
-
-var _parse_sheet = require('./lib/parse_sheet.js');
-
-var _parse_sheet2 = _interopRequireDefault(_parse_sheet);
-
-var _date_math = require('../lib/date_math.js');
-
-var _date_math2 = _interopRequireDefault(_date_math);
-
-var _calculate_interval = require('../../public/lib/calculate_interval.js');
-
-var _calculate_interval2 = _interopRequireDefault(_calculate_interval);
-
-var _reposition_arguments = require('./lib/reposition_arguments.js');
-
-var _reposition_arguments2 = _interopRequireDefault(_reposition_arguments);
-
-var _index_arguments = require('./lib/index_arguments.js');
-
-var _index_arguments2 = _interopRequireDefault(_index_arguments);
-
-var _validate_time = require('./lib/validate_time.js');
-
-var _validate_time2 = _interopRequireDefault(_validate_time);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = function (tlConfig) {
+export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
 
   let queryCache = {};
@@ -50,34 +24,32 @@ module.exports = function (tlConfig) {
     const functionDef = tlConfig.server.plugins.timelion.getFunction(fnName);
 
     function resolveArgument(item) {
-      if (_lodash2.default.isArray(item)) {
-        return _bluebird2.default.all(_lodash2.default.map(item, resolveArgument));
+      if (Array.isArray(item)) {
+        return Promise.all(_.map(item, resolveArgument));
       }
 
-      if (_lodash2.default.isObject(item)) {
+      if (_.isObject(item)) {
         switch (item.type) {
-          case 'function':
-            {
-              const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
-              if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
-                stats.queryCount++;
-                return _bluebird2.default.resolve(_lodash2.default.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
-              }
-              return invoke(item.function, item.arguments);
+          case 'function': {
+            const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
+            if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
+              stats.queryCount++;
+              return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-          case 'reference':
-            {
-              let reference;
-              if (item.series) {
-                reference = sheet[item.plot - 1][item.series - 1];
-              } else {
-                reference = {
-                  type: 'chainList',
-                  list: sheet[item.plot - 1]
-                };
-              }
-              return invoke('first', [reference]);
+            return invoke(item.function, item.arguments);
+          }
+          case 'reference': {
+            let reference;
+            if (item.series) {
+              reference = sheet[item.plot - 1][item.series - 1];
+            } else {
+              reference = {
+                type: 'chainList',
+                list: sheet[item.plot - 1]
+              };
             }
+            return invoke('first', [reference]);
+          }
           case 'chain':
             return invokeChain(item);
           case 'chainList':
@@ -88,18 +60,18 @@ module.exports = function (tlConfig) {
           case 'seriesList':
             return item;
         }
-        throw new Error('Argument type not supported: ' + JSON.stringify(item));
+        throw new Error ('Argument type not supported: ' + JSON.stringify(item));
       } else {
         return item;
       }
     }
 
-    args = (0, _reposition_arguments2.default)(functionDef, args);
+    args = repositionArguments(functionDef, args);
 
-    args = _lodash2.default.map(args, resolveArgument);
+    args = _.map(args, resolveArgument);
 
-    return _bluebird2.default.all(args).then(function (args) {
-      args.byName = (0, _index_arguments2.default)(functionDef, args);
+    return Promise.all(args).then(function (args) {
+      args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
   }
@@ -107,7 +79,7 @@ module.exports = function (tlConfig) {
   function invokeChain(chainObj, result) {
     if (chainObj.chain.length === 0) return result[0];
 
-    const chain = _lodash2.default.clone(chainObj.chain);
+    const chain = _.clone(chainObj.chain);
     const link = chain.shift();
 
     let promise;
@@ -123,18 +95,19 @@ module.exports = function (tlConfig) {
     return promise.then(function (result) {
       return invokeChain({ type: 'chain', chain: chain }, [result]);
     });
+
   }
 
   function resolveChainList(chainList) {
-    const seriesList = _lodash2.default.map(chainList, function (chain) {
+    const seriesList = _.map(chainList, function (chain) {
       const values = invoke('first', [chain]);
       return values.then(function (args) {
         return args;
       });
     });
-    return _bluebird2.default.all(seriesList).then(function (args) {
-      const list = _lodash2.default.chain(args).pluck('list').flatten().value();
-      const seriesList = _lodash2.default.merge.apply(this, _lodash2.default.flatten([{}, args]));
+    return Promise.all(seriesList).then(function (args) {
+      const list = _.chain(args).pluck('list').flatten().value();
+      const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
       return seriesList;
     });
@@ -143,28 +116,28 @@ module.exports = function (tlConfig) {
   function preProcessSheet(sheet) {
 
     let queries = {};
-    _lodash2.default.each(sheet, function (chainList, i) {
+    _.each(sheet, function (chainList, i) {
       try {
-        const queriesInCell = _lodash2.default.mapValues(preprocessChain(chainList), function (val) {
+        const queriesInCell = _.mapValues(preprocessChain(chainList), function (val) {
           val.cell = i;
           return val;
         });
-        queries = _lodash2.default.extend(queries, queriesInCell);
+        queries = _.extend(queries, queriesInCell);
       } catch (e) {
         throwWithCell(i, e);
       }
     });
-    queries = _lodash2.default.values(queries);
+    queries = _.values(queries);
 
-    const promises = _lodash2.default.chain(queries).values().map(function (query) {
+    const promises = _.chain(queries).values().map(function (query) {
       return invoke(query.function, query.arguments);
     }).value();
 
-    return _bluebird2.default.settle(promises).then(function (resolvedDatasources) {
+    return Promise.settle(promises).then(function (resolvedDatasources) {
 
-      stats.queryTime = new Date().getTime();
+      stats.queryTime = (new Date()).getTime();
 
-      _lodash2.default.each(queries, function (query, i) {
+      _.each(queries, function (query, i) {
         const functionDef = tlConfig.server.plugins.timelion.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
@@ -179,7 +152,7 @@ module.exports = function (tlConfig) {
         queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
       });
 
-      stats.cacheCount = _lodash2.default.keys(queryCache).length;
+      stats.cacheCount = _.keys(queryCache).length;
       return sheet;
     });
   }
@@ -187,25 +160,31 @@ module.exports = function (tlConfig) {
   function processRequest(request) {
     if (!request) throw new Error('Empty request body');
 
-    (0, _validate_time2.default)(request.time, tlConfig);
+    validateTime(request.time, tlConfig);
 
     tlConfig.time = request.time;
-    tlConfig.time.to = (0, _date_math2.default)(request.time.to, true).valueOf();
-    tlConfig.time.from = (0, _date_math2.default)(request.time.from).valueOf();
-    tlConfig.time.interval = (0, _calculate_interval2.default)(tlConfig.time.from, tlConfig.time.to, tlConfig.settings['timelion:target_buckets'] || 200, tlConfig.time.interval, tlConfig.settings['timelion:min_interval'] || '1ms');
+    tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
+    tlConfig.time.from = parseDateMath(request.time.from).valueOf();
+    tlConfig.time.interval = calculateInterval(
+      tlConfig.time.from,
+      tlConfig.time.to,
+      tlConfig.settings['timelion:target_buckets'] || 200,
+      tlConfig.time.interval,
+      tlConfig.settings['timelion:min_interval']  || '1ms',
+    );
 
     tlConfig.setTargetSeries();
 
-    stats.invokeTime = new Date().getTime();
+    stats.invokeTime = (new Date()).getTime();
     stats.queryCount = 0;
     queryCache = {};
 
     // This is setting the "global" sheet, required for resolving references
-    sheet = (0, _parse_sheet2.default)(request.sheet);
+    sheet = parseSheet(request.sheet);
     return preProcessSheet(sheet).then(function () {
-      return _lodash2.default.map(sheet, function (chainList, i) {
+      return _.map(sheet, function (chainList, i) {
         return resolveChainList(chainList).then(function (seriesList) {
-          stats.sheetTime = new Date().getTime();
+          stats.sheetTime = (new Date()).getTime();
           return seriesList;
         }).catch(function (e) {
           throwWithCell(i, e);
@@ -216,8 +195,6 @@ module.exports = function (tlConfig) {
 
   return {
     processRequest: processRequest,
-    getStats: function getStats() {
-      return stats;
-    }
+    getStats: function () { return stats; }
   };
-};
+}

@@ -372,7 +372,7 @@ module.service('webitelExportDataService', (es, Notifier, webitelRecords) => {
                     }
                 }
                 es.search({
-                    index: query.index.id,
+                    index: query.index.title,
                     scroll: '5m',
                     size: 10000,
                     body: getBody(query)

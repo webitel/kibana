@@ -16,7 +16,7 @@ export class Job {
     this.id = options._id; // TODO add domain
     this.domain = options._source.domain;
     this.timeZone = options._source.timezone;
-    this.settingsIndex = this.domain ? `.kibana-${this.domain}` : '.kibana';
+    this.settingsIndex = this.domain ? `.kibana-${this.domain}` : '.kibana'; //todo
     this.data = options._source;
     this.client = client;
     this.timerId = null;
@@ -94,6 +94,22 @@ export class Job {
     }, done);
   }
 
+  getIndexName (id, cb) {
+    this.client.get({
+      index: this.settingsIndex,
+      type: 'doc',
+      id: `index-pattern:${id}`,
+      _sourceInclude: ["index-pattern.title"]
+    }, function (err, response) {
+      if (err) {
+        return cb(err)
+      }
+
+      const title = response.found && response._source["index-pattern"] && response._source["index-pattern"].title;
+      return cb(null, title);
+    });
+  }
+
   loadVisData (emailConfig, done) {
     if (this.data.vis instanceof Array) {
       // console.log(this.data.vis);
@@ -103,7 +119,7 @@ export class Job {
           let b = _.clone(vis.body, true);
           if (this.timeZone)
             replaceTimeZone(vis.body.aggs, '', this.timeZone);
-          
+
           b.query.bool.must.push({
             "range": {
               "variables.start_stamp": {
@@ -118,19 +134,32 @@ export class Job {
           //     "lte": this.dateInterval.to
           //   }
           // }})
-          this.client.search({
-            index: (vis.indexPattern || "cdr*") + (this.domain ? `-${this.domain}` : ''),
-            body: b
-          }, function (err, res) {
+
+
+
+
+          this.getIndexName(vis.indexPattern, (err, indexName) => {
             if (err)
-              return cb(err)
-            try {
-              const writer = parse(vis.state, res);
-              makeFile(writer, vis, cb);
-            } catch (e) {
-              return cb(e)
+              return cb(err);
+
+            if (!indexName) {
+              return cb(new Error(`No found index name!!1 from: ${vis.indexPattern}`))
             }
-          })
+            this.client.search({
+              index: indexName + (this.domain ? `-${this.domain}` : ''),
+              body: b
+            }, function (err, res) {
+              if (err)
+                return cb(err);
+              try {
+                const writer = parse(vis.state, res);
+                makeFile(writer, vis, cb);
+              } catch (e) {
+                return cb(e)
+              }
+            })
+          });
+
         },
         (err, data) => {
           if (err)

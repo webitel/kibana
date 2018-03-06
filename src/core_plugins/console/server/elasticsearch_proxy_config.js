@@ -1,37 +1,16 @@
-'use strict';
+import _ from 'lodash';
+import { readFileSync } from 'fs';
+import http from 'http';
+import https from 'https';
+import url from 'url';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getElasticsearchProxyConfig = undefined;
+const readFile = (file) => readFileSync(file, 'utf8');
 
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _fs = require('fs');
-
-var _http = require('http');
-
-var _http2 = _interopRequireDefault(_http);
-
-var _https = require('https');
-
-var _https2 = _interopRequireDefault(_https);
-
-var _url = require('url');
-
-var _url2 = _interopRequireDefault(_url);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const readFile = file => (0, _fs.readFileSync)(file, 'utf8');
-
-const createAgent = server => {
+const createAgent = (server) => {
   const config = server.config();
-  const target = _url2.default.parse(config.get('elasticsearch.url'));
+  const target = url.parse(config.get('elasticsearch.url'));
 
-  if (!/^https/.test(target.protocol)) return new _http2.default.Agent();
+  if (!/^https/.test(target.protocol)) return new http.Agent();
 
   const agentOptions = {};
 
@@ -44,7 +23,7 @@ const createAgent = server => {
       agentOptions.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      agentOptions.checkServerIdentity = _lodash2.default.noop;
+      agentOptions.checkServerIdentity = _.noop;
       break;
     case 'full':
       agentOptions.rejectUnauthorized = true;
@@ -53,7 +32,7 @@ const createAgent = server => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (_lodash2.default.size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
+  if (_.size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
     agentOptions.ca = config.get('elasticsearch.ssl.certificateAuthorities').map(readFile);
   }
 
@@ -64,10 +43,10 @@ const createAgent = server => {
     agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
   }
 
-  return new _https2.default.Agent(agentOptions);
+  return new https.Agent(agentOptions);
 };
 
-const getElasticsearchProxyConfig = exports.getElasticsearchProxyConfig = server => {
+export const getElasticsearchProxyConfig = (server) => {
   return {
     timeout: server.config().get('elasticsearch.requestTimeout'),
     agent: createAgent(server)

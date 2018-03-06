@@ -1,7 +1,5 @@
-'use strict';
+import { relative } from 'path';
 
-var _path = require('path');
-
-module.exports = function pathContains(root, child) {
-  return (0, _path.relative)(child, root).slice(0, 2) !== '..';
-};
+export default function pathContains(root, child) {
+  return relative(child, root).slice(0, 2) !== '..';
+}

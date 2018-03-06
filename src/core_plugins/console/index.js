@@ -1,18 +1,23 @@
-'use strict';
+import Boom from 'boom';
+import { resolveApi } from './api_server/server';
+import { existsSync } from 'fs';
+import { resolve, join, sep } from 'path';
+import { has, isEmpty } from 'lodash';
+import setHeaders from '../elasticsearch/lib/set_headers';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+import {
+  ProxyConfigCollection,
+  getElasticsearchProxyConfig,
+  createProxyRoute
+} from './server';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-exports.default = function (kibana) {
-  const modules = (0, _path.resolve)(__dirname, 'public/webpackShims/');
-  const src = (0, _path.resolve)(__dirname, 'public/src/');
+export default function (kibana) {
+  const modules = resolve(__dirname, 'public/webpackShims/');
+  const src = resolve(__dirname, 'public/src/');
 
   const apps = [];
 
-  if ((0, _fs.existsSync)((0, _path.resolve)(__dirname, 'public/tests'))) {
+  if (existsSync(resolve(__dirname, 'public/tests'))) {
     apps.push({
       title: 'Console Tests',
       id: 'sense-tests',
@@ -24,96 +29,106 @@ exports.default = function (kibana) {
 
   return new kibana.Plugin({
     id: 'console',
-    require: ['elasticsearch'],
+    require: [ 'elasticsearch' ],
 
-    config: function config(Joi) {
+    isEnabled(config) {
+      // console must be disabled when tribe mode is configured
+      return (
+        config.get('console.enabled') &&
+        !config.get('elasticsearch.tribe.url')
+      );
+    },
+
+    config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
-          verify: Joi.boolean()
+          verify: Joi.boolean(),
         }).default(),
-        proxyConfig: Joi.array().items(Joi.object().keys({
-          match: Joi.object().keys({
-            protocol: Joi.string().default('*'),
-            host: Joi.string().default('*'),
-            port: Joi.string().default('*'),
-            path: Joi.string().default('*')
-          }),
+        proxyConfig: Joi.array().items(
+          Joi.object().keys({
+            match: Joi.object().keys({
+              protocol: Joi.string().default('*'),
+              host: Joi.string().default('*'),
+              port: Joi.string().default('*'),
+              path: Joi.string().default('*')
+            }),
 
-          timeout: Joi.number(),
-          ssl: Joi.object().keys({
-            verify: Joi.boolean(),
-            ca: Joi.array().single().items(Joi.string()),
-            cert: Joi.string(),
-            key: Joi.string()
-          }).default()
-        })).default()
+            timeout: Joi.number(),
+            ssl: Joi.object().keys({
+              verify: Joi.boolean(),
+              ca: Joi.array().single().items(Joi.string()),
+              cert: Joi.string(),
+              key: Joi.string()
+            }).default()
+          })
+        ).default()
       }).default();
     },
 
-    deprecations: function deprecations() {
-      return [(settings, log) => {
-        if ((0, _lodash.has)(settings, 'proxyConfig')) {
-          log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+    deprecations: function () {
+      return [
+        (settings, log) => {
+          if (has(settings, 'proxyConfig')) {
+            log('Config key "proxyConfig" is deprecated. Configuration can be inferred from the "elasticsearch" settings');
+          }
         }
-      }];
+      ];
     },
 
-    init: function init(server, options) {
+    init: function (server, options) {
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const filterHeaders = server.plugins.elasticsearch.filterHeaders;
-
-      const proxyConfigCollection = new _server3.ProxyConfigCollection(options.proxyConfig);
+      const { filterHeaders } = server.plugins.elasticsearch;
+      const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
-      server.route((0, _server3.createProxyRoute)({
+      server.route(createProxyRoute({
         baseUrl: config.get('elasticsearch.url'),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
           const filteredHeaders = filterHeaders(req.headers, whitelist);
-          const headers = (0, _set_headers2.default)(filteredHeaders, config.get('elasticsearch.customHeaders'));
+          const headers = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
 
-          if (!(0, _lodash.isEmpty)(config.get('console.proxyConfig'))) {
-            return _extends({}, proxyConfigCollection.configForUri(uri), {
-              headers
-            });
+          if (!isEmpty(config.get('console.proxyConfig'))) {
+            return {
+              ...proxyConfigCollection.configForUri(uri),
+              headers,
+            };
           }
 
-          return _extends({}, (0, _server3.getElasticsearchProxyConfig)(server), {
-            headers
-          });
+          return {
+            ...getElasticsearchProxyConfig(server),
+            headers,
+          };
         }
       }));
 
       server.route({
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
-        handler: function handler(req, reply) {
-          var _req$query = req.query;
-          const sense_version = _req$query.sense_version,
-                apis = _req$query.apis;
-
+        handler: function (req, reply) {
+          const { sense_version: version, apis } = req.query;
           if (!apis) {
-            reply(_boom2.default.badRequest('"apis" is a required param.'));
+            reply(Boom.badRequest('"apis" is a required param.'));
             return;
           }
 
-          return _server2.default.resolveApi(sense_version, apis.split(','), reply);
+          return resolveApi(version, apis.split(','), reply);
         }
       });
 
-      const testApp = kibana.uiExports.apps.hidden.byId['sense-tests'];
+      const testApp = server.getHiddenUiAppById('sense-tests');
       if (testApp) {
         server.route({
           path: '/app/sense-tests',
           method: 'GET',
-          handler: function handler(req, reply) {
+          handler: function (req, reply) {
             return reply.renderApp(testApp);
           }
         });
@@ -131,31 +146,11 @@ exports.default = function (kibana) {
         };
       },
 
-      noParse: [(0, _path.join)(modules, 'ace' + _path.sep), (0, _path.join)(modules, 'moment_src/moment' + _path.sep), (0, _path.join)(src, 'sense_editor/mode/worker.js')]
+      noParse: [
+        join(modules, 'ace' + sep),
+        join(modules, 'moment_src/moment' + sep),
+        join(src, 'sense_editor/mode/worker.js')
+      ]
     }
   });
-};
-
-var _boom = require('boom');
-
-var _boom2 = _interopRequireDefault(_boom);
-
-var _server = require('./api_server/server');
-
-var _server2 = _interopRequireDefault(_server);
-
-var _fs = require('fs');
-
-var _path = require('path');
-
-var _lodash = require('lodash');
-
-var _set_headers = require('../elasticsearch/lib/set_headers');
-
-var _set_headers2 = _interopRequireDefault(_set_headers);
-
-var _server3 = require('./server');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = exports['default'];
+}

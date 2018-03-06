@@ -1,21 +1,26 @@
-import React, { PropTypes } from 'react';
-import StdAgg from './std_agg';
+import PropTypes from 'prop-types';
+import React from 'react';
 import aggToComponent from '../lib/agg_to_component';
 import { sortable } from 'react-anything-sortable';
+import { UnsupportedAgg } from './unsupported_agg';
 
 function Agg(props) {
   const { model } = props;
   let Component = aggToComponent[model.type];
   if (!Component) {
-    Component = StdAgg;
+    Component = UnsupportedAgg;
   }
-  const style = Object.assign({ cursor: 'default' }, props.style);
+  const style = {
+    cursor: 'default',
+    ...props.style
+  };
   return (
     <div
       className={props.className}
       style={style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -25,7 +30,8 @@ function Agg(props) {
         onDelete={props.onDelete}
         panel={props.panel}
         series={props.series}
-        siblings={props.siblings}/>
+        siblings={props.siblings}
+      />
     </div>
   );
 

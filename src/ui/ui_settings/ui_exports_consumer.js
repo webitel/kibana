@@ -1,8 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 /**
  *  The UiExports class accepts consumer objects that it consults while
  *  trying to consume all of the `uiExport` declarations provided by
@@ -20,16 +15,14 @@ Object.defineProperty(exports, "__esModule", {
  *
  *  @class UiExportsConsumer
  */
-class UiExportsConsumer {
-  constructor() {
-    this._uiSettingDefaults = {};
-  }
+export class UiExportsConsumer {
+  _uiSettingDefaults = {};
 
   exportConsumer(type) {
     switch (type) {
       case 'uiSettingDefaults':
         return (plugin, settingDefinitions) => {
-          Object.keys(settingDefinitions).forEach(key => {
+          Object.keys(settingDefinitions).forEach((key) => {
             if (key in this._uiSettingDefaults) {
               throw new Error(`uiSettingDefaults for key "${key}" are already defined`);
             }
@@ -48,4 +41,3 @@ class UiExportsConsumer {
     return this._uiSettingDefaults;
   }
 }
-exports.UiExportsConsumer = UiExportsConsumer;

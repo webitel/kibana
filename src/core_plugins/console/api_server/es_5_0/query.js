@@ -1,5 +1,3 @@
-'use strict';
-
 let _ = require("lodash");
 
 var SPAN_QUERIES = {
@@ -28,48 +26,48 @@ var SPAN_QUERIES = {
 };
 
 var DECAY_FUNC_DESC = {
-  __template: {
-    "FIELD": {
+    __template: {
+      "FIELD": {
+        "origin": "",
+        "scale": ""
+      }
+    },
+    "{field}": {
       "origin": "",
-      "scale": ""
+      "scale": "",
+      "offset": "",
+      "decay": 0.5
     }
   },
-  "{field}": {
-    "origin": "",
-    "scale": "",
-    "offset": "",
-    "decay": 0.5
-  }
-},
-    SCORING_FUNCS = {
-  "script_score": {
-    __template: {
-      "script": "_score * doc['f'].value"
+  SCORING_FUNCS = {
+    "script_score": {
+      __template: {
+        "script": "_score * doc['f'].value"
+      },
+      "script": {
+        //populated by a global rule
+      }
     },
-    "script": {
-      //populated by a global rule
-    }
-  },
-  "boost_factor": 2.0,
-  "random_score": {
-    "seed": 314159265359
-  },
-  "linear": DECAY_FUNC_DESC,
-  "exp": DECAY_FUNC_DESC,
-  "gauss": DECAY_FUNC_DESC,
-  "field_value_factor": {
-    __template: {
-      "field": ""
+    "boost_factor": 2.0,
+    "random_score": {
+      "seed": 314159265359
     },
-    "field": "{field}",
-    "factor": 1.2,
-    "modifier": {
-      __one_of: ["none", "log", "log1p", "log2p", "ln", "ln1p", "ln2p", "square", "sqrt", "reciprocal"]
+    "linear": DECAY_FUNC_DESC,
+    "exp": DECAY_FUNC_DESC,
+    "gauss": DECAY_FUNC_DESC,
+    "field_value_factor": {
+      __template: {
+        "field": ""
+      },
+      "field": "{field}",
+      "factor": 1.2,
+      "modifier": {
+        __one_of: ["none", "log", "log1p", "log2p", "ln", "ln1p", "ln2p", "square", "sqrt", "reciprocal"]
+      }
     }
-  }
-};
+  };
 
-module.exports = function (api) {
+export default function (api) {
   api.addGlobalAutocompleteRules('query', {
     match: {
       __template: {
@@ -86,7 +84,8 @@ module.exports = function (api) {
         'max_expansions': 10,
         'analyzer': '',
         'fuzziness': 1.0,
-        'prefix_length': 1
+        'prefix_length': 1,
+        'minimum_should_match': 1
       }
     },
     match_phrase: {
@@ -125,15 +124,21 @@ module.exports = function (api) {
       type: { __one_of: ['best_fields', 'most_fields', 'cross_fields', 'phrase', 'phrase_prefix'] }
     },
     bool: {
-      must: [{
-        __scope_link: '.'
-      }],
-      must_not: [{
-        __scope_link: '.'
-      }],
-      should: [{
-        __scope_link: '.'
-      }],
+      must: [
+        {
+          __scope_link: '.'
+        }
+      ],
+      must_not: [
+        {
+          __scope_link: '.'
+        }
+      ],
+      should: [
+        {
+          __scope_link: '.'
+        }
+      ],
       filter: {
         __scope_link: 'GLOBAL.filter'
       },
@@ -170,9 +175,11 @@ module.exports = function (api) {
       },
       tie_breaker: 0.7,
       boost: 1.2,
-      queries: [{
-        __scope_link: '.'
-      }]
+      queries: [
+        {
+          __scope_link: '.'
+        }
+      ]
     },
     field: {
       '{field}': {
@@ -281,9 +288,6 @@ module.exports = function (api) {
       allow_leading_wildcard: {
         __one_of: [true, false]
       },
-      lowercase_expanded_terms: {
-        __one_of: [true, false]
-      },
       enable_position_increments: {
         __one_of: [true, false]
       },
@@ -318,7 +322,6 @@ module.exports = function (api) {
       default_operator: { __one_of: ["OR", "AND"] },
       analyzer: "",
       flags: "OR|AND|PREFIX",
-      lowercase_expanded_terms: { __one_of: [true, false] },
       locale: "ROOT",
       lenient: { __one_of: [true, false] }
     },
@@ -357,17 +360,21 @@ module.exports = function (api) {
     },
     span_near: {
       __template: {
-        'clauses': [{
-          span_term: {
-            'FIELD': {
-              'value': 'VALUE'
+        'clauses': [
+          {
+            span_term: {
+              'FIELD': {
+                'value': 'VALUE'
+              }
             }
           }
-        }],
+        ],
         slop: 12,
         in_order: false
       },
-      clauses: [SPAN_QUERIES],
+      clauses: [
+        SPAN_QUERIES
+      ],
       slop: 12,
       in_order: {
         __one_of: [false, true]
@@ -409,15 +416,19 @@ module.exports = function (api) {
     },
     span_or: {
       __template: {
-        clauses: [{
-          span_term: {
-            'FIELD': {
-              'value': 'VALUE'
+        clauses: [
+          {
+            span_term: {
+              'FIELD': {
+                'value': 'VALUE'
+              }
             }
           }
-        }]
+        ]
       },
-      clauses: [SPAN_QUERIES]
+      clauses: [
+        SPAN_QUERIES
+      ]
     },
     span_containing: {
       __template: {
@@ -430,19 +441,22 @@ module.exports = function (api) {
         },
         big: {
           span_near: {
-            'clauses': [{
-              span_term: {
-                'FIELD': {
-                  'value': 'VALUE'
+            'clauses': [
+              {
+                span_term: {
+                  'FIELD': {
+                    'value': 'VALUE'
+                  }
+                }
+              },
+              {
+                span_term: {
+                  'FIELD': {
+                    'value': 'VALUE'
+                  }
                 }
               }
-            }, {
-              span_term: {
-                'FIELD': {
-                  'value': 'VALUE'
-                }
-              }
-            }],
+            ],
             "slop": 5,
             "in_order": false
           }
@@ -462,19 +476,22 @@ module.exports = function (api) {
         },
         big: {
           span_near: {
-            'clauses': [{
-              span_term: {
-                'FIELD': {
-                  'value': 'VALUE'
+            'clauses': [
+              {
+                span_term: {
+                  'FIELD': {
+                    'value': 'VALUE'
+                  }
+                }
+              },
+              {
+                span_term: {
+                  'FIELD': {
+                    'value': 'VALUE'
+                  }
                 }
               }
-            }, {
-              span_term: {
-                'FIELD': {
-                  'value': 'VALUE'
-                }
-              }
-            }],
+            ],
             "slop": 5,
             "in_order": false
           }
@@ -525,18 +542,22 @@ module.exports = function (api) {
     custom_filters_score: {
       __template: {
         query: {},
-        filters: [{
-          filter: {}
-        }]
+        filters: [
+          {
+            filter: {}
+          }
+        ]
       },
       query: {},
-      filters: [{
-        filter: {},
-        boost: 2.0,
-        script: {
-          //populated by a global rule
+      filters: [
+        {
+          filter: {},
+          boost: 2.0,
+          script: {
+            //populated by a global rule
+          }
         }
-      }],
+      ],
       score_mode: {
         __one_of: ['first', 'min', 'max', 'total', 'avg', 'multiply']
       },
@@ -565,21 +586,30 @@ module.exports = function (api) {
     // js hint gets confused here
     /* jshint -W015 */
     function_score: _.defaults({
-      __template: {
+        __template: {
+          query: {},
+          functions: [
+            {}
+          ]
+        },
         query: {},
-        functions: [{}]
+        functions: [
+          _.defaults(
+            {
+              filter: {},
+              weight: 1.0
+            },
+            SCORING_FUNCS
+          )
+        ],
+        boost: 1.0,
+        boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"] },
+        score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"] },
+        max_boost: 10,
+        min_score: 1.0
       },
-      query: {},
-      functions: [_.defaults({
-        filter: {},
-        weight: 1.0
-      }, SCORING_FUNCS)],
-      boost: 1.0,
-      boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"] },
-      score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"] },
-      max_boost: 10,
-      min_score: 1.0
-    }, SCORING_FUNCS),
+      SCORING_FUNCS
+    ),
     script: {
       __template: {
         "script": "_score * doc['f'].value"
@@ -587,7 +617,8 @@ module.exports = function (api) {
       script: {
         //populated by a global rule
       }
-    }
+    },
+
 
   });
-};
+}

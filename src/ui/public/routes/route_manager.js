@@ -4,7 +4,8 @@ import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';
 import { parsePathToBreadcrumbs } from './breadcrumbs';
 
-function RouteManager() {
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+export default function RouteManager() {
   const self = this;
   const setup = new RouteSetupManager();
   const when = [];
@@ -81,5 +82,3 @@ function RouteManager() {
 
   self.RouteManager = RouteManager;
 }
-
-module.exports = RouteManager;

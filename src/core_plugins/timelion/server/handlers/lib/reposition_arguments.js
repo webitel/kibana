@@ -1,22 +1,16 @@
-'use strict';
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import _ from 'lodash';
 
 // Applies to unresolved arguments in the AST
-module.exports = function repositionArguments(functionDef, unorderedArgs) {
+export default function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
 
-  _lodash2.default.each(unorderedArgs, function (unorderedArg, i) {
+  _.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
     let targetIndex;
     let value;
     let storeAsArray;
 
-    if (_lodash2.default.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];
 
       if (!argDef) {
@@ -31,10 +25,11 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
           storeAsArray = true;
         }
       } else {
-        targetIndex = _lodash2.default.findIndex(functionDef.args, function (orderedArg) {
+        targetIndex = _.findIndex(functionDef.args, function (orderedArg) {
           return unorderedArg.name === orderedArg.name;
         });
         storeAsArray = argDef.multi;
+
       }
       value = unorderedArg.value;
     } else {
@@ -44,7 +39,7 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
       value = unorderedArg;
     }
 
-    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || '#' + i));
+    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
 
     if (storeAsArray) {
       args[targetIndex] = args[targetIndex] || [];
@@ -55,4 +50,5 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
   });
 
   return args;
-};
+
+}

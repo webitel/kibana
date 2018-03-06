@@ -1,32 +1,36 @@
-'use strict';
-
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_get_doc', {
     methods: ['GET'],
-    patterns: ["{index}/{type}/{id}"],
+    patterns: [
+      "{index}/{type}/{id}"
+    ],
     url_params: {
       "version": 1,
       "routing": "",
       "parent": "",
       "_source": "",
-      "_source_exclude": "",
-      "_source_include": ""
+      "_source_excludes": "",
+      "_source_includes": ""
     }
   });
   api.addEndpointDescription('_get_doc_source', {
     methods: ['GET'],
-    patterns: ["{index}/{type}/{id}/_source"],
+    patterns: [
+      "{index}/{type}/{id}/_source"
+    ],
     url_params: {
       "version": 1,
       "routing": "",
       "parent": "",
-      "_source_exclude": "",
-      "_source_include": ""
+      "_source_excludes": "",
+      "_source_includes": ""
     }
   });
   api.addEndpointDescription('_delete_doc', {
     methods: ['DELETE'],
-    patterns: ["{index}/{type}/{id}"],
+    patterns: [
+      "{index}/{type}/{id}"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["external", "internal"],
@@ -36,7 +40,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('index_doc', {
     methods: ['PUT', 'POST'],
-    patterns: ["{index}/{type}/{id}"],
+    patterns: [
+      "{index}/{type}/{id}"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["external", "internal"],
@@ -52,7 +58,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('create_doc', {
     methods: ['PUT', 'POST'],
-    patterns: ["{index}/{type}/{id}/_create"],
+    patterns: [
+      "{index}/{type}/{id}/_create"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["external", "internal"],
@@ -67,7 +75,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('index_doc_no_id', {
     methods: ['POST'],
-    patterns: ["{index}/{type}"],
+    patterns: [
+      "{index}/{type}"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["external", "internal"],
@@ -83,7 +93,9 @@ module.exports = function (api) {
 
   api.addEndpointDescription('_update', {
     methods: ['POST'],
-    patterns: ["{index}/{type}/{id}/_update"],
+    patterns: [
+      "{index}/{type}/{id}/_update"
+    ],
     url_params: {
       "version": 1,
       "version_type": ["force", "internal"],
@@ -109,9 +121,15 @@ module.exports = function (api) {
 
   api.addEndpointDescription('_put_script', {
     methods: ['POST', 'PUT'],
-    patterns: ["_scripts/{lang}/{id}", "_scripts/{lang}/{id}/_create"],
+    patterns: [
+      "_scripts/{lang}/{id}",
+      "_scripts/{lang}/{id}/_create"
+    ],
     url_components: {
-      "lang": ["groovy", "expressions"]
+      "lang": [
+        "groovy",
+        "expressions"
+      ]
     },
     data_autocomplete_rules: {
       "script": ""
@@ -120,7 +138,9 @@ module.exports = function (api) {
 
   api.addEndpointDescription('_termvectors', {
     methods: ['GET', 'POST'],
-    patterns: ["{index}/{type}/_termvectors"],
+    patterns: [
+      "{index}/{type}/_termvectors"
+    ],
     priority: 10, // collision with get doc
     url_params: {
       "fields": "",
@@ -136,7 +156,9 @@ module.exports = function (api) {
       "preference": ""
     },
     data_autocomplete_rules: {
-      fields: ["{field}"],
+      fields: [
+        "{field}"
+      ],
       offsets: { __one_of: [false, true] },
       payloads: { __one_of: [false, true] },
       positions: { __one_of: [false, true] },
@@ -163,7 +185,9 @@ module.exports = function (api) {
   });
   api.addEndpointDescription('_termvectors_id', {
     methods: ['GET', 'POST'],
-    patterns: ["{index}/{type}/{id}/_termvectors"],
+    patterns: [
+      "{index}/{type}/{id}/_termvectors"
+    ],
     url_params: {
       "fields": "",
       "offsets": "__flag__",
@@ -179,7 +203,9 @@ module.exports = function (api) {
       "dfs": "__flag__"
     },
     data_autocomplete_rules: {
-      fields: ["{field}"],
+      fields: [
+        "{field}"
+      ],
       offsets: { __one_of: [false, true] },
       payloads: { __one_of: [false, true] },
       positions: { __one_of: [false, true] },
@@ -204,4 +230,4 @@ module.exports = function (api) {
       }
     }
   });
-};
+}
