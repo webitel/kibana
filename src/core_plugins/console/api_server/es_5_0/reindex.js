@@ -1,10 +1,14 @@
-export default function (api) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
 
   api.addEndpointDescription('_post_reindex', {
-    methods: [ 'POST' ],
-    patterns: [
-      '_reindex'
-    ],
+    methods: ['POST'],
+    patterns: ['_reindex'],
     url_params: {
       refresh: '__flag__',
       wait_for_completion: 'true',
@@ -28,12 +32,12 @@ export default function (api) {
           __template: {
             'FIELD': 'desc'
           },
-          'FIELD': { __one_of: [ 'asc', 'desc' ] }
+          'FIELD': { __one_of: ['asc', 'desc'] }
         },
         'size': 1000,
         'remote': {
           __template: {
-            'host': '',
+            'host': ''
           },
           'host': '',
           'username': '',
@@ -44,14 +48,16 @@ export default function (api) {
       },
       'dest': {
         'index': '',
-        'version_type': { __one_of: [ 'internal', 'external' ] },
+        'version_type': { __one_of: ['internal', 'external'] },
         'op_type': 'create',
-        'routing': { __one_of: [ 'keep', 'discard', '=SOME TEXT'] },
+        'routing': { __one_of: ['keep', 'discard', '=SOME TEXT'] },
         'pipeline': ''
       },
       'conflicts': 'proceed',
       'size': 10,
-      'script': { __scope_link: 'GLOBAL.script' },
+      'script': { __scope_link: 'GLOBAL.script' }
     }
-  })
-}
+  });
+};
+
+module.exports = exports['default'];

@@ -1,23 +1,24 @@
-import { accessSync, R_OK } from 'fs';
-import { find } from 'lodash';
-import { fromRoot } from '../../utils';
+'use strict';
 
-const CONFIG_PATHS = [
-  process.env.CONFIG_PATH,
-  fromRoot('config/kibana.yml'),
-  '/etc/kibana/kibana.yml'
-].filter(Boolean);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getData = exports.getConfig = undefined;
 
-const DATA_PATHS = [
-  process.env.DATA_PATH,
-  fromRoot('data'),
-  '/var/lib/kibana'
-].filter(Boolean);
+var _fs = require('fs');
+
+var _lodash = require('lodash');
+
+var _utils = require('../../utils');
+
+const CONFIG_PATHS = [process.env.CONFIG_PATH, (0, _utils.fromRoot)('config/kibana.yml'), '/etc/kibana/kibana.yml'].filter(Boolean);
+
+const DATA_PATHS = [process.env.DATA_PATH, (0, _utils.fromRoot)('data'), '/var/lib/kibana'].filter(Boolean);
 
 function findFile(paths) {
-  const availablePath = find(paths, configPath => {
+  const availablePath = (0, _lodash.find)(paths, configPath => {
     try {
-      accessSync(configPath, R_OK);
+      (0, _fs.accessSync)(configPath, _fs.R_OK);
       return true;
     } catch (e) {
       //Check the next path
@@ -26,5 +27,5 @@ function findFile(paths) {
   return availablePath || paths[0];
 }
 
-export const getConfig = () => findFile(CONFIG_PATHS);
-export const getData = () => findFile(DATA_PATHS);
+const getConfig = exports.getConfig = () => findFile(CONFIG_PATHS);
+const getData = exports.getData = () => findFile(DATA_PATHS);

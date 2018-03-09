@@ -1,1 +1,14 @@
-export { uiRenderMixin } from './ui_render_mixin';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ui_render_mixin = require('./ui_render_mixin');
+
+Object.defineProperty(exports, 'uiRenderMixin', {
+  enumerable: true,
+  get: function get() {
+    return _ui_render_mixin.uiRenderMixin;
+  }
+});

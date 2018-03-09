@@ -1,27 +1,26 @@
 <kbn-management-app section="kibana">
-    <div class="container-fluid">
-        <h1>CTI config</h1>
+    <div style="font-size: 18px;margin: 15px;" class="container-fluid">
 
-        <label class="control-label">
+        <label style="font-size: 18px;margin: 15px;" class="control-label">
             <input ng-model="conf.useWebPhone" type="checkbox">
             Use web phone
         </label>
         <br>
 
-        <label class="control-label">
+        <label style="font-size: 18px;margin: 15px;" class="control-label">
             <input ng-model="conf.useWebRTC" type="checkbox" >
             Use WebRTC
         </label>
         <br>
 
-        <label class="control-label">
+        <label style="font-size: 18px;margin: 15px;" class="control-label">
             <input ng-model="conf.leftPosition" type="checkbox">
             Left position CTI
         </label>
         <br>
 
-        <div class="input-group">
-            <button ng-click="save()" class="btn btn-success">Save</button>
+        <div style="font-size: 18px;margin: 15px;" class="input-group">
+            <button ng-click="save()" class="kuiButton kuiButton--primary">Save</button>
         </div>
     </div>
 </kbn-management-app>

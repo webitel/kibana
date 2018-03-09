@@ -1,8 +1,29 @@
-import yauzl from 'yauzl';
-import path from 'path';
-import mkdirp from 'mkdirp';
-import { createWriteStream } from 'fs';
-import { get } from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.analyzeArchive = analyzeArchive;
+exports._isDirectory = _isDirectory;
+exports.extractArchive = extractArchive;
+
+var _yauzl = require('yauzl');
+
+var _yauzl2 = _interopRequireDefault(_yauzl);
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _mkdirp = require('mkdirp');
+
+var _mkdirp2 = _interopRequireDefault(_mkdirp);
+
+var _fs = require('fs');
+
+var _lodash = require('lodash');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  * Returns an array of package objects. There will be one for each of
@@ -11,12 +32,12 @@ import { get } from 'lodash';
  * @param {string} archive - path to plugin archive zip file
  */
 
-export function analyzeArchive(archive) {
+function analyzeArchive(archive) {
   const plugins = [];
   const regExp = new RegExp('(kibana[\\\\/][^\\\\/]+)[\\\\/]package\.json', 'i');
 
-  return new Promise ((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
+  return new Promise((resolve, reject) => {
+    _yauzl2.default.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
         return reject(err);
       }
@@ -50,7 +71,7 @@ export function analyzeArchive(archive) {
               // the version of kibana down to the patch level. If these two versions need
               // to diverge, they can specify a kibana.version to indicate the version of
               // kibana the plugin is intended to work with.
-              kibanaVersion: get(pkg, 'kibana.version', pkg.version)
+              kibanaVersion: (0, _lodash.get)(pkg, 'kibana.version', pkg.version)
             }));
 
             zipfile.readEntry();
@@ -66,13 +87,13 @@ export function analyzeArchive(archive) {
 }
 
 const isDirectoryRegex = /(\/|\\)$/;
-export function _isDirectory(filename) {
+function _isDirectory(filename) {
   return isDirectoryRegex.test(filename);
 }
 
-export function extractArchive(archive, targetDir, extractPath) {
+function extractArchive(archive, targetDir, extractPath) {
   return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
+    _yauzl2.default.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
         return reject(err);
       }
@@ -89,11 +110,11 @@ export function extractArchive(archive, targetDir, extractPath) {
         }
 
         if (targetDir) {
-          fileName = path.join(targetDir, fileName);
+          fileName = _path2.default.join(targetDir, fileName);
         }
 
         if (_isDirectory(fileName)) {
-          mkdirp(fileName, function (err) {
+          (0, _mkdirp2.default)(fileName, function (err) {
             if (err) {
               return reject(err);
             }
@@ -108,12 +129,12 @@ export function extractArchive(archive, targetDir, extractPath) {
             }
 
             // ensure parent directory exists
-            mkdirp(path.dirname(fileName), function (err) {
+            (0, _mkdirp2.default)(_path2.default.dirname(fileName), function (err) {
               if (err) {
                 return reject(err);
               }
 
-              readStream.pipe(createWriteStream(fileName));
+              readStream.pipe((0, _fs.createWriteStream)(fileName));
               readStream.on('end', function () {
                 zipfile.readEntry();
               });

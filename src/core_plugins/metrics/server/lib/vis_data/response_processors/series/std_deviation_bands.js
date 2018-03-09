@@ -1,14 +1,35 @@
-import _ from 'lodash';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
-import mapBucket from '../../helpers/map_bucket';
-export default function stdDeviationBands(resp, panel, series) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = stdDeviationBands;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _get_splits = require('../../helpers/get_splits');
+
+var _get_splits2 = _interopRequireDefault(_get_splits);
+
+var _get_last_metric = require('../../helpers/get_last_metric');
+
+var _get_last_metric2 = _interopRequireDefault(_get_last_metric);
+
+var _map_bucket = require('../../helpers/map_bucket');
+
+var _map_bucket2 = _interopRequireDefault(_map_bucket);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function stdDeviationBands(resp, panel, series) {
   return next => results => {
-    const metric = getLastMetric(series);
+    const metric = (0, _get_last_metric2.default)(series);
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
-      getSplits(resp, panel, series).forEach((split) => {
-        const upper = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
-        const lower = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
+      (0, _get_splits2.default)(resp, panel, series).forEach(split => {
+        const upper = split.timeseries.buckets.map((0, _map_bucket2.default)(_lodash2.default.assign({}, metric, { mode: 'upper' })));
+        const lower = split.timeseries.buckets.map((0, _map_bucket2.default)(_lodash2.default.assign({}, metric, { mode: 'lower' })));
         results.push({
           id: `${split.id}:upper`,
           label: split.label,
@@ -29,5 +50,5 @@ export default function stdDeviationBands(resp, panel, series) {
     }
     return next(results);
   };
-
 }
+module.exports = exports['default'];

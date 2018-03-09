@@ -1,28 +1,38 @@
-import { join } from 'path';
+'use strict';
 
-import { pkg } from '../utils';
-import Command from '../cli/command';
-import { getData } from '../server/path';
-import { Keystore } from '../server/keystore';
+var _path = require('path');
 
-const path = join(getData(), 'kibana.keystore');
-const keystore = new Keystore(path);
+var _utils = require('../utils');
 
-import { createCli } from './create';
-import { listCli } from './list';
-import { addCli } from './add';
-import { removeCli } from './remove';
+var _command = require('../cli/command');
 
-const program = new Command('bin/kibana-keystore');
+var _command2 = _interopRequireDefault(_command);
 
-program
-  .version(pkg.version)
-  .description('A tool for managing settings stored in the Kibana keystore');
+var _path2 = require('../server/path');
 
-createCli(program, keystore);
-listCli(program, keystore);
-addCli(program, keystore);
-removeCli(program, keystore);
+var _keystore = require('../server/keystore');
+
+var _create = require('./create');
+
+var _list = require('./list');
+
+var _add = require('./add');
+
+var _remove = require('./remove');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const path = (0, _path.join)((0, _path2.getData)(), 'kibana.keystore');
+const keystore = new _keystore.Keystore(path);
+
+const program = new _command2.default('bin/kibana-keystore');
+
+program.version(_utils.pkg.version).description('A tool for managing settings stored in the Kibana keystore');
+
+(0, _create.createCli)(program, keystore);
+(0, _list.listCli)(program, keystore);
+(0, _add.addCli)(program, keystore);
+(0, _remove.removeCli)(program, keystore);
 
 program.parse(process.argv);
 

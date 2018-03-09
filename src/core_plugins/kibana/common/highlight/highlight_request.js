@@ -1,13 +1,20 @@
-import { highlightTags } from './highlight_tags';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getHighlightRequest = getHighlightRequest;
+
+var _highlight_tags = require('./highlight_tags');
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
-export function getHighlightRequest(query, getConfig) {
+function getHighlightRequest(query, getConfig) {
   if (!getConfig('doc_table:highlight')) return;
 
   return {
-    pre_tags: [highlightTags.pre],
-    post_tags: [highlightTags.post],
+    pre_tags: [_highlight_tags.highlightTags.pre],
+    post_tags: [_highlight_tags.highlightTags.post],
     fields: {
       '*': {}
     },

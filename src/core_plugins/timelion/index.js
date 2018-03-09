@@ -1,4 +1,10 @@
-export default function (kibana) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
     uiExports: {
@@ -8,7 +14,7 @@ export default function (kibana) {
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: 'plugins/timelion/app',
-        injectVars: function (server) {
+        injectVars: function injectVars(server) {
           const config = server.config();
           return {
             kbnIndex: config.get('kibana.index'),
@@ -16,21 +22,11 @@ export default function (kibana) {
             esApiVersion: config.get('elasticsearch.apiVersion')
           };
         },
-        uses: [
-          'fieldFormats',
-          'savedObjectTypes'
-        ]
+        uses: ['fieldFormats', 'savedObjectTypes']
       },
-      hacks: [
-        'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart/timechart'
-      ],
-      visTypes: [
-        'plugins/timelion/vis'
-      ],
-      home: [
-        'plugins/timelion/register_feature'
-      ],
+      hacks: ['plugins/timelion/lib/panel_registry', 'plugins/timelion/panels/timechart/timechart'],
+      visTypes: ['plugins/timelion/vis'],
+      home: ['plugins/timelion/register_feature'],
       mappings: require('./mappings.json'),
 
       uiSettingDefaults: {
@@ -76,6 +72,8 @@ export default function (kibana) {
         }
       }
     },
-    init: require('./init.js'),
+    init: require('./init.js')
   });
-}
+};
+
+module.exports = exports['default'];

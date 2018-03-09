@@ -1,10 +1,19 @@
-export default function (server) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/validate/es',
-    handler: function (request, reply) {
-      return request.getUiSettingsService().getAll().then((uiSettings) => {
-        const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+    handler: function handler(request, reply) {
+      return request.getUiSettingsService().getAll().then(uiSettings => {
+        var _server$plugins$elast = server.plugins.elasticsearch.getCluster('data');
+
+        const callWithRequest = _server$plugins$elast.callWithRequest;
+
 
         const timefield = uiSettings['timelion:es.timefield'];
 
@@ -27,7 +36,8 @@ export default function (server) {
           });
         });
       });
-
     }
   });
-}
+};
+
+module.exports = exports['default'];

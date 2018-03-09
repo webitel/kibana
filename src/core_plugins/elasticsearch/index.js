@@ -1,22 +1,20 @@
-import { compact, get, has, set } from 'lodash';
-import { unset } from '../../utils';
+'use strict';
 
-import healthCheck from './lib/health_check';
-import { createDataCluster } from './lib/create_data_cluster';
-import { createAdminCluster } from './lib/create_admin_cluster';
-import { clientLogger } from './lib/client_logger';
-import { createClusters } from './lib/create_clusters';
-import filterHeaders from './lib/filter_headers';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-import { createProxy } from './lib/create_proxy';
-
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
-
-export default function (kibana) {
+exports.default = function (kibana) {
   return new kibana.Plugin({
     require: ['kibana'],
     config(Joi) {
-      const { array, boolean, number, object, string, ref } = Joi;
+      const array = Joi.array,
+            boolean = Joi.boolean,
+            number = Joi.number,
+            object = Joi.object,
+            string = Joi.string,
+            ref = Joi.ref;
+
 
       const sslSchema = object({
         verificationMode: string().valid('none', 'certificate', 'full').default('full'),
@@ -57,40 +55,33 @@ export default function (kibana) {
           startupTimeout: number().default(5000),
           logQueries: boolean().default(false),
           ssl: sslSchema,
-          apiVersion: Joi.string().default('master'),
+          apiVersion: Joi.string().default('master')
         }).default()
       }).default();
     },
 
     deprecations({ rename }) {
-      const sslVerify = (basePath) => {
-        const getKey = (path) => {
-          return compact([basePath, path]).join('.');
+      const sslVerify = basePath => {
+        const getKey = path => {
+          return (0, _lodash.compact)([basePath, path]).join('.');
         };
 
         return (settings, log) => {
-          const sslSettings = get(settings, getKey('ssl'));
+          const sslSettings = (0, _lodash.get)(settings, getKey('ssl'));
 
-          if (!has(sslSettings, 'verify')) {
+          if (!(0, _lodash.has)(sslSettings, 'verify')) {
             return;
           }
 
-          const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
-          set(sslSettings, 'verificationMode', verificationMode);
-          unset(sslSettings, 'verify');
+          const verificationMode = (0, _lodash.get)(sslSettings, 'verify') ? 'full' : 'none';
+          (0, _lodash.set)(sslSettings, 'verificationMode', verificationMode);
+          (0, _utils.unset)(sslSettings, 'verify');
 
           log(`Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with "${getKey('ssl.verificationMode')}"`);
         };
       };
 
-      return [
-        rename('ssl.ca', 'ssl.certificateAuthorities'),
-        rename('ssl.cert', 'ssl.certificate'),
-        sslVerify(),
-        rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
-        rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
-        sslVerify('tribe')
-      ];
+      return [rename('ssl.ca', 'ssl.certificateAuthorities'), rename('ssl.cert', 'ssl.certificate'), sslVerify(), rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'), rename('tribe.ssl.cert', 'tribe.ssl.certificate'), sslVerify('tribe')];
     },
 
     uiExports: {
@@ -99,35 +90,66 @@ export default function (kibana) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
-          esDataIsTribe: get(options, 'tribe.url') ? true : false,
+          esDataIsTribe: (0, _lodash.get)(options, 'tribe.url') ? true : false
         };
       }
     },
 
     init(server) {
-      const clusters = createClusters(server);
+      const clusters = (0, _create_clusters.createClusters)(server);
 
       server.expose('getCluster', clusters.get);
       server.expose('createCluster', clusters.create);
 
-      server.expose('filterHeaders', filterHeaders);
-      server.expose('ElasticsearchClientLogging', clientLogger(server));
+      server.expose('filterHeaders', _filter_headers2.default);
+      server.expose('ElasticsearchClientLogging', (0, _client_logger.clientLogger)(server));
 
-      createDataCluster(server);
-      createAdminCluster(server);
+      (0, _create_data_cluster.createDataCluster)(server);
+      (0, _create_admin_cluster.createAdminCluster)(server);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+      (0, _create_proxy.createProxy)(server, 'POST', '/{index}/_search');
+      (0, _create_proxy.createProxy)(server, 'POST', '/_msearch');
 
       /*WEBITEL*/
-      createProxy(server, 'POST', '/_search/scroll');
-
+      (0, _create_proxy.createProxy)(server, 'POST', '/_search/scroll');
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server);
+
+      var _healthCheck = (0, _health_check2.default)(this, server);
+
+      const start = _healthCheck.start,
+            waitUntilReady = _healthCheck.waitUntilReady;
+
       server.expose('waitUntilReady', waitUntilReady);
       start();
     }
   });
+};
 
-}
+var _lodash = require('lodash');
+
+var _utils = require('../../utils');
+
+var _health_check = require('./lib/health_check');
+
+var _health_check2 = _interopRequireDefault(_health_check);
+
+var _create_data_cluster = require('./lib/create_data_cluster');
+
+var _create_admin_cluster = require('./lib/create_admin_cluster');
+
+var _client_logger = require('./lib/client_logger');
+
+var _create_clusters = require('./lib/create_clusters');
+
+var _filter_headers = require('./lib/filter_headers');
+
+var _filter_headers2 = _interopRequireDefault(_filter_headers);
+
+var _create_proxy = require('./lib/create_proxy');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const DEFAULT_REQUEST_HEADERS = ['authorization'];
+
+module.exports = exports['default'];

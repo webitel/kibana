@@ -1,4 +1,11 @@
-import { IndexMappings } from './index_mappings';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.kibanaIndexMappingsMixin = kibanaIndexMappingsMixin;
+
+var _index_mappings = require('./index_mappings');
 
 /**
  *  The default mappings used for the kibana index. This is
@@ -23,16 +30,13 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
             type: 'keyword'
           }
         }
-      },
+      }
     }
   }
 };
 
-export function kibanaIndexMappingsMixin(kbnServer, server) {
-  const mappings = new IndexMappings(
-    BASE_SAVED_OBJECT_MAPPINGS,
-    kbnServer.uiExports.savedObjectMappings
-  );
+function kibanaIndexMappingsMixin(kbnServer, server) {
+  const mappings = new _index_mappings.IndexMappings(BASE_SAVED_OBJECT_MAPPINGS, kbnServer.uiExports.savedObjectMappings);
 
   /**
    *  Get the mappings dsl that we expect to see in the

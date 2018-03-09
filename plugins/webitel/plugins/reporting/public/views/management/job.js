@@ -24,8 +24,8 @@ routes.when('/management/kibana/reporting/:id/edit', {
     controller
 });
 
-function controller($scope, $http, savedVisualizations, $timeout, $routeParams, $location, quickRanges, Private, config, indexPatterns) {
-
+function controller($scope, $http, savedVisualizations, $timeout, $routeParams, $location, config) {
+    var quickRanges = config.get('timepicker:quickRanges');
     $scope.field = {vis: []};
     $scope.intervalOptions = quickRanges;
     $scope.isNew = !$routeParams.id;

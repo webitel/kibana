@@ -1,4 +1,11 @@
-import { createTypeReducer, flatConcat } from './lib';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.flatConcatAtType = undefined;
+
+var _lib = require('./lib');
 
 /**
  *  Reducer that merges two values concatenating all values
@@ -6,4 +13,4 @@ import { createTypeReducer, flatConcat } from './lib';
  *  @param  {Any} [initial]
  *  @return {Function}
  */
-export const flatConcatAtType = createTypeReducer(flatConcat);
+const flatConcatAtType = exports.flatConcatAtType = (0, _lib.createTypeReducer)(_lib.flatConcat);

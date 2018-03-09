@@ -1,6 +1,10 @@
-import { badRequest } from 'boom';
+'use strict';
 
-export default function (kbnServer, server, config) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kbnServer, server, config) {
   const versionHeader = 'kbn-version';
   const actualVersion = config.get('pkg.version');
 
@@ -8,7 +12,7 @@ export default function (kbnServer, server, config) {
     const versionRequested = req.headers[versionHeader];
 
     if (versionRequested && versionRequested !== actualVersion) {
-      return reply(badRequest('Browser client is out of date, please refresh the page', {
+      return reply((0, _boom.badRequest)('Browser client is out of date, please refresh the page', {
         expected: actualVersion,
         got: versionRequested
       }));
@@ -16,4 +20,8 @@ export default function (kbnServer, server, config) {
 
     return reply.continue();
   });
-}
+};
+
+var _boom = require('boom');
+
+module.exports = exports['default'];

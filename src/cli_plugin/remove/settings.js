@@ -1,6 +1,13 @@
-import { resolve } from 'path';
+'use strict';
 
-export function parse(command, options) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parse = parse;
+
+var _path = require('path');
+
+function parse(command, options) {
   const settings = {
     quiet: options.quiet || false,
     silent: options.silent || false,
@@ -9,7 +16,7 @@ export function parse(command, options) {
     plugin: command
   };
 
-  settings.pluginPath = resolve(settings.pluginDir, settings.plugin);
+  settings.pluginPath = (0, _path.resolve)(settings.pluginDir, settings.plugin);
 
   return settings;
 }

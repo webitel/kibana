@@ -1,7 +1,18 @@
-import * as states from './states';
-import { EventEmitter } from 'events';
+'use strict';
 
-export default class Status extends EventEmitter {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _states = require('./states');
+
+var states = _interopRequireWildcard(_states);
+
+var _events = require('events');
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+class Status extends _events.EventEmitter {
   constructor(id, server) {
     super();
 
@@ -17,11 +28,7 @@ export default class Status extends EventEmitter {
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
 
-      const tags = [
-        'status',
-        this.id,
-        this.state === 'red' ? 'error' : 'info'
-      ];
+      const tags = ['status', this.id, this.state === 'red' ? 'error' : 'info'];
 
       server.log(tags, {
         tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
@@ -60,6 +67,7 @@ export default class Status extends EventEmitter {
   }
 }
 
+exports.default = Status;
 states.all.forEach(function (state) {
   Status.prototype[state.id] = function (message) {
     if (this.state === 'disabled') return;
@@ -85,3 +93,4 @@ states.all.forEach(function (state) {
     this.emit('change', previous, previousMsg, this.state, this.message);
   };
 });
+module.exports = exports['default'];

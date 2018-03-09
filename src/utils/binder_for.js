@@ -1,6 +1,13 @@
-import { BinderBase } from './binder';
+'use strict';
 
-export class BinderFor extends BinderBase {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BinderFor = undefined;
+
+var _binder = require('./binder');
+
+class BinderFor extends _binder.BinderBase {
   constructor(emitter) {
     super();
     this.emitter = emitter;
@@ -10,3 +17,4 @@ export class BinderFor extends BinderBase {
     super.on(this.emitter, ...args);
   }
 }
+exports.BinderFor = BinderFor;

@@ -1,17 +1,20 @@
-const { resolve } = require('path');
+'use strict';
+
+var _require = require('path');
+
+const resolve = _require.resolve;
 
 // this must happen before `require('babel-register')` and can't be changed
 // once the module has been loaded
+
 if (!process.env.BABEL_CACHE_PATH) {
   process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../optimize/.babelcache.json');
 }
 
 // paths that babel-register should ignore
-const ignore = [
-  /[\\\/](node_modules|bower_components)[\\\/]/,
-];
+const ignore = [/[\\\/](node_modules|bower_components)[\\\/]/];
 
-if (global.__BUILT_WITH_BABEL__) {
+if ('true') {
   // when building the Kibana source we replace the statement
   // `global.__BUILT_WITH_BABEL__` with the value `true` so that
   // when babel-register is required for the first time by users
@@ -28,7 +31,5 @@ if (global.__BUILT_WITH_BABEL__) {
 require('babel-register')({
   ignore,
   babelrc: false,
-  presets: [
-    require.resolve('../babel-preset/node')
-  ],
+  presets: [require.resolve('../babel-preset/node')]
 });

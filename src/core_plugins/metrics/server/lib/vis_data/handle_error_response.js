@@ -1,4 +1,10 @@
-export default panel => error => {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = panel => error => {
   if (error.isBoom && error.status === 401) throw error;
   const result = {};
   let errorResponse;
@@ -21,3 +27,5 @@ export default panel => error => {
   };
   return result;
 };
+
+module.exports = exports["default"];

@@ -1,7 +1,12 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 /**
  * Logs messages and errors
  */
-export default class Logger {
+class Logger {
 
   constructor(settings = {}) {
     this.previousLineEnded = true;
@@ -44,3 +49,5 @@ export default class Logger {
   }
 
 }
+exports.default = Logger;
+module.exports = exports['default'];

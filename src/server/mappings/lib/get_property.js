@@ -1,6 +1,17 @@
-import toPath from 'lodash/internal/toPath';
+'use strict';
 
-import { getRootType } from './get_root_type';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getProperty = getProperty;
+
+var _toPath = require('lodash/internal/toPath');
+
+var _toPath2 = _interopRequireDefault(_toPath);
+
+var _get_root_type = require('./get_root_type');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  *  Recursively read properties from the mapping object of type "object"
@@ -17,10 +28,7 @@ function getPropertyMappingFromObjectMapping(mapping, path) {
   }
 
   if (path.length > 1) {
-    return getPropertyMappingFromObjectMapping(
-      props[path[0]],
-      path.slice(1)
-    );
+    return getPropertyMappingFromObjectMapping(props[path[0]], path.slice(1));
   } else {
     return props[path[0]];
   }
@@ -32,9 +40,6 @@ function getPropertyMappingFromObjectMapping(mapping, path) {
  *  @param  {string|Array<string>} path
  *  @return {Object|undefined}
  */
-export function getProperty(mappings, path) {
-  return getPropertyMappingFromObjectMapping(
-    mappings[getRootType(mappings)],
-    toPath(path)
-  );
+function getProperty(mappings, path) {
+  return getPropertyMappingFromObjectMapping(mappings[(0, _get_root_type.getRootType)(mappings)], (0, _toPath2.default)(path));
 }

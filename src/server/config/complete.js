@@ -1,13 +1,40 @@
-import { difference } from 'lodash';
-import { transformDeprecations } from './transform_deprecations';
-import { formatListAsProse, getFlattenedObject } from '../../utils';
+'use strict';
 
-const getFlattenedKeys = object => (
-  Object.keys(getFlattenedObject(object))
-);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kbnServer, server, config) {
+
+  server.decorate('server', 'config', function () {
+    return kbnServer.config;
+  });
+
+  const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get()).map(key => `"${key}"`);
+
+  if (!unusedKeys.length) {
+    return;
+  }
+
+  const desc = unusedKeys.length === 1 ? 'setting was' : 'settings were';
+
+  const error = new Error(`${(0, _utils.formatListAsProse)(unusedKeys)} ${desc} not applied. ` + 'Check for spelling errors and ensure that expected ' + 'plugins are installed and enabled.');
+
+  error.code = 'InvalidConfig';
+  error.processExitCode = 64;
+  throw error;
+};
+
+var _lodash = require('lodash');
+
+var _transform_deprecations = require('./transform_deprecations');
+
+var _utils = require('../../utils');
+
+const getFlattenedKeys = object => Object.keys((0, _utils.getFlattenedObject)(object));
 
 const getUnusedConfigKeys = (settings, configValues) => {
-  const inputKeys = getFlattenedKeys(transformDeprecations(settings));
+  const inputKeys = getFlattenedKeys((0, _transform_deprecations.transformDeprecations)(settings));
   const appliedKeys = getFlattenedKeys(configValues);
 
   if (inputKeys.includes('env')) {
@@ -17,33 +44,7 @@ const getUnusedConfigKeys = (settings, configValues) => {
     inputKeys[inputKeys.indexOf('env')] = 'env.name';
   }
 
-  return difference(inputKeys, appliedKeys);
+  return (0, _lodash.difference)(inputKeys, appliedKeys);
 };
 
-export default function (kbnServer, server, config) {
-
-  server.decorate('server', 'config', function () {
-    return kbnServer.config;
-  });
-
-  const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get())
-    .map(key => `"${key}"`);
-
-  if (!unusedKeys.length) {
-    return;
-  }
-
-  const desc = unusedKeys.length === 1
-    ? 'setting was'
-    : 'settings were';
-
-  const error = new Error(
-    `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
-    'Check for spelling errors and ensure that expected ' +
-    'plugins are installed and enabled.'
-  );
-
-  error.code = 'InvalidConfig';
-  error.processExitCode = 64;
-  throw error;
-}
+module.exports = exports['default'];

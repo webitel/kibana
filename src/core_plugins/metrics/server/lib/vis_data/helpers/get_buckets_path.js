@@ -1,8 +1,16 @@
-import { startsWith } from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = require('lodash');
+
 const percentileTest = /\[[0-9\.]+\]$/;
 const percentileNumberTest = /\d+\.\d+/;
-export default (id, metrics) => {
-  const metric = metrics.find(m => startsWith(id, m.id));
+
+exports.default = (id, metrics) => {
+  const metric = metrics.find(m => (0, _lodash.startsWith)(id, m.id));
   let bucketsPath = String(id);
 
   switch (metric.type) {
@@ -32,7 +40,7 @@ export default (id, metrics) => {
       break;
   }
 
-
   return bucketsPath;
 };
 
+module.exports = exports['default'];

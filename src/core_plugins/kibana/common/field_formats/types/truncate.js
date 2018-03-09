@@ -1,13 +1,26 @@
-import _ from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createTruncateFormat = createTruncateFormat;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const omission = '...';
 
-export function createTruncateFormat(FieldFormat) {
-  return class TruncateFormat extends FieldFormat {
+function createTruncateFormat(FieldFormat) {
+  var _class, _temp;
+
+  return _temp = _class = class TruncateFormat extends FieldFormat {
     _convert(val) {
       const length = this.param('fieldLength');
       if (length > 0) {
-        return _.trunc(val, {
+        return _lodash2.default.trunc(val, {
           'length': length + omission.length,
           'omission': omission
         });
@@ -16,8 +29,5 @@ export function createTruncateFormat(FieldFormat) {
       return val;
     }
 
-    static id = 'truncate';
-    static title = 'Truncated String';
-    static fieldType = ['string'];
-  };
+  }, _class.id = 'truncate', _class.title = 'Truncated String', _class.fieldType = ['string'], _temp;
 }

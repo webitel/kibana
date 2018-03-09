@@ -1,4 +1,10 @@
-export function injectVars(server) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.injectVars = injectVars;
+function injectVars(server) {
   const serverConfig = server.config();
 
   //DEPRECATED SETTINGS
@@ -10,8 +16,7 @@ export function injectVars(server) {
   const regionmapsConfig = serverConfig.get('regionmap');
   const mapConfig = serverConfig.get('map');
 
-
-  regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
+  regionmapsConfig.layers = regionmapsConfig.layers ? regionmapsConfig.layers : [];
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
@@ -20,7 +25,7 @@ export function injectVars(server) {
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,
-        config: tilemapConfig,
+        config: tilemapConfig
       }
     }
   };

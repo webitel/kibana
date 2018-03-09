@@ -1,8 +1,14 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 const set = Symbol('internal set');
 
-export default class Collection {
-  constructor() { // Set's have a length of 0, mimic that
+class Collection {
+  constructor() {
+    // Set's have a length of 0, mimic that
     this[set] = new Set(arguments[0] || []);
   }
 
@@ -66,3 +72,5 @@ export default class Collection {
     return this[set][Symbol.iterator]();
   }
 }
+exports.default = Collection;
+module.exports = exports['default'];

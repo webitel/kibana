@@ -1,23 +1,41 @@
-import _ from 'lodash';
+'use strict';
 
-import * as states from './states';
-import Status from './status';
-import { version } from '../../../package.json';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-export default class ServerStatus {
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _states = require('./states');
+
+var states = _interopRequireWildcard(_states);
+
+var _status = require('./status');
+
+var _status2 = _interopRequireDefault(_status);
+
+var _package = require('../../../package.json');
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class ServerStatus {
   constructor(server) {
     this.server = server;
     this._created = {};
   }
 
   create(id) {
-    const status = new Status(id, this.server);
+    const status = new _status2.default(id, this.server);
     this._created[status.id] = status;
     return status;
   }
 
   createForPlugin(plugin) {
-    if (plugin.version === 'kibana') plugin.version = version;
+    if (plugin.version === 'kibana') plugin.version = _package.version;
     const status = this.create(`plugin:${plugin.id}@${plugin.version}`);
     status.plugin = plugin;
     return status;
@@ -25,7 +43,7 @@ export default class ServerStatus {
 
   each(fn) {
     const self = this;
-    _.forOwn(self._created, function (status, i, list) {
+    _lodash2.default.forOwn(self._created, function (status, i, list) {
       if (status.state !== 'disabled') {
         fn.call(self, status, i, list);
       }
@@ -37,9 +55,7 @@ export default class ServerStatus {
   }
 
   getForPluginId(pluginId) {
-    return _.find(this._created, s =>
-      s.plugin && s.plugin.id === pluginId
-    );
+    return _lodash2.default.find(this._created, s => s.plugin && s.plugin.id === pluginId);
   }
 
   getState(id) {
@@ -56,27 +72,27 @@ export default class ServerStatus {
 
   overall() {
     const state = Object
-      // take all created status objects
-      .values(this._created)
-      // get the state descriptor for each status
-      .map(status => states.get(status.state))
-      // reduce to the state with the highest severity, defaulting to green
-      .reduce((a, b) => a.severity > b.severity ? a : b, states.get('green'));
+    // take all created status objects
+    .values(this._created)
+    // get the state descriptor for each status
+    .map(status => states.get(status.state))
+    // reduce to the state with the highest severity, defaulting to green
+    .reduce((a, b) => a.severity > b.severity ? a : b, states.get('green'));
 
-    const statuses = _.where(this._created, { state: state.id });
-    const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
+    const statuses = _lodash2.default.where(this._created, { state: state.id });
+    const since = _lodash2.default.get(_lodash2.default.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
       title: state.title,
-      nickname: _.sample(state.nicknames),
+      nickname: _lodash2.default.sample(state.nicknames),
       icon: state.icon,
-      since: since,
+      since: since
     };
   }
 
   isGreen() {
-    return (this.overall().state === 'green');
+    return this.overall().state === 'green';
   }
 
   notGreen() {
@@ -91,7 +107,9 @@ export default class ServerStatus {
   toJSON() {
     return {
       overall: this.overall(),
-      statuses: _.values(this._created)
+      statuses: _lodash2.default.values(this._created)
     };
   }
 }
+exports.default = ServerStatus;
+module.exports = exports['default'];

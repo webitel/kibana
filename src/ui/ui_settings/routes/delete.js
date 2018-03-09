@@ -1,20 +1,35 @@
-async function handleRequest(request) {
-  const { key } = request.params;
-  const uiSettings = request.getUiSettingsService();
+'use strict';
 
-  /*WEBITEL*/
-  if (!request.auth.credentials) {
-    return new Error('Session unauthorized');
-  }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-  await uiSettings.remove(key, request.auth.credentials.domain);
+let handleRequest = (() => {
+  var _ref = _asyncToGenerator(function* (request) {
+    const key = request.params.key;
 
-  return {
-    settings: await uiSettings.getUserProvided(undefined, request.auth.credentials.domain)
+    const uiSettings = request.getUiSettingsService();
+
+    /*WEBITEL*/
+    if (!request.auth.credentials) {
+      return new Error('Session unauthorized');
+    }
+
+    yield uiSettings.remove(key, request.auth.credentials.domain);
+
+    return {
+      settings: yield uiSettings.getUserProvided(undefined, request.auth.credentials.domain)
+    };
+  });
+
+  return function handleRequest(_x) {
+    return _ref.apply(this, arguments);
   };
-}
+})();
 
-export const deleteRoute = {
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+const deleteRoute = exports.deleteRoute = {
   path: '/api/kibana/settings/{key}',
   method: 'DELETE',
   handler(request, reply) {

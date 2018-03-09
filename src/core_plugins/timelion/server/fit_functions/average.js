@@ -1,17 +1,28 @@
-import _ from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = average;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Upsampling and down sampling of non-cummulative sets
 // Good: min, max, average
 // Bad: sum, count
 
-export default function average(dataTuples, targetTuples) {
+function average(dataTuples, targetTuples) {
 
   // Phase 1: Downsample
   // We nessecarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
-  const resultTimes = _.pluck(targetTuples, 0);
-  const dataTuplesQueue = _.clone(dataTuples);
-  const resultValues = _.map(targetTuples, function (bucket) {
+  const resultTimes = _lodash2.default.pluck(targetTuples, 0);
+  const dataTuplesQueue = _lodash2.default.clone(dataTuples);
+  const resultValues = _lodash2.default.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
     const avgSet = [];
@@ -29,13 +40,13 @@ export default function average(dataTuples, targetTuples) {
 
     const sum = avgSet.reduce((sum, num) => sum + num, 0);
 
-    return avgSet.length ? (sum / avgSet.length) : NaN;
+    return avgSet.length ? sum / avgSet.length : NaN;
   });
 
   // Phase 2: Upsample if needed
   // If we have any NaNs we are probably resampling from a big interval to a small one (eg, 1M as 1d)
   // So look for the missing stuff in the array, and smooth it out
-  const naNIndex = _.findIndex(resultValues, function (val) {
+  const naNIndex = _lodash2.default.findIndex(resultValues, function (val) {
     return isNaN(val);
   });
 
@@ -67,9 +78,9 @@ export default function average(dataTuples, targetTuples) {
       }
       i++;
     }
-
   }
 
-  const resultTuples = _.zip(resultTimes, resultValues);
+  const resultTuples = _lodash2.default.zip(resultTimes, resultValues);
   return resultTuples;
 }
+module.exports = exports['default'];

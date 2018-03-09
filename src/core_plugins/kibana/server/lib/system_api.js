@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isSystemApiRequest = isSystemApiRequest;
 const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
@@ -6,6 +12,6 @@ const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
  * @param request HAPI request object
  * @return        true if request is a system API request; false, otherwise
  */
-export function isSystemApiRequest(request) {
+function isSystemApiRequest(request) {
   return !!request.headers[SYSTEM_API_HEADER_NAME];
 }

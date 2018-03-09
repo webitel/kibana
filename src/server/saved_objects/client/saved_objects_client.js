@@ -1,27 +1,37 @@
-import uuid from 'uuid';
+'use strict';
 
-import { getRootType } from '../../mappings';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SavedObjectsClient = undefined;
 
-import {
-  getSearchDsl,
-  trimIdPrefix,
-  includedFields,
-  decorateEsError,
-  errors,
-} from './lib';
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-export class SavedObjectsClient {
+var _uuid = require('uuid');
+
+var _uuid2 = _interopRequireDefault(_uuid);
+
+var _mappings = require('../../mappings');
+
+var _lib = require('./lib');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+class SavedObjectsClient {
   constructor(options) {
-    const {
-      index,
-      mappings,
-      callCluster,
-      onBeforeWrite = () => {},
-    } = options;
+    this.errors = _lib.errors;
+    const index = options.index,
+          mappings = options.mappings,
+          callCluster = options.callCluster;
+    var _options$onBeforeWrit = options.onBeforeWrite;
+    const onBeforeWrite = _options$onBeforeWrit === undefined ? () => {} : _options$onBeforeWrit;
+
 
     this._index = index;
     this._mappings = mappings;
-    this._type = getRootType(this._mappings);
+    this._type = (0, _mappings.getRootType)(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
   }
@@ -91,8 +101,7 @@ export class SavedObjectsClient {
    *
    * @type {ErrorHelpers} see ./lib/errors
    */
-  static errors = errors
-  errors = errors
+
 
   /**
    * Persists an object
@@ -106,43 +115,47 @@ export class SavedObjectsClient {
   */
 
   /*WEBITEL*/
-  async create(type, attributes = {}, options = {}, domainName) {
-    const {
-      id,
-      overwrite = false
-    } = options;
+  create(type, attributes = {}, options = {}, domainName) {
+    var _this = this;
 
-    const method = id && !overwrite ? 'create' : 'index';
-    const time = this._getCurrentTime();
+    return _asyncToGenerator(function* () {
+      const id = options.id;
+      var _options$overwrite = options.overwrite;
+      const overwrite = _options$overwrite === undefined ? false : _options$overwrite;
 
-    try {
-      const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
-        type: this._type,
-        index: domainName ? this._index + '-' + domainName : this._index,
-        refresh: 'wait_for',
-        body: {
+
+      const method = id && !overwrite ? 'create' : 'index';
+      const time = _this._getCurrentTime();
+
+      try {
+        const response = yield _this._writeToCluster(method, {
+          id: _this._generateEsId(type, id),
+          type: _this._type,
+          index: domainName ? _this._index + '-' + domainName : _this._index,
+          refresh: 'wait_for',
+          body: {
+            type,
+            updated_at: time,
+            [type]: attributes
+          }
+        });
+
+        return {
+          id: (0, _lib.trimIdPrefix)(response._id, type),
           type,
           updated_at: time,
-          [type]: attributes
-        },
-      });
+          version: response._version,
+          attributes
+        };
+      } catch (error) {
+        if (_lib.errors.isNotFoundError(error)) {
+          // See "503s from missing index" above
+          throw _lib.errors.createEsAutoCreateIndexError();
+        }
 
-      return {
-        id: trimIdPrefix(response._id, type),
-        type,
-        updated_at: time,
-        version: response._version,
-        attributes
-      };
-    } catch (error) {
-      if (errors.isNotFoundError(error)) {
-        // See "503s from missing index" above
-        throw errors.createEsAutoCreateIndexError();
+        throw error;
       }
-
-      throw error;
-    }
+    })();
   }
 
   /**
@@ -155,69 +168,71 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async bulkCreate(objects, options = {}, domainName) {
-    const {
-      overwrite = false
-    } = options;
-    const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
-      const method = object.id && !overwrite ? 'create' : 'index';
+  bulkCreate(objects, options = {}, domainName) {
+    var _this2 = this;
 
-      return [
-        {
+    return _asyncToGenerator(function* () {
+      var _options$overwrite2 = options.overwrite;
+      const overwrite = _options$overwrite2 === undefined ? false : _options$overwrite2;
+
+      const time = _this2._getCurrentTime();
+      const objectToBulkRequest = function objectToBulkRequest(object) {
+        const method = object.id && !overwrite ? 'create' : 'index';
+
+        return [{
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
-            _type: this._type,
+            _id: _this2._generateEsId(object.type, object.id),
+            _type: _this2._type
           }
-        },
-        {
+        }, {
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes
+        }];
+      };
+
+      var _ref = yield _this2._writeToCluster('bulk', {
+        index: domainName ? _this2._index + '-' + domainName : _this2._index,
+        refresh: 'wait_for',
+        body: objects.reduce(function (acc, object) {
+          return [...acc, ...objectToBulkRequest(object)];
+        }, [])
+      });
+
+      const items = _ref.items;
+
+
+      return items.map(function (response, i) {
+        var _Object$values$ = Object.values(response)[0];
+        const error = _Object$values$.error,
+              responseId = _Object$values$._id,
+              version = _Object$values$._version;
+        var _objects$i = objects[i],
+            _objects$i$id = _objects$i.id;
+        const id = _objects$i$id === undefined ? responseId : _objects$i$id,
+              type = _objects$i.type,
+              attributes = _objects$i.attributes;
+
+
+        if (error) {
+          return {
+            id,
+            type,
+            error: {
+              message: error.reason || JSON.stringify(error)
+            }
+          };
         }
-      ];
-    };
 
-    const { items } = await this._writeToCluster('bulk', {
-      index: domainName ? this._index + '-' + domainName : this._index,
-      refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
-    });
-
-    return items.map((response, i) => {
-      const {
-        error,
-        _id: responseId,
-        _version: version,
-      } = Object.values(response)[0];
-
-      const {
-        id = responseId,
-        type,
-        attributes,
-      } = objects[i];
-
-      if (error) {
         return {
           id,
           type,
-          error: {
-            message: error.reason || JSON.stringify(error)
-          }
+          updated_at: time,
+          version,
+          attributes
         };
-      }
-
-      return {
-        id,
-        type,
-        updated_at: time,
-        version,
-        attributes
-      };
-    });
+      });
+    })();
   }
 
   /**
@@ -229,30 +244,32 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async delete(type, id, domainName) {
-    const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: domainName ? this._index + '-' + domainName : this._index,
-      refresh: 'wait_for',
-      ignore: [404],
-    });
+  delete(type, id, domainName) {
+    var _this3 = this;
 
-    const deleted = response.result === 'deleted';
-    if (deleted) {
-      return {};
-    }
+    return _asyncToGenerator(function* () {
+      const response = yield _this3._writeToCluster('delete', {
+        id: _this3._generateEsId(type, id),
+        type: _this3._type,
+        index: domainName ? _this3._index + '-' + domainName : _this3._index,
+        refresh: 'wait_for',
+        ignore: [404]
+      });
 
-    const docNotFound = response.result === 'not_found';
-    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
-    if (docNotFound || indexNotFound) {
-      // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
-    }
+      const deleted = response.result === 'deleted';
+      if (deleted) {
+        return {};
+      }
 
-    throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
-    );
+      const docNotFound = response.result === 'not_found';
+      const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
+      if (docNotFound || indexNotFound) {
+        // see "404s from missing index" above
+        throw _lib.errors.createGenericNotFoundError();
+      }
+
+      throw new Error(`Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response })}`);
+    })();
   }
 
   /**
@@ -270,72 +287,79 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async find(options = {}, domainName) {
-    const {
-      type,
-      search,
-      searchFields,
-      page = 1,
-      perPage = 20,
-      sortField,
-      sortOrder,
-      fields,
-    } = options;
+  find(options = {}, domainName) {
+    var _this4 = this;
 
-    if (searchFields && !Array.isArray(searchFields)) {
-      throw new TypeError('options.searchFields must be an array');
-    }
+    return _asyncToGenerator(function* () {
+      const type = options.type,
+            search = options.search,
+            searchFields = options.searchFields;
+      var _options$page = options.page;
+      const page = _options$page === undefined ? 1 : _options$page;
+      var _options$perPage = options.perPage;
+      const perPage = _options$perPage === undefined ? 20 : _options$perPage,
+            sortField = options.sortField,
+            sortOrder = options.sortOrder,
+            fields = options.fields;
 
-    if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
-    }
 
-    const esOptions = {
-      index: domainName ? this._index + '-' + domainName : this._index,
-      size: perPage,
-      from: perPage * (page - 1),
-      _source: includedFields(type, fields),
-      ignore: [404],
-      body: {
-        version: true,
-        ...getSearchDsl(this._mappings, {
+      if (searchFields && !Array.isArray(searchFields)) {
+        throw new TypeError('options.searchFields must be an array');
+      }
+
+      if (fields && !Array.isArray(fields)) {
+        throw new TypeError('options.searchFields must be an array');
+      }
+
+      const esOptions = {
+        index: domainName ? _this4._index + '-' + domainName : _this4._index,
+        size: perPage,
+        from: perPage * (page - 1),
+        _source: (0, _lib.includedFields)(type, fields),
+        ignore: [404],
+        body: _extends({
+          version: true
+        }, (0, _lib.getSearchDsl)(_this4._mappings, {
           search,
           searchFields,
           type,
           sortField,
           sortOrder
-        })
+        }))
+      };
+
+      const response = yield _this4._callCluster('search', esOptions);
+
+      if (response.status === 404) {
+        // 404 is only possible here if the index is missing, which
+        // we don't want to leak, see "404s from missing index" above
+        return {
+          page,
+          per_page: perPage,
+          total: 0,
+          saved_objects: []
+        };
       }
-    };
 
-    const response = await this._callCluster('search', esOptions);
-
-    if (response.status === 404) {
-      // 404 is only possible here if the index is missing, which
-      // we don't want to leak, see "404s from missing index" above
       return {
         page,
         per_page: perPage,
-        total: 0,
-        saved_objects: []
-      };
-    }
+        total: response.hits.total,
+        saved_objects: response.hits.hits.map(function (hit) {
+          var _hit$_source = hit._source;
+          const type = _hit$_source.type,
+                updatedAt = _hit$_source.updated_at;
 
-    return {
-      page,
-      per_page: perPage,
-      total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
-        return {
-          id: trimIdPrefix(hit._id, type),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-        };
-      }),
-    };
+          return _extends({
+            id: (0, _lib.trimIdPrefix)(hit._id, type),
+            type
+          }, updatedAt && { updated_at: updatedAt }, {
+            version: hit._version,
+            attributes: hit._source[type]
+          });
+        })
+      };
+    })();
   }
 
   /**
@@ -352,43 +376,52 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async bulkGet(objects = [], domainName) {
-    if (objects.length === 0) {
-      return { saved_objects: [] };
-    }
+  bulkGet(objects = [], domainName) {
+    var _this5 = this;
 
-    const response = await this._callCluster('mget', {
-      index: domainName ? this._index + '-' + domainName : this._index,
-      body: {
-        docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
-          _type: this._type,
-        }))
+    return _asyncToGenerator(function* () {
+      if (objects.length === 0) {
+        return { saved_objects: [] };
       }
-    });
 
-    return {
-      saved_objects: response.docs.map((doc, i) => {
-        const { id, type } = objects[i];
-
-        if (!doc.found) {
-          return {
-            id,
-            type,
-            error: { statusCode: 404, message: 'Not found' }
-          };
+      const response = yield _this5._callCluster('mget', {
+        index: domainName ? _this5._index + '-' + domainName : _this5._index,
+        body: {
+          docs: objects.map(function (object) {
+            return {
+              _id: _this5._generateEsId(object.type, object.id),
+              _type: _this5._type
+            };
+          })
         }
+      });
 
-        const time = doc._source.updated_at;
-        return {
-          id,
-          type,
-          ...time && { updated_at: time },
-          version: doc._version,
-          attributes: doc._source[type]
-        };
-      })
-    };
+      return {
+        saved_objects: response.docs.map(function (doc, i) {
+          var _objects$i2 = objects[i];
+          const id = _objects$i2.id,
+                type = _objects$i2.type;
+
+
+          if (!doc.found) {
+            return {
+              id,
+              type,
+              error: { statusCode: 404, message: 'Not found' }
+            };
+          }
+
+          const time = doc._source.updated_at;
+          return _extends({
+            id,
+            type
+          }, time && { updated_at: time }, {
+            version: doc._version,
+            attributes: doc._source[type]
+          });
+        })
+      };
+    })();
   }
 
   /**
@@ -400,30 +433,35 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async get(type, id, domainName) {
-    const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: domainName ? this._index + '-' + domainName : this._index,
-      ignore: [404]
-    });
+  get(type, id, domainName) {
+    var _this6 = this;
 
-    const docNotFound = response.found === false;
-    const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound) {
-      // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
-    }
+    return _asyncToGenerator(function* () {
+      const response = yield _this6._callCluster('get', {
+        id: _this6._generateEsId(type, id),
+        type: _this6._type,
+        index: domainName ? _this6._index + '-' + domainName : _this6._index,
+        ignore: [404]
+      });
 
-    const { updated_at: updatedAt } = response._source;
+      const docNotFound = response.found === false;
+      const indexNotFound = response.status === 404;
+      if (docNotFound || indexNotFound) {
+        // see "404s from missing index" above
+        throw _lib.errors.createGenericNotFoundError();
+      }
 
-    return {
-      id,
-      type,
-      ...updatedAt && { updated_at: updatedAt },
-      version: response._version,
-      attributes: response._source[type]
-    };
+      const updatedAt = response._source.updated_at;
+
+
+      return _extends({
+        id,
+        type
+      }, updatedAt && { updated_at: updatedAt }, {
+        version: response._version,
+        attributes: response._source[type]
+      });
+    })();
   }
 
   /**
@@ -437,59 +475,73 @@ export class SavedObjectsClient {
    */
 
   /*WEBITEL*/
-  async update(type, id, attributes, options = {}, domainName) {
-    const time = this._getCurrentTime();
-    const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: domainName ? this._index + '-' + domainName : this._index,
-      version: options.version,
-      refresh: 'wait_for',
-      ignore: [404],
-      body: {
-        doc: {
-          updated_at: time,
-          [type]: attributes
+  update(type, id, attributes, options = {}, domainName) {
+    var _this7 = this;
+
+    return _asyncToGenerator(function* () {
+      const time = _this7._getCurrentTime();
+      const response = yield _this7._writeToCluster('update', {
+        id: _this7._generateEsId(type, id),
+        type: _this7._type,
+        index: domainName ? _this7._index + '-' + domainName : _this7._index,
+        version: options.version,
+        refresh: 'wait_for',
+        ignore: [404],
+        body: {
+          doc: {
+            updated_at: time,
+            [type]: attributes
+          }
         }
-      },
-    });
+      });
 
-    if (response.status === 404) {
-      // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
-    }
+      if (response.status === 404) {
+        // see "404s from missing index" above
+        throw _lib.errors.createGenericNotFoundError();
+      }
 
-    return {
-      id,
-      type,
-      updated_at: time,
-      version: response._version,
-      attributes
-    };
+      return {
+        id,
+        type,
+        updated_at: time,
+        version: response._version,
+        attributes
+      };
+    })();
   }
 
-  async _writeToCluster(method, params) {
-    try {
-      await this._onBeforeWrite();
-      return await this._callCluster(method, params);
-    } catch (err) {
-      throw decorateEsError(err);
-    }
+  _writeToCluster(method, params) {
+    var _this8 = this;
+
+    return _asyncToGenerator(function* () {
+      try {
+        yield _this8._onBeforeWrite();
+        return yield _this8._callCluster(method, params);
+      } catch (err) {
+        throw (0, _lib.decorateEsError)(err);
+      }
+    })();
   }
 
-  async _callCluster(method, params) {
-    try {
-      return await this._unwrappedCallCluster(method, params);
-    } catch (err) {
-      throw decorateEsError(err);
-    }
+  _callCluster(method, params) {
+    var _this9 = this;
+
+    return _asyncToGenerator(function* () {
+      try {
+        return yield _this9._unwrappedCallCluster(method, params);
+      } catch (err) {
+        throw (0, _lib.decorateEsError)(err);
+      }
+    })();
   }
 
   _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
+    return `${type}:${id || _uuid2.default.v1()}`;
   }
 
   _getCurrentTime() {
     return new Date().toISOString();
   }
 }
+exports.SavedObjectsClient = SavedObjectsClient;
+SavedObjectsClient.errors = _lib.errors;

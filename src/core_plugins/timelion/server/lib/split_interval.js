@@ -1,6 +1,12 @@
-export default function splitInterval(interval) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = splitInterval;
+function splitInterval(interval) {
   if (!interval.match(/[0-9]+[mshdwMy]+/g)) {
-    throw new Error ('Malformed `interval`: ' + interval);
+    throw new Error('Malformed `interval`: ' + interval);
   }
   const parts = interval.match(/[0-9]+|[mshdwMy]+/g);
 
@@ -9,3 +15,4 @@ export default function splitInterval(interval) {
     unit: parts[1]
   };
 }
+module.exports = exports['default'];

@@ -1,8 +1,15 @@
-import { inspect } from 'util';
+'use strict';
 
-import { PluginSpec } from '../plugin_spec';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PluginPack = undefined;
 
-export class PluginPack {
+var _util = require('util');
+
+var _plugin_spec = require('../plugin_spec');
+
+class PluginPack {
   constructor({ path, pkg, provider }) {
     this._path = path;
     this._pkg = pkg;
@@ -33,7 +40,7 @@ export class PluginPack {
   getPluginSpecs() {
     const pack = this;
     const api = {
-      Plugin: class ScopedPluginSpec extends PluginSpec {
+      Plugin: class ScopedPluginSpec extends _plugin_spec.PluginSpec {
         constructor(options) {
           super(pack, options);
         }
@@ -46,10 +53,11 @@ export class PluginPack {
     // verify that all specs are instances of passed "Plugin" class
     specs.forEach(spec => {
       if (!(spec instanceof api.Plugin)) {
-        throw new TypeError('unexpected plugin export ' + inspect(spec));
+        throw new TypeError('unexpected plugin export ' + (0, _util.inspect)(spec));
       }
     });
 
     return specs;
   }
 }
+exports.PluginPack = PluginPack;

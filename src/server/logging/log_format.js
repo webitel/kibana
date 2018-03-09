@@ -1,12 +1,42 @@
-import Stream from 'stream';
-import moment from 'moment';
-import { get, _ } from 'lodash';
-import numeral from '@elastic/numeral';
-import ansicolors from 'ansicolors';
-import stringify from 'json-stringify-safe';
-import querystring from 'querystring';
-import applyFiltersToKeys from './apply_filters_to_keys';
-import { inspect } from 'util';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _stream = require('stream');
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var _lodash = require('lodash');
+
+var _numeral = require('@elastic/numeral');
+
+var _numeral2 = _interopRequireDefault(_numeral);
+
+var _ansicolors = require('ansicolors');
+
+var _ansicolors2 = _interopRequireDefault(_ansicolors);
+
+var _jsonStringifySafe = require('json-stringify-safe');
+
+var _jsonStringifySafe2 = _interopRequireDefault(_jsonStringifySafe);
+
+var _querystring = require('querystring');
+
+var _querystring2 = _interopRequireDefault(_querystring);
+
+var _apply_filters_to_keys = require('./apply_filters_to_keys');
+
+var _apply_filters_to_keys2 = _interopRequireDefault(_apply_filters_to_keys);
+
+var _util = require('util');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function serializeError(err = {}) {
   return {
@@ -18,15 +48,14 @@ function serializeError(err = {}) {
   };
 }
 
-const levelColor = function (code) {
-  if (code < 299) return ansicolors.green(code);
-  if (code < 399) return ansicolors.yellow(code);
-  if (code < 499) return ansicolors.magenta(code);
-  return ansicolors.red(code);
+const levelColor = function levelColor(code) {
+  if (code < 299) return _ansicolors2.default.green(code);
+  if (code < 399) return _ansicolors2.default.yellow(code);
+  if (code < 499) return _ansicolors2.default.magenta(code);
+  return _ansicolors2.default.red(code);
 };
 
-
-export default class TransformObjStream extends Stream.Transform {
+class TransformObjStream extends _stream2.default.Transform {
   constructor(config) {
     super({
       readableObjectMode: false,
@@ -37,7 +66,7 @@ export default class TransformObjStream extends Stream.Transform {
 
   filter(data) {
     if (!this.config.filter) return data;
-    return applyFiltersToKeys(data, this.config.filter);
+    return (0, _apply_filters_to_keys2.default)(data, this.config.filter);
   }
 
   _transform(event, enc, next) {
@@ -47,8 +76,9 @@ export default class TransformObjStream extends Stream.Transform {
   }
 
   extractAndFormatTimestamp(data, format) {
-    const { useUTC } = this.config;
-    const date = moment(data['@timestamp']);
+    const useUTC = this.config.useUTC;
+
+    const date = (0, _moment2.default)(data['@timestamp']);
     if (useUTC) {
       date.utc();
     }
@@ -64,12 +94,9 @@ export default class TransformObjStream extends Stream.Transform {
     };
 
     if (data.type === 'response') {
-      _.defaults(data, _.pick(event, [
-        'method',
-        'statusCode'
-      ]));
+      _lodash._.defaults(data, _lodash._.pick(event, ['method', 'statusCode']));
 
-      const source = get(event, 'source', {});
+      const source = (0, _lodash.get)(event, 'source', {});
       data.req = {
         url: event.path,
         method: event.method || '',
@@ -81,7 +108,7 @@ export default class TransformObjStream extends Stream.Transform {
 
       let contentLength = 0;
       if (typeof event.responsePayload === 'object') {
-        contentLength = stringify(event.responsePayload).length;
+        contentLength = (0, _jsonStringifySafe2.default)(event.responsePayload).length;
       } else {
         contentLength = String(event.responsePayload).length;
       }
@@ -92,7 +119,7 @@ export default class TransformObjStream extends Stream.Transform {
         contentLength: contentLength
       };
 
-      const query = querystring.stringify(event.query);
+      const query = _querystring2.default.stringify(event.query);
       if (query) data.req.url += '?' + query;
 
       data.message = data.req.method.toUpperCase() + ' ';
@@ -100,53 +127,45 @@ export default class TransformObjStream extends Stream.Transform {
       data.message += ' ';
       data.message += levelColor(data.res.statusCode);
       data.message += ' ';
-      data.message += ansicolors.brightBlack(data.res.responseTime + 'ms');
-      data.message += ansicolors.brightBlack(' - ' + numeral(contentLength).format('0.0b'));
-    }
-    else if (data.type === 'ops') {
-      _.defaults(data, _.pick(event, [
-        'pid',
-        'os',
-        'proc',
-        'load'
-      ]));
-      data.message  = ansicolors.brightBlack('memory: ');
-      data.message += numeral(get(data, 'proc.mem.heapUsed')).format('0.0b');
+      data.message += _ansicolors2.default.brightBlack(data.res.responseTime + 'ms');
+      data.message += _ansicolors2.default.brightBlack(' - ' + (0, _numeral2.default)(contentLength).format('0.0b'));
+    } else if (data.type === 'ops') {
+      _lodash._.defaults(data, _lodash._.pick(event, ['pid', 'os', 'proc', 'load']));
+      data.message = _ansicolors2.default.brightBlack('memory: ');
+      data.message += (0, _numeral2.default)((0, _lodash.get)(data, 'proc.mem.heapUsed')).format('0.0b');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('uptime: ');
-      data.message += numeral(get(data, 'proc.uptime')).format('00:00:00');
+      data.message += _ansicolors2.default.brightBlack('uptime: ');
+      data.message += (0, _numeral2.default)((0, _lodash.get)(data, 'proc.uptime')).format('00:00:00');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('load: [');
-      data.message += get(data, 'os.load', []).map(function (val) {
-        return numeral(val).format('0.00');
+      data.message += _ansicolors2.default.brightBlack('load: [');
+      data.message += (0, _lodash.get)(data, 'os.load', []).map(function (val) {
+        return (0, _numeral2.default)(val).format('0.00');
       }).join(' ');
-      data.message += ansicolors.brightBlack(']');
+      data.message += _ansicolors2.default.brightBlack(']');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('delay: ');
-      data.message += numeral(get(data, 'proc.delay')).format('0.000');
-    }
-    else if (data.type === 'error') {
+      data.message += _ansicolors2.default.brightBlack('delay: ');
+      data.message += (0, _numeral2.default)((0, _lodash.get)(data, 'proc.delay')).format('0.000');
+    } else if (data.type === 'error') {
       data.level = 'error';
       data.error = serializeError(event.error);
       data.url = event.url;
-      const message =  get(event, 'error.message');
+      const message = (0, _lodash.get)(event, 'error.message');
       data.message = message || 'Unknown error (no message)';
-    }
-    else if (event.data instanceof Error) {
+    } else if (event.data instanceof Error) {
       data.type = 'error';
-      data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
+      data.level = _lodash._.contains(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.data);
-      const message =  get(event, 'data.message');
+      const message = (0, _lodash.get)(event, 'data.message');
       data.message = message || 'Unknown error object (no message)';
-    }
-    else if (_.isPlainObject(event.data) && event.data.tmpl) {
-      _.assign(data, event.data);
+    } else if (_lodash._.isPlainObject(event.data) && event.data.tmpl) {
+      _lodash._.assign(data, event.data);
       data.tmpl = undefined;
-      data.message = _.template(event.data.tmpl)(event.data);
-    }
-    else {
-      data.message = _.isString(event.data) ? event.data : inspect(event.data);
+      data.message = _lodash._.template(event.data.tmpl)(event.data);
+    } else {
+      data.message = _lodash._.isString(event.data) ? event.data : (0, _util.inspect)(event.data);
     }
     return data;
   }
 }
+exports.default = TransformObjStream;
+module.exports = exports['default'];

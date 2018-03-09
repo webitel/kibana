@@ -1,116 +1,142 @@
-import { defaults, get } from 'lodash';
-import { props, reduce as reduceAsync } from 'bluebird';
-import Boom from 'boom';
-import { resolve } from 'path';
+'use strict';
 
-export function uiRenderMixin(kbnServer, server, config) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.uiRenderMixin = uiRenderMixin;
+
+var _lodash = require('lodash');
+
+var _bluebird = require('bluebird');
+
+var _boom = require('boom');
+
+var _boom2 = _interopRequireDefault(_boom);
+
+var _path = require('path');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+function uiRenderMixin(kbnServer, server, config) {
+  let getKibanaPayload = (() => {
+    var _ref2 = _asyncToGenerator(function* ({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+      const uiSettings = request.getUiSettingsService();
+      const translations = yield request.getUiTranslations();
+
+      /*WEBITEL*/
+      const domainName = request.auth.credentials && request.auth.credentials.domain;
+
+      return {
+        app: app,
+        bundleId: `app:${app.getId()}`,
+        nav: server.getUiNavLinks(),
+        version: kbnServer.version,
+        branch: config.get('pkg.branch'),
+        buildNum: config.get('pkg.buildNum'),
+        buildSha: config.get('pkg.buildSha'),
+        basePath: config.get('server.basePath'),
+        serverName: config.get('server.name'),
+        devMode: config.get('env.dev'),
+        translations: translations,
+        uiSettings: yield (0, _bluebird.props)({
+          defaults: uiSettings.getDefaults(),
+          user: includeUserProvidedConfig && uiSettings.getUserProvided(undefined, domainName)
+        }),
+        vars: yield replaceInjectedVars(request, (0, _lodash.defaults)(injectedVarsOverrides, (yield app.getInjectedVars()) || {}, defaultInjectedVars))
+      };
+    });
+
+    return function getKibanaPayload(_x3) {
+      return _ref2.apply(this, arguments);
+    };
+  })();
+
+  let renderApp = (() => {
+    var _ref3 = _asyncToGenerator(function* ({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
+      try {
+        const request = reply.request;
+        const translations = yield request.getUiTranslations();
+
+        return reply.view(app.getTemplateName(), {
+          app,
+          kibanaPayload: yield getKibanaPayload({
+            app,
+            request,
+            includeUserProvidedConfig,
+            injectedVarsOverrides
+          }),
+          bundlePath: `${config.get('server.basePath')}/bundles`,
+          i18n: function i18n(key) {
+            return (0, _lodash.get)(translations, key, '');
+          }
+        });
+      } catch (err) {
+        reply(err);
+      }
+    });
+
+    return function renderApp(_x4) {
+      return _ref3.apply(this, arguments);
+    };
+  })();
 
   function replaceInjectedVars(request, injectedVars) {
-    const { injectedVarsReplacers = [] } = kbnServer.uiExports;
+    var _kbnServer$uiExports$ = kbnServer.uiExports.injectedVarsReplacers;
+    const injectedVarsReplacers = _kbnServer$uiExports$ === undefined ? [] : _kbnServer$uiExports$;
 
-    return reduceAsync(
-      injectedVarsReplacers,
-      async (acc, replacer) => await replacer(acc, request, kbnServer.server),
-      injectedVars
-    );
+
+    return (0, _bluebird.reduce)(injectedVarsReplacers, (() => {
+      var _ref = _asyncToGenerator(function* (acc, replacer) {
+        return yield replacer(acc, request, kbnServer.server);
+      });
+
+      return function (_x, _x2) {
+        return _ref.apply(this, arguments);
+      };
+    })(), injectedVars);
   }
 
   let defaultInjectedVars = {};
   kbnServer.afterPluginsInit(() => {
-    const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
-    defaultInjectedVars = defaultInjectedVarProviders
-      .reduce((allDefaults, { fn, pluginSpec }) => (
-        defaults(
-          allDefaults,
-          fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
-        )
-      ), {});
+    var _kbnServer$uiExports$2 = kbnServer.uiExports.defaultInjectedVarProviders;
+    const defaultInjectedVarProviders = _kbnServer$uiExports$2 === undefined ? [] : _kbnServer$uiExports$2;
+
+    defaultInjectedVars = defaultInjectedVarProviders.reduce((allDefaults, { fn, pluginSpec }) => (0, _lodash.defaults)(allDefaults, fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))), {});
   });
 
   // render all views from ./views
-  server.setupViews(resolve(__dirname, 'views'));
+  server.setupViews((0, _path.resolve)(__dirname, 'views'));
 
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    async handler(req, reply) {
-      const id = req.params.id;
-      const app = server.getUiAppById(id);
-      if (!app) return reply(Boom.notFound('Unknown app ' + id));
+    handler(req, reply) {
+      return _asyncToGenerator(function* () {
+        const id = req.params.id;
+        const app = server.getUiAppById(id);
+        if (!app) return reply(_boom2.default.notFound('Unknown app ' + id));
 
-      try {
-        if (kbnServer.status.isGreen()) {
-          await reply.renderApp(app);
-        } else {
-          await reply.renderStatusPage();
+        try {
+          if (kbnServer.status.isGreen()) {
+            yield reply.renderApp(app);
+          } else {
+            yield reply.renderStatusPage();
+          }
+        } catch (err) {
+          reply(_boom2.default.wrap(err));
         }
-      } catch (err) {
-        reply(Boom.wrap(err));
-      }
+      })();
     }
   });
-
-  async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-    const uiSettings = request.getUiSettingsService();
-    const translations = await request.getUiTranslations();
-
-    /*WEBITEL*/
-    const domainName = request.auth.credentials && request.auth.credentials.domain;
-
-    return {
-      app: app,
-      bundleId: `app:${app.getId()}`,
-      nav: server.getUiNavLinks(),
-      version: kbnServer.version,
-      branch: config.get('pkg.branch'),
-      buildNum: config.get('pkg.buildNum'),
-      buildSha: config.get('pkg.buildSha'),
-      basePath: config.get('server.basePath'),
-      serverName: config.get('server.name'),
-      devMode: config.get('env.dev'),
-      translations: translations,
-      uiSettings: await props({
-        defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided(undefined, domainName)
-      }),
-      vars: await replaceInjectedVars(
-        request,
-        defaults(
-          injectedVarsOverrides,
-          await app.getInjectedVars() || {},
-          defaultInjectedVars,
-        ),
-      )
-    };
-  }
-
-  async function renderApp({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
-    try {
-      const request = reply.request;
-      const translations = await request.getUiTranslations();
-
-      return reply.view(app.getTemplateName(), {
-        app,
-        kibanaPayload: await getKibanaPayload({
-          app,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
-        bundlePath: `${config.get('server.basePath')}/bundles`,
-        i18n: key => get(translations, key, ''),
-      });
-    } catch (err) {
-      reply(err);
-    }
-  }
 
   server.decorate('reply', 'renderApp', function (app, injectedVarsOverrides) {
     return renderApp({
       app,
       reply: this,
       includeUserProvidedConfig: true,
-      injectedVarsOverrides,
+      injectedVarsOverrides
     });
   });
 
@@ -118,7 +144,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     return renderApp({
       app,
       reply: this,
-      includeUserProvidedConfig: false,
+      includeUserProvidedConfig: false
     });
   });
 }

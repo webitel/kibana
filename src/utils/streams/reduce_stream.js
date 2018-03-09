@@ -1,4 +1,13 @@
-import { Transform } from 'stream';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createReduceStream = createReduceStream;
+
+var _stream = require('stream');
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /**
  *  Create a transform stream that consumes each chunk it receives
@@ -13,7 +22,7 @@ import { Transform } from 'stream';
  *                        initial value.
  *  @return {Transform}
  */
-export function createReduceStream(reducer, initial) {
+function createReduceStream(reducer, initial) {
   let i = -1;
   let value = initial;
 
@@ -27,27 +36,29 @@ export function createReduceStream(reducer, initial) {
     throw new TypeError('reducer must be a function');
   }
 
-  return new Transform({
+  return new _stream.Transform({
     readableObjectMode: true,
     writableObjectMode: true,
-    async transform(chunk, enc, callback) {
-      try {
-        if (failed) {
-          return callback();
-        }
+    transform(chunk, enc, callback) {
+      return _asyncToGenerator(function* () {
+        try {
+          if (failed) {
+            return callback();
+          }
 
-        i += 1;
-        if (i === 0 && initial === undefined) {
-          value = chunk;
-        } else {
-          value = await reducer(value, chunk, enc);
-        }
+          i += 1;
+          if (i === 0 && initial === undefined) {
+            value = chunk;
+          } else {
+            value = yield reducer(value, chunk, enc);
+          }
 
-        callback();
-      } catch (err) {
-        failed = true;
-        callback(err);
-      }
+          callback();
+        } catch (err) {
+          failed = true;
+          callback(err);
+        }
+      })();
     },
 
     flush(callback) {

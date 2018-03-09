@@ -1,20 +1,20 @@
-export default function (api) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
 
   api.addEndpointDescription('_get_settings', {
-    patterns: [
-      "{indices}/_settings",
-      "_settings"
-    ],
+    patterns: ["{indices}/_settings", "_settings"],
     url_params: {
       flat_settings: "__flag__"
     }
   });
   api.addEndpointDescription('_put_settings', {
     methods: ['PUT'],
-    patterns: [
-      "{indices}/_settings",
-      "_settings"
-    ],
+    patterns: ["{indices}/_settings", "_settings"],
     data_autocomplete_rules: {
       refresh_interval: '1s',
       number_of_shards: 5,
@@ -83,4 +83,6 @@ export default function (api) {
       }
     }
   });
-}
+};
+
+module.exports = exports["default"];

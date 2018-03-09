@@ -1,4 +1,10 @@
-export default function (api) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
   api.addGlobalAutocompleteRules('highlight', {
     pre_tags: {},
     post_tags: {},
@@ -21,4 +27,6 @@ export default function (api) {
     lang: "",
     params: {}
   });
-}
+};
+
+module.exports = exports['default'];

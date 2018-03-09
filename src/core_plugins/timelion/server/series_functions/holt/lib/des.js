@@ -1,6 +1,17 @@
-import _ from 'lodash';
+'use strict';
 
-export default function des(points, alpha, beta) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = des;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function des(points, alpha, beta) {
   let level;
   let prevLevel;
   let trend;
@@ -8,10 +19,10 @@ export default function des(points, alpha, beta) {
   let unknownCount = 0;
 
   if (points.length < 2) {
-    throw new Error ('You need at least 2 points to use double exponential smoothing');
+    throw new Error('You need at least 2 points to use double exponential smoothing');
   }
 
-  const smoothedPoints = _.map(points, (point, i) => {
+  const smoothedPoints = _lodash2.default.map(points, (point, i) => {
     if (i === 0) {
       return point;
     }
@@ -29,12 +40,13 @@ export default function des(points, alpha, beta) {
       // These 2 variables are not required, but are used for clarity.
       prevLevel = level;
       prevTrend = trend;
-      level = (alpha * point) + (1 - alpha) * (prevLevel + prevTrend);
+      level = alpha * point + (1 - alpha) * (prevLevel + prevTrend);
       trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
     }
 
-    return (level + (unknownCount * trend));
+    return level + unknownCount * trend;
   }, []);
 
   return smoothedPoints;
 }
+module.exports = exports['default'];

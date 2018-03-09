@@ -1,4 +1,30 @@
-import Boom from 'boom';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isSavedObjectsClientError = isSavedObjectsClientError;
+exports.decorateBadRequestError = decorateBadRequestError;
+exports.isBadRequestError = isBadRequestError;
+exports.decorateNotAuthorizedError = decorateNotAuthorizedError;
+exports.isNotAuthorizedError = isNotAuthorizedError;
+exports.decorateForbiddenError = decorateForbiddenError;
+exports.isForbiddenError = isForbiddenError;
+exports.createGenericNotFoundError = createGenericNotFoundError;
+exports.isNotFoundError = isNotFoundError;
+exports.decorateConflictError = decorateConflictError;
+exports.isConflictError = isConflictError;
+exports.decorateEsUnavailableError = decorateEsUnavailableError;
+exports.isEsUnavailableError = isEsUnavailableError;
+exports.createEsAutoCreateIndexError = createEsAutoCreateIndexError;
+exports.isEsAutoCreateIndexError = isEsAutoCreateIndexError;
+exports.decorateGeneralError = decorateGeneralError;
+
+var _boom = require('boom');
+
+var _boom2 = _interopRequireDefault(_boom);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
@@ -7,10 +33,10 @@ function decorate(error, errorCode, statusCode, message) {
     return error;
   }
 
-  const boom = Boom.boomify(error, {
+  const boom = _boom2.default.boomify(error, {
     statusCode,
     message,
-    override: false,
+    override: false
   });
 
   boom[code] = errorCode;
@@ -18,85 +44,78 @@ function decorate(error, errorCode, statusCode, message) {
   return boom;
 }
 
-export function isSavedObjectsClientError(error) {
+function isSavedObjectsClientError(error) {
   return error && !!error[code];
 }
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
-export function decorateBadRequestError(error, reason) {
+function decorateBadRequestError(error, reason) {
   return decorate(error, CODE_BAD_REQUEST, 400, reason);
 }
-export function isBadRequestError(error) {
+function isBadRequestError(error) {
   return error && error[code] === CODE_BAD_REQUEST;
 }
 
-
 // 401 - Not Authorized
 const CODE_NOT_AUTHORIZED = 'SavedObjectsClient/notAuthorized';
-export function decorateNotAuthorizedError(error, reason) {
+function decorateNotAuthorizedError(error, reason) {
   return decorate(error, CODE_NOT_AUTHORIZED, 401, reason);
 }
-export function isNotAuthorizedError(error) {
+function isNotAuthorizedError(error) {
   return error && error[code] === CODE_NOT_AUTHORIZED;
 }
 
-
 // 403 - Forbidden
 const CODE_FORBIDDEN = 'SavedObjectsClient/forbidden';
-export function decorateForbiddenError(error, reason) {
+function decorateForbiddenError(error, reason) {
   return decorate(error, CODE_FORBIDDEN, 403, reason);
 }
-export function isForbiddenError(error) {
+function isForbiddenError(error) {
   return error && error[code] === CODE_FORBIDDEN;
 }
 
-
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
-export function createGenericNotFoundError() {
-  return decorate(Boom.notFound(), CODE_NOT_FOUND, 404);
+function createGenericNotFoundError() {
+  return decorate(_boom2.default.notFound(), CODE_NOT_FOUND, 404);
 }
-export function isNotFoundError(error) {
+function isNotFoundError(error) {
   return error && error[code] === CODE_NOT_FOUND;
 }
 
-
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
-export function decorateConflictError(error, reason) {
+function decorateConflictError(error, reason) {
   return decorate(error, CODE_CONFLICT, 409, reason);
 }
-export function isConflictError(error) {
+function isConflictError(error) {
   return error && error[code] === CODE_CONFLICT;
 }
 
-
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
-export function decorateEsUnavailableError(error, reason) {
+function decorateEsUnavailableError(error, reason) {
   return decorate(error, CODE_ES_UNAVAILABLE, 503, reason);
 }
-export function isEsUnavailableError(error) {
+function isEsUnavailableError(error) {
   return error && error[code] === CODE_ES_UNAVAILABLE;
 }
 
-
 // 503 - Unable to automatically create index because of action.auto_create_index setting
 const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
-export function createEsAutoCreateIndexError() {
-  const error = Boom.serverUnavailable('Automatic index creation failed');
+function createEsAutoCreateIndexError() {
+  const error = _boom2.default.serverUnavailable('Automatic index creation failed');
   error.output.payload.code = 'ES_AUTO_CREATE_INDEX_ERROR';
 
   return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
 }
-export function isEsAutoCreateIndexError(error) {
+function isEsAutoCreateIndexError(error) {
   return error && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
 }
 
-
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
-export function decorateGeneralError(error, reason) {
+function decorateGeneralError(error, reason) {
   return decorate(error, CODE_GENERAL_ERROR, 500, reason);
 }

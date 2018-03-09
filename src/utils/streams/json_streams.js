@@ -1,4 +1,12 @@
-import { Transform } from 'stream';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createJsonParseStream = createJsonParseStream;
+exports.createJsonStringifyStream = createJsonStringifyStream;
+
+var _stream = require('stream');
 
 /**
  *  Create a Transform stream that accepts strings (in
@@ -11,8 +19,8 @@ import { Transform } from 'stream';
  *
  *  @return {Transform}
  */
-export function createJsonParseStream() {
-  return new Transform({
+function createJsonParseStream() {
+  return new _stream.Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     transform(json, enc, callback) {
@@ -38,8 +46,8 @@ export function createJsonParseStream() {
  *  @property {Boolean} options.pretty
  *  @return {Transform}
  */
-export function createJsonStringifyStream({ pretty = false } = {}) {
-  return new Transform({
+function createJsonStringifyStream({ pretty = false } = {}) {
+  return new _stream.Transform({
     writableObjectMode: true,
     readableObjectMode: true,
     transform(json, enc, callback) {

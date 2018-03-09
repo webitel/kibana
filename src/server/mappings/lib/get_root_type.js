@@ -1,4 +1,11 @@
-import { getTypes } from './get_types';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getRootType = getRootType;
+
+var _get_types = require('./get_types');
 
 /**
  *  Get the singular root type in the EsMappingsDsl
@@ -8,8 +15,8 @@ import { getTypes } from './get_types';
  *  @param  {EsMappingsDsl} mappings
  *  @return {string}
  */
-export function getRootType(mappings) {
-  const allTypes = getTypes(mappings);
+function getRootType(mappings) {
+  const allTypes = (0, _get_types.getTypes)(mappings);
 
   if (allTypes.length !== 1) {
     throw new TypeError(`Unable to get root type of mappings object with ${allTypes.length} root types.`);

@@ -1,24 +1,45 @@
-import Wreck from 'wreck';
-import Progress from '../progress';
-import { fromNode as fn } from 'bluebird';
-import { createWriteStream } from 'fs';
-import HttpProxyAgent from 'http-proxy-agent';
-import { getProxyForUrl } from 'proxy-from-env';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _wreck = require('wreck');
+
+var _wreck2 = _interopRequireDefault(_wreck);
+
+var _progress = require('../progress');
+
+var _progress2 = _interopRequireDefault(_progress);
+
+var _bluebird = require('bluebird');
+
+var _fs = require('fs');
+
+var _httpProxyAgent = require('http-proxy-agent');
+
+var _httpProxyAgent2 = _interopRequireDefault(_httpProxyAgent);
+
+var _proxyFromEnv = require('proxy-from-env');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function getProxyAgent(sourceUrl, logger) {
-  const proxy = getProxyForUrl(sourceUrl);
+  const proxy = (0, _proxyFromEnv.getProxyForUrl)(sourceUrl);
 
   if (!proxy) {
     return null;
   }
 
   logger.log(`Picked up proxy ${proxy} from environment variable.`);
-  return new HttpProxyAgent(proxy);
+  return new _httpProxyAgent2.default(proxy);
 }
 
 function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
-  return fn(cb => {
+  return (0, _bluebird.fromNode)(cb => {
     const reqOptions = { timeout, redirects: maxRedirects };
     const proxyAgent = getProxyAgent(sourceUrl, logger);
 
@@ -26,7 +47,7 @@ function sendRequest({ sourceUrl, timeout }, logger) {
       reqOptions.agent = proxyAgent;
     }
 
-    const req = Wreck.request('GET', sourceUrl, reqOptions, (err, resp) => {
+    const req = _wreck2.default.request('GET', sourceUrl, reqOptions, (err, resp) => {
       if (err) {
         if (err.code === 'ECONNREFUSED') {
           err = new Error('ENOTFOUND');
@@ -46,14 +67,14 @@ function sendRequest({ sourceUrl, timeout }, logger) {
 
 function downloadResponse({ resp, targetPath, progress }) {
   return new Promise((resolve, reject) => {
-    const writeStream = createWriteStream(targetPath);
+    const writeStream = (0, _fs.createWriteStream)(targetPath);
 
     // if either stream errors, fail quickly
     resp.on('error', reject);
     writeStream.on('error', reject);
 
     // report progress as we download
-    resp.on('data', (chunk) => {
+    resp.on('data', chunk => {
       progress.progress(chunk.length);
     });
 
@@ -68,26 +89,41 @@ function downloadResponse({ resp, targetPath, progress }) {
 /*
 Responsible for managing http transfers
 */
-export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
-  try {
-    const { req, resp } = await sendRequest({ sourceUrl, timeout }, logger);
 
+exports.default = (() => {
+  var _ref = _asyncToGenerator(function* (logger, sourceUrl, targetPath, timeout) {
     try {
-      const totalSize = parseFloat(resp.headers['content-length']) || 0;
-      const progress = new Progress(logger);
-      progress.init(totalSize);
+      var _ref2 = yield sendRequest({ sourceUrl, timeout }, logger);
 
-      await downloadResponse({ resp, targetPath, progress });
+      const req = _ref2.req,
+            resp = _ref2.resp;
 
-      progress.complete();
+
+      try {
+        const totalSize = parseFloat(resp.headers['content-length']) || 0;
+        const progress = new _progress2.default(logger);
+        progress.init(totalSize);
+
+        yield downloadResponse({ resp, targetPath, progress });
+
+        progress.complete();
+      } catch (err) {
+        req.abort();
+        throw err;
+      }
     } catch (err) {
-      req.abort();
+      if (err.message !== 'ENOTFOUND') {
+        logger.error(err);
+      }
       throw err;
     }
-  } catch (err) {
-    if (err.message !== 'ENOTFOUND') {
-      logger.error(err);
-    }
-    throw err;
+  });
+
+  function downloadUrl(_x, _x2, _x3, _x4) {
+    return _ref.apply(this, arguments);
   }
-}
+
+  return downloadUrl;
+})();
+
+module.exports = exports['default'];

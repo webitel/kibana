@@ -1,10 +1,15 @@
-import {
-  getFieldCapabilities,
-  resolveTimePattern,
-  createNoMatchingIndicesError,
-} from './lib';
+'use strict';
 
-export class IndexPatternsService {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.IndexPatternsService = undefined;
+
+var _lib = require('./lib');
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+class IndexPatternsService {
   constructor(callDataCluster) {
     this._callDataCluster = callDataCluster;
   }
@@ -18,9 +23,15 @@ export class IndexPatternsService {
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
    */
-  async getFieldsForWildcard(options = {}) {
-    const { pattern, metaFields } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
+  getFieldsForWildcard(options = {}) {
+    var _this = this;
+
+    return _asyncToGenerator(function* () {
+      const pattern = options.pattern,
+            metaFields = options.metaFields;
+
+      return yield (0, _lib.getFieldCapabilities)(_this._callDataCluster, pattern, metaFields);
+    })();
   }
 
   /**
@@ -33,14 +44,25 @@ export class IndexPatternsService {
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
    */
-  async getFieldsForTimePattern(options = {}) {
-    const { pattern, lookBack, metaFields } = options;
-    const { matches } = await resolveTimePattern(this._callDataCluster, pattern);
-    const indices = matches.slice(0, lookBack);
-    if (indices.length === 0) {
-      throw createNoMatchingIndicesError(pattern);
-    }
-    return await getFieldCapabilities(this._callDataCluster, indices, metaFields);
+  getFieldsForTimePattern(options = {}) {
+    var _this2 = this;
+
+    return _asyncToGenerator(function* () {
+      const pattern = options.pattern,
+            lookBack = options.lookBack,
+            metaFields = options.metaFields;
+
+      var _ref = yield (0, _lib.resolveTimePattern)(_this2._callDataCluster, pattern);
+
+      const matches = _ref.matches;
+
+      const indices = matches.slice(0, lookBack);
+      if (indices.length === 0) {
+        throw (0, _lib.createNoMatchingIndicesError)(pattern);
+      }
+      return yield (0, _lib.getFieldCapabilities)(_this2._callDataCluster, indices, metaFields);
+    })();
   }
 
 }
+exports.IndexPatternsService = IndexPatternsService;

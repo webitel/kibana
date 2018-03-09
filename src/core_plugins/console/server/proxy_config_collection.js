@@ -1,17 +1,25 @@
-import { defaultsDeep } from 'lodash';
+'use strict';
 
-import { ProxyConfig } from './proxy_config';
-import { parse as parseUrl } from 'url';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ProxyConfigCollection = undefined;
 
+var _lodash = require('lodash');
 
-export class ProxyConfigCollection {
+var _proxy_config = require('./proxy_config');
+
+var _url = require('url');
+
+class ProxyConfigCollection {
   constructor(configs = []) {
-    this.configs = configs.map(settings => new ProxyConfig(settings));
+    this.configs = configs.map(settings => new _proxy_config.ProxyConfig(settings));
   }
 
   configForUri(uri) {
-    const parsedUri = parseUrl(uri);
+    const parsedUri = (0, _url.parse)(uri);
     const settings = this.configs.map(config => config.getForParsedUri(parsedUri));
-    return defaultsDeep({}, ...settings);
+    return (0, _lodash.defaultsDeep)({}, ...settings);
   }
 }
+exports.ProxyConfigCollection = ProxyConfigCollection;

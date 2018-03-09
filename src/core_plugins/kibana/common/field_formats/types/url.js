@@ -1,14 +1,26 @@
-import _ from 'lodash';
-import { getHighlightHtml } from '../../highlight/highlight_html';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createUrlFormat = createUrlFormat;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _highlight_html = require('../../highlight/highlight_html');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
 
-export function createUrlFormat(FieldFormat) {
+function createUrlFormat(FieldFormat) {
   class UrlFormat extends FieldFormat {
     constructor(params) {
       super(params);
-      this._compileTemplate = _.memoize(this._compileTemplate);
+      this._compileTemplate = _lodash2.default.memoize(this._compileTemplate);
     }
 
     getParamDefaults() {
@@ -43,7 +55,7 @@ export function createUrlFormat(FieldFormat) {
     _compileTemplate(template) {
       const parts = template.split(templateMatchRE).map(function (part, i) {
         // trim all the odd bits, the variable names
-        return (i % 2) ? part.trim() : part;
+        return i % 2 ? part.trim() : part;
       });
 
       return function (locals) {
@@ -65,37 +77,25 @@ export function createUrlFormat(FieldFormat) {
       };
     }
 
-    static id = 'url';
-    static title = 'Url';
-    static fieldType = [
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'string',
-      'murmur3',
-      'unknown',
-      'conflict'
-    ];
   }
 
+  UrlFormat.id = 'url';
+  UrlFormat.title = 'Url';
+  UrlFormat.fieldType = ['number', 'boolean', 'date', 'ip', 'string', 'murmur3', 'unknown', 'conflict'];
   UrlFormat.prototype._convert = {
-    text: function (value) {
+    text: function text(value) {
       return this._formatLabel(value);
     },
 
-    html: function (rawValue, field, hit, parsedUrl) {
-      const url = _.escape(this._formatUrl(rawValue));
-      const label = _.escape(this._formatLabel(rawValue, url));
+    html: function html(rawValue, field, hit, parsedUrl) {
+      const url = _lodash2.default.escape(this._formatUrl(rawValue));
+      const label = _lodash2.default.escape(this._formatLabel(rawValue, url));
 
       switch (this.param('type')) {
         case 'img':
           // If the URL hasn't been formatted to become a meaningful label then the best we can do
           // is tell screen readers where the image comes from.
-          const imageLabel =
-            label === url
-              ? `A dynamically-specified image located at ${url}`
-              : label;
+          const imageLabel = label === url ? `A dynamically-specified image located at ${url}` : label;
 
           return `<img src="${url}" alt="${imageLabel}">`;
         default:
@@ -123,18 +123,18 @@ export function createUrlFormat(FieldFormat) {
             }
             // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
             else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
-              prefix = `${parsedUrl.origin}`;
-            }
-            // Handle urls like: `../app/kibana`
-            else {
-              prefix = `${parsedUrl.origin}${parsedUrl.basePath}/app/`;
-            }
+                prefix = `${parsedUrl.origin}`;
+              }
+              // Handle urls like: `../app/kibana`
+              else {
+                  prefix = `${parsedUrl.origin}${parsedUrl.basePath}/app/`;
+                }
           }
 
           let linkLabel;
 
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+            linkLabel = (0, _highlight_html.getHighlightHtml)(label, hit.highlight[field.name]);
           } else {
             linkLabel = label;
           }

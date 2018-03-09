@@ -1,7 +1,16 @@
-import { Config } from './config';
-import { transformDeprecations } from './transform_deprecations';
+'use strict';
 
-export default function (kbnServer) {
-  const settings = transformDeprecations(kbnServer.settings);
-  kbnServer.config = Config.withDefaultSchema(settings);
-}
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kbnServer) {
+  const settings = (0, _transform_deprecations.transformDeprecations)(kbnServer.settings);
+  kbnServer.config = _config.Config.withDefaultSchema(settings);
+};
+
+var _config = require('./config');
+
+var _transform_deprecations = require('./transform_deprecations');
+
+module.exports = exports['default'];

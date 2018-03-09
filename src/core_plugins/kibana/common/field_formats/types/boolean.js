@@ -1,7 +1,16 @@
-import { asPrettyString } from '../../utils/as_pretty_string';
+'use strict';
 
-export function createBoolFormat(FieldFormat) {
-  return class BoolFormat extends FieldFormat {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createBoolFormat = createBoolFormat;
+
+var _as_pretty_string = require('../../utils/as_pretty_string');
+
+function createBoolFormat(FieldFormat) {
+  var _class, _temp;
+
+  return _temp = _class = class BoolFormat extends FieldFormat {
     _convert(value) {
       if (typeof value === 'string') {
         value = value.trim().toLowerCase();
@@ -19,12 +28,9 @@ export function createBoolFormat(FieldFormat) {
         case 'yes':
           return 'true';
         default:
-          return asPrettyString(value);
+          return (0, _as_pretty_string.asPrettyString)(value);
       }
     }
 
-    static id = 'boolean';
-    static title = 'Boolean';
-    static fieldType = ['boolean', 'number', 'string'];
-  };
+  }, _class.id = 'boolean', _class.title = 'Boolean', _class.fieldType = ['boolean', 'number', 'string'], _temp;
 }

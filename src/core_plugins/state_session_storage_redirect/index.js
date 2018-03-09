@@ -1,4 +1,10 @@
-export default function (kibana) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
@@ -6,8 +12,10 @@ export default function (kibana) {
         title: 'Redirecting',
         id: 'stateSessionStorageRedirect',
         main: 'plugins/state_session_storage_redirect',
-        hidden: true,
+        hidden: true
       }
     }
   });
-}
+};
+
+module.exports = exports['default'];

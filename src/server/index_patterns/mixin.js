@@ -1,11 +1,15 @@
-import { IndexPatternsService } from './service';
+'use strict';
 
-import {
-  createFieldsForWildcardRoute,
-  createFieldsForTimePatternRoute,
-} from './routes';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.indexPatternsMixin = indexPatternsMixin;
 
-export function indexPatternsMixin(kbnServer, server) {
+var _service = require('./service');
+
+var _routes = require('./routes');
+
+function indexPatternsMixin(kbnServer, server) {
   const pre = {
     /**
     *  Create an instance of the `indexPatterns` service
@@ -26,7 +30,7 @@ export function indexPatternsMixin(kbnServer, server) {
    *  @type {IndexPatternsService}
    */
   server.decorate('server', 'indexPatternsServiceFactory', ({ callCluster }) => {
-    return new IndexPatternsService(callCluster);
+    return new _service.IndexPatternsService(callCluster);
   });
 
   /**
@@ -37,11 +41,14 @@ export function indexPatternsMixin(kbnServer, server) {
    *  @type {IndexPatternsService}
    */
   server.addMemoizedFactoryToRequest('getIndexPatternsService', request => {
-    const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+    var _request$server$plugi = request.server.plugins.elasticsearch.getCluster('data');
+
+    const callWithRequest = _request$server$plugi.callWithRequest;
+
     const callCluster = (...args) => callWithRequest(request, ...args);
     return server.indexPatternsServiceFactory({ callCluster });
   });
 
-  server.route(createFieldsForWildcardRoute(pre));
-  server.route(createFieldsForTimePatternRoute(pre));
+  server.route((0, _routes.createFieldsForWildcardRoute)(pre));
+  server.route((0, _routes.createFieldsForTimePatternRoute)(pre));
 }

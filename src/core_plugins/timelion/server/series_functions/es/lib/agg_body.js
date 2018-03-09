@@ -1,5 +1,10 @@
+"use strict";
 
-export function buildAggBody(fieldName, scriptedFields) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.buildAggBody = buildAggBody;
+function buildAggBody(fieldName, scriptedFields) {
 
   const scriptedField = scriptedFields.find(field => {
     return field.name === fieldName;

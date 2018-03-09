@@ -1,3 +1,8 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 /**
  *  Creates a reducer wrapper which, when called with a reducer, creates a new
  *  reducer that replaces the `type` value with `newType` before delegating to
@@ -5,6 +10,4 @@
  *  @param  {String} newType
  *  @return {Function}
  */
-export const alias = (newType) => (next) => (acc, spec, type, pluginSpec) => (
-  next(acc, spec, newType, pluginSpec)
-);
+const alias = exports.alias = newType => next => (acc, spec, type, pluginSpec) => next(acc, spec, newType, pluginSpec);

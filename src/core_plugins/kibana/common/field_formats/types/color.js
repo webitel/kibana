@@ -1,29 +1,51 @@
-import _ from 'lodash';
-import { asPrettyString } from '../../utils/as_pretty_string';
-import { DEFAULT_COLOR } from './color_default';
+'use strict';
 
-const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-export function createColorFormat(FieldFormat) {
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+exports.createColorFormat = createColorFormat;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _as_pretty_string = require('../../utils/as_pretty_string');
+
+var _color_default = require('./color_default');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const convertTemplate = _lodash2.default.template('<span style="<%- style %>"><%- val %></span>');
+
+function createColorFormat(FieldFormat) {
   class ColorFormat extends FieldFormat {
     getParamDefaults() {
       return {
         fieldType: null, // populated by editor, see controller below
-        colors: [_.cloneDeep(DEFAULT_COLOR)]
+        colors: [_lodash2.default.cloneDeep(_color_default.DEFAULT_COLOR)]
       };
     }
 
     findColorRuleForVal(val) {
       switch (this.param('fieldType')) {
         case 'string':
-          return _.findLast(this.param('colors'), (colorParam) => {
+          return _lodash2.default.findLast(this.param('colors'), colorParam => {
             return new RegExp(colorParam.regex).test(val);
           });
 
         case 'number':
-          return _.findLast(this.param('colors'), ({ range }) => {
+          return _lodash2.default.findLast(this.param('colors'), ({ range }) => {
             if (!range) return;
-            const [start, end] = range.split(':');
+
+            var _range$split = range.split(':'),
+                _range$split2 = _slicedToArray(_range$split, 2);
+
+            const start = _range$split2[0],
+                  end = _range$split2[1];
+
             return val >= Number(start) && val <= Number(end);
           });
 
@@ -32,18 +54,15 @@ export function createColorFormat(FieldFormat) {
       }
     }
 
-    static id = 'color';
-    static title = 'Color';
-    static fieldType = [
-      'number',
-      'string'
-    ];
   }
 
+  ColorFormat.id = 'color';
+  ColorFormat.title = 'Color';
+  ColorFormat.fieldType = ['number', 'string'];
   ColorFormat.prototype._convert = {
     html(val) {
       const color = this.findColorRuleForVal(val);
-      if (!color) return _.escape(asPrettyString(val));
+      if (!color) return _lodash2.default.escape((0, _as_pretty_string.asPrettyString)(val));
 
       let style = '';
       if (color.text) style += `color: ${color.text};`;

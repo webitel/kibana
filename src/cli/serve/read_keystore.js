@@ -1,25 +1,35 @@
-import { join } from 'path';
-import { set } from 'lodash';
+'use strict';
 
-import { Keystore } from '../../server/keystore';
-import { getData } from '../../server/path';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.loadKeystore = loadKeystore;
+exports.readKeystore = readKeystore;
 
-export function loadKeystore() {
-  const path = join(getData(), 'kibana.keystore');
+var _path = require('path');
 
-  const keystore = new Keystore(path);
+var _lodash = require('lodash');
+
+var _keystore = require('../../server/keystore');
+
+var _path2 = require('../../server/path');
+
+function loadKeystore() {
+  const path = (0, _path.join)((0, _path2.getData)(), 'kibana.keystore');
+
+  const keystore = new _keystore.Keystore(path);
   keystore.load();
 
   return keystore;
 }
 
-export function readKeystore() {
+function readKeystore() {
   const keystore = loadKeystore();
   const keys = Object.keys(keystore.data);
 
   const data = {};
   keys.forEach(key => {
-    set(data, key, keystore.data[key]);
+    (0, _lodash.set)(data, key, keystore.data[key]);
   });
 
   return data;

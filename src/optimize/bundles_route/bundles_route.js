@@ -1,8 +1,19 @@
-import { isAbsolute, extname } from 'path';
+'use strict';
 
-import LruCache from 'lru-cache';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createBundlesRoute = createBundlesRoute;
 
-import { createDynamicAssetResponse } from './dynamic_asset_response';
+var _path = require('path');
+
+var _lruCache = require('lru-cache');
+
+var _lruCache2 = _interopRequireDefault(_lruCache);
+
+var _dynamic_asset_response = require('./dynamic_asset_response');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  *  Creates a route that serves files from `bundlesPath`. If the
@@ -13,14 +24,14 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
  *  @property {string} options.basePublicPath
  *  @return {Hapi.RouteConfig}
  */
-export function createBundlesRoute({ bundlesPath, basePublicPath }) {
+function createBundlesRoute({ bundlesPath, basePublicPath }) {
 
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `createDynamicAssetResponse()` that
   // will store the 100 most recently used hashes.
-  const fileHashCache = new LruCache(100);
+  const fileHashCache = new _lruCache2.default(100);
 
-  if (typeof bundlesPath !== 'string' || !isAbsolute(bundlesPath)) {
+  if (typeof bundlesPath !== 'string' || !(0, _path.isAbsolute)(bundlesPath)) {
     throw new TypeError('bundlesPath must be an absolute path to the directory containing the bundles');
   }
 
@@ -40,12 +51,12 @@ export function createBundlesRoute({ bundlesPath, basePublicPath }) {
       ext: {
         onPreHandler: {
           method(request, reply) {
-            const ext = extname(request.params.path);
+            const ext = (0, _path.extname)(request.params.path);
             if (ext !== '.js' && ext !== '.css') {
               return reply.continue();
             }
 
-            reply(createDynamicAssetResponse({
+            reply((0, _dynamic_asset_response.createDynamicAssetResponse)({
               request,
               bundlesPath,
               fileHashCache,
@@ -53,13 +64,13 @@ export function createBundlesRoute({ bundlesPath, basePublicPath }) {
             }));
           }
         }
-      },
+      }
     },
     handler: {
       directory: {
         path: bundlesPath,
         listing: false,
-        lookupCompressed: true,
+        lookupCompressed: true
       }
     }
   };

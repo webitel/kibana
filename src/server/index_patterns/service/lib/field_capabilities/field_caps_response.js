@@ -1,6 +1,18 @@
-import { uniq } from 'lodash';
-import { castEsToKbnFieldTypeName } from '../../../../../utils';
-import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.readFieldCapsResponse = readFieldCapsResponse;
+
+var _lodash = require('lodash');
+
+var _utils = require('../../../../../utils');
+
+var _should_read_field_from_doc_values = require('./should_read_field_from_doc_values');
 
 /**
  *  Read the response from the _field_caps API to determine the type and
@@ -58,7 +70,7 @@ import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_value
  *  @param {FieldCapsResponse} fieldCapsResponse
  *  @return {Promise<Array<FieldInfo>>}
  */
-export function readFieldCapsResponse(fieldCapsResponse) {
+function readFieldCapsResponse(fieldCapsResponse) {
   const capsByNameThenType = fieldCapsResponse.fields;
   return Object.keys(capsByNameThenType).map(fieldName => {
     const capsByType = capsByNameThenType[fieldName];
@@ -66,19 +78,16 @@ export function readFieldCapsResponse(fieldCapsResponse) {
 
     // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
     const isSearchable = types.some(type => {
-      return !!capsByType[type].searchable ||
-        (!!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0);
+      return !!capsByType[type].searchable || !!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0;
     });
 
     const isAggregatable = types.some(type => {
-      return !!capsByType[type].aggregatable ||
-        (!!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0);
+      return !!capsByType[type].aggregatable || !!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0;
     });
-
 
     // If there are multiple types but they all resolve to the same kibana type
     // ignore the conflict and carry on (my wayward son)
-    const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
+    const uniqueKibanaTypes = (0, _lodash.uniq)(types.map(_utils.castEsToKbnFieldTypeName));
     if (uniqueKibanaTypes.length > 1) {
       return {
         name: fieldName,
@@ -86,8 +95,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,
-        conflictDescriptions: types.reduce((acc, esType) => ({
-          ...acc,
+        conflictDescriptions: types.reduce((acc, esType) => _extends({}, acc, {
           [esType]: capsByType[esType].indices
         }), {})
       };
@@ -96,10 +104,10 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     const esType = types[0];
     return {
       name: fieldName,
-      type: castEsToKbnFieldTypeName(esType),
+      type: (0, _utils.castEsToKbnFieldTypeName)(esType),
       searchable: isSearchable,
       aggregatable: isAggregatable,
-      readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
+      readFromDocValues: (0, _should_read_field_from_doc_values.shouldReadFieldFromDocValues)(isAggregatable, esType)
     };
   });
 }

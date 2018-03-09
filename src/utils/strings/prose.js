@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.formatListAsProse = formatListAsProse;
 /**
  *  Converts an array of items into a sentence-ready string.
  *
@@ -7,10 +13,10 @@
  *                                               when `true` (default), otherwise uses "or"
  *  @return {String}
  */
-export function formatListAsProse(list, options = {}) {
-  const {
-    inclusive = true
-  } = options;
+function formatListAsProse(list, options = {}) {
+  var _options$inclusive = options.inclusive;
+  const inclusive = _options$inclusive === undefined ? true : _options$inclusive;
+
 
   if (!Array.isArray(list)) {
     throw new TypeError('formatListAsProse() requires an array');
@@ -23,8 +29,5 @@ export function formatListAsProse(list, options = {}) {
     return list.join(` ${conjunction} `);
   }
 
-  return list
-    .slice(0, -1)
-    .concat(`${conjunction} ${list[count - 1]}`)
-    .join(', ');
+  return list.slice(0, -1).concat(`${conjunction} ${list[count - 1]}`).join(', ');
 }

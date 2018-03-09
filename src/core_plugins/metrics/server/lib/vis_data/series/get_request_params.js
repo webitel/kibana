@@ -1,6 +1,16 @@
-import buildRequestBody from './build_request_body';
+'use strict';
 
-export default (req, panel, series) => {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _build_request_body = require('./build_request_body');
+
+var _build_request_body2 = _interopRequireDefault(_build_request_body);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (req, panel, series) => {
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const bodies = [];
 
@@ -9,9 +19,11 @@ export default (req, panel, series) => {
     ignore: [404],
     timeout: '90s',
     requestTimeout: 90000,
-    ignoreUnavailable: true,
+    ignoreUnavailable: true
   });
 
-  bodies.push(buildRequestBody(req, panel, series));
+  bodies.push((0, _build_request_body2.default)(req, panel, series));
   return bodies;
 };
+
+module.exports = exports['default'];

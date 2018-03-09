@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.noWhiteSpace = noWhiteSpace;
 const TAGS_WITH_WS = />\s+</g;
 
 /**
@@ -13,6 +19,6 @@ const TAGS_WITH_WS = />\s+</g;
  * @param  {string} html - the html to modify
  * @return {string} - modified html
  */
-export function noWhiteSpace(html) {
+function noWhiteSpace(html) {
   return html.replace(TAGS_WITH_WS, '><');
 }

@@ -1,6 +1,21 @@
-import fs from 'fs';
-import { promisify } from 'bluebird';
-import { join as joinPath } from 'path';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.readControlGroups = readControlGroups;
+exports.readCPUStat = readCPUStat;
+exports.getAllStats = getAllStats;
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _bluebird = require('bluebird');
+
+var _path = require('path');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Logic from elasticsearch/core/src/main/java/org/elasticsearch/monitor/os/OsProbe.java
 
@@ -19,28 +34,27 @@ const CPU_FS_PERIOD_US_FILE = 'cpu.cfs_period_us';
 const CPU_FS_QUOTA_US_FILE = 'cpu.cfs_quota_us';
 const CPU_STATS_FILE = 'cpu.stat';
 
-const readFile = promisify(fs.readFile);
+const readFile = (0, _bluebird.promisify)(_fs2.default.readFile);
 
-export function readControlGroups() {
-  return readFile(PROC_SELF_CGROUP_FILE)
-    .then(data => {
-      const response = {};
+function readControlGroups() {
+  return readFile(PROC_SELF_CGROUP_FILE).then(data => {
+    const response = {};
 
-      data.toString().split(/\n/).forEach(line => {
-        const matches = line.match(CONTROL_GROUP_RE);
+    data.toString().split(/\n/).forEach(line => {
+      const matches = line.match(CONTROL_GROUP_RE);
 
-        if (matches === null) {
-          return;
-        }
+      if (matches === null) {
+        return;
+      }
 
-        const controllers = matches[1].split(CONTROLLER_SEPERATOR_RE);
-        controllers.forEach(controller => {
-          response[controller] = matches[2];
-        });
+      const controllers = matches[1].split(CONTROLLER_SEPERATOR_RE);
+      controllers.forEach(controller => {
+        response[controller] = matches[2];
       });
-
-      return response;
     });
+
+    return response;
+  });
 }
 
 function fileContentsToInteger(path) {
@@ -50,18 +64,18 @@ function fileContentsToInteger(path) {
 }
 
 function readCPUAcctUsage(controlGroup) {
-  return fileContentsToInteger(joinPath(PROC_CGROUP_CPUACCT_DIR, controlGroup, CPUACCT_USAGE_FILE));
+  return fileContentsToInteger((0, _path.join)(PROC_CGROUP_CPUACCT_DIR, controlGroup, CPUACCT_USAGE_FILE));
 }
 
 function readCPUFsPeriod(controlGroup) {
-  return fileContentsToInteger(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_PERIOD_US_FILE));
+  return fileContentsToInteger((0, _path.join)(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_PERIOD_US_FILE));
 }
 
 function readCPUFsQuota(controlGroup) {
-  return fileContentsToInteger(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_QUOTA_US_FILE));
+  return fileContentsToInteger((0, _path.join)(PROC_CGROUP_CPU_DIR, controlGroup, CPU_FS_QUOTA_US_FILE));
 }
 
-export function readCPUStat(controlGroup) {
+function readCPUStat(controlGroup) {
   return new Promise((resolve, reject) => {
     const stat = {
       number_of_elapsed_periods: -1,
@@ -69,11 +83,11 @@ export function readCPUStat(controlGroup) {
       time_throttled_nanos: -1
     };
 
-    readFile(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE)).then(data => {
+    readFile((0, _path.join)(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE)).then(data => {
       data.toString().split(/\n/).forEach(line => {
         const fields = line.split(/\s+/);
 
-        switch(fields[0]) {
+        switch (fields[0]) {
           case 'nr_periods':
             stat.number_of_elapsed_periods = parseInt(fields[1], 10);
             break;
@@ -99,7 +113,7 @@ export function readCPUStat(controlGroup) {
   });
 }
 
-export function getAllStats(options = {}) {
+function getAllStats(options = {}) {
   return new Promise((resolve, reject) => {
     readControlGroups().then(groups => {
       const cpuPath = options.cpuPath || groups[GROUP_CPU];
@@ -110,12 +124,7 @@ export function getAllStats(options = {}) {
         return resolve(null);
       }
 
-      return Promise.all([
-        readCPUAcctUsage(cpuAcctPath),
-        readCPUFsPeriod(cpuPath),
-        readCPUFsQuota(cpuPath),
-        readCPUStat(cpuPath)
-      ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
+      return Promise.all([readCPUAcctUsage(cpuAcctPath), readCPUFsPeriod(cpuPath), readCPUFsQuota(cpuPath), readCPUStat(cpuPath)]).then(([cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat]) => {
         resolve({
           cpuacct: {
             control_group: cpuAcctPath,

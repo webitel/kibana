@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.includedFields = includedFields;
 /**
  * Provides an array of paths for ES source filtering
  *
@@ -5,14 +11,12 @@
  * @param {string|array} fields
  * @returns {array}
  */
-export function includedFields(type, fields) {
+function includedFields(type, fields) {
   if (!fields || fields.length === 0) return;
 
   // convert to an array
   const sourceFields = typeof fields === 'string' ? [fields] : fields;
   const sourceType = type || '*';
 
-  return sourceFields.map(f => `${sourceType}.${f}`)
-    .concat('type')
-    .concat(fields); // v5 compatibility
+  return sourceFields.map(f => `${sourceType}.${f}`).concat('type').concat(fields); // v5 compatibility
 }

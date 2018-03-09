@@ -1,11 +1,19 @@
-import { deepCloneWithBuffers as clone } from '../utils';
-import { forEach, noop } from 'lodash';
+'use strict';
 
-export function createTransform(deprecations) {
-  return (settings, log = noop) => {
-    const result = clone(settings);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createTransform = createTransform;
 
-    forEach(deprecations, (deprecation) => {
+var _utils = require('../utils');
+
+var _lodash = require('lodash');
+
+function createTransform(deprecations) {
+  return (settings, log = _lodash.noop) => {
+    const result = (0, _utils.deepCloneWithBuffers)(settings);
+
+    (0, _lodash.forEach)(deprecations, deprecation => {
       deprecation(result, log);
     });
 

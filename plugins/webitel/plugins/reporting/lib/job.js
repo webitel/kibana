@@ -122,7 +122,7 @@ export class Job {
 
           b.query.bool.must.push({
             "range": {
-              "variables.start_stamp": {
+              "created_time": {
                 "gte": this.dateInterval.from,
                 "lte": this.dateInterval.to
               }
@@ -145,6 +145,9 @@ export class Job {
             if (!indexName) {
               return cb(new Error(`No found index name!!1 from: ${vis.indexPattern}`))
             }
+
+            console.log('find:', indexName + (this.domain ? `-${this.domain}` : ''));
+            console.log(b);
             this.client.search({
               index: indexName + (this.domain ? `-${this.domain}` : ''),
               body: b

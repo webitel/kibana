@@ -1,4 +1,15 @@
-import moment from 'moment';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createDurationFormat = createDurationFormat;
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const ratioToSeconds = {
   picoseconds: 0.000000000001,
@@ -8,40 +19,20 @@ const ratioToSeconds = {
 const HUMAN_FRIENDLY = 'humanize';
 const DEFAULT_OUTPUT_PRECISION = 2;
 const DEFAULT_INPUT_FORMAT = { text: 'Seconds', kind: 'seconds' };
-const inputFormats = [
-  { text: 'Picoseconds', kind: 'picoseconds' },
-  { text: 'Nanoseconds', kind: 'nanoseconds' },
-  { text: 'Microseconds', kind: 'microseconds' },
-  { text: 'Milliseconds', kind: 'milliseconds' },
-  DEFAULT_INPUT_FORMAT,
-  { text: 'Minutes', kind: 'minutes' },
-  { text: 'Hours', kind: 'hours' },
-  { text: 'Days', kind: 'days' },
-  { text: 'Weeks', kind: 'weeks' },
-  { text: 'Months', kind: 'months' },
-  { text: 'Years', kind: 'years' }
-];
+const inputFormats = [{ text: 'Picoseconds', kind: 'picoseconds' }, { text: 'Nanoseconds', kind: 'nanoseconds' }, { text: 'Microseconds', kind: 'microseconds' }, { text: 'Milliseconds', kind: 'milliseconds' }, DEFAULT_INPUT_FORMAT, { text: 'Minutes', kind: 'minutes' }, { text: 'Hours', kind: 'hours' }, { text: 'Days', kind: 'days' }, { text: 'Weeks', kind: 'weeks' }, { text: 'Months', kind: 'months' }, { text: 'Years', kind: 'years' }];
 const DEFAULT_OUTPUT_FORMAT = { text: 'Human Readable', method: 'humanize' };
-const outputFormats = [
-  DEFAULT_OUTPUT_FORMAT,
-  { text: 'Milliseconds', method: 'asMilliseconds' },
-  { text: 'Seconds', method: 'asSeconds' },
-  { text: 'Minutes', method: 'asMinutes' },
-  { text: 'Hours', method: 'asHours' },
-  { text: 'Days', method: 'asDays' },
-  { text: 'Weeks', method: 'asWeeks' },
-  { text: 'Months', method: 'asMonths' },
-  { text: 'Years', method: 'asYears' }
-];
+const outputFormats = [DEFAULT_OUTPUT_FORMAT, { text: 'Milliseconds', method: 'asMilliseconds' }, { text: 'Seconds', method: 'asSeconds' }, { text: 'Minutes', method: 'asMinutes' }, { text: 'Hours', method: 'asHours' }, { text: 'Days', method: 'asDays' }, { text: 'Weeks', method: 'asWeeks' }, { text: 'Months', method: 'asMonths' }, { text: 'Years', method: 'asYears' }];
 
 function parseInputAsDuration(val, inputFormat) {
   const ratio = ratioToSeconds[inputFormat] || 1;
   const kind = inputFormat in ratioToSeconds ? 'seconds' : inputFormat;
-  return moment.duration(val * ratio, kind);
+  return _moment2.default.duration(val * ratio, kind);
 }
 
-export function createDurationFormat(FieldFormat) {
-  return class DurationFormat extends FieldFormat {
+function createDurationFormat(FieldFormat) {
+  var _class, _temp;
+
+  return _temp = _class = class DurationFormat extends FieldFormat {
     isHuman() {
       return this.param('outputFormat') === HUMAN_FRIENDLY;
     }
@@ -64,11 +55,5 @@ export function createDurationFormat(FieldFormat) {
       return prefix + precise;
     }
 
-    static id = 'duration';
-    static title = 'Duration';
-    static fieldType = 'number';
-
-    static inputFormats = inputFormats;
-    static outputFormats = outputFormats;
-  };
+  }, _class.id = 'duration', _class.title = 'Duration', _class.fieldType = 'number', _class.inputFormats = inputFormats, _class.outputFormats = outputFormats, _temp;
 }

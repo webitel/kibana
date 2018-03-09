@@ -1,11 +1,9 @@
-import { resolve } from 'path';
-import { open, fstat, createReadStream, close } from 'fs';
+'use strict';
 
-import Boom from 'boom';
-import { fromNode as fcb } from 'bluebird';
-
-import { getFileHash } from './file_hash';
-import { replacePlaceholder } from '../public_path_placeholder';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createDynamicAssetResponse = undefined;
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -32,59 +30,87 @@ import { replacePlaceholder } from '../public_path_placeholder';
  *  @property {string} options.publicPath
  *  @property {LruCache} options.fileHashCache
  */
-export async function createDynamicAssetResponse(options) {
-  const {
-    request,
-    bundlesPath,
-    publicPath,
-    fileHashCache,
-  } = options;
+let createDynamicAssetResponse = exports.createDynamicAssetResponse = (() => {
+  var _ref = _asyncToGenerator(function* (options) {
+    const request = options.request,
+          bundlesPath = options.bundlesPath,
+          publicPath = options.publicPath,
+          fileHashCache = options.fileHashCache;
 
-  let fd;
-  try {
-    const path = resolve(bundlesPath, request.params.path);
 
-    // prevent path traversal, only process paths that resolve within bundlesPath
-    if (!path.startsWith(bundlesPath)) {
-      return Boom.forbidden(null, 'EACCES');
-    }
+    let fd;
+    try {
+      const path = (0, _path.resolve)(bundlesPath, request.params.path);
 
-    // we use and manage a file descriptor mostly because
-    // that's what Inert does, and since we are accessing
-    // the file 2 or 3 times per request it seems logical
-    fd = await fcb(cb => open(path, 'r', cb));
-
-    const stat = await fcb(cb => fstat(fd, cb));
-    const hash = await getFileHash(fileHashCache, path, stat, fd);
-
-    const read = createReadStream(null, {
-      fd,
-      start: 0,
-      autoClose: true
-    });
-    fd = null; // read stream is now responsible for fd
-
-    const response = request.generateResponse(replacePlaceholder(read, publicPath));
-    response.code(200);
-    response.etag(`${hash}-${publicPath}`);
-    response.header('cache-control', 'must-revalidate');
-    response.type(request.server.mime.path(path).type);
-    return response;
-
-  } catch (error) {
-    if (fd) {
-      try {
-        await fcb(cb => close(fd, cb));
-      } catch (error) {
-        // ignore errors from close, we already have one to report
-        // and it's very likely they are the same
+      // prevent path traversal, only process paths that resolve within bundlesPath
+      if (!path.startsWith(bundlesPath)) {
+        return _boom2.default.forbidden(null, 'EACCES');
       }
-    }
 
-    if (error.code === 'ENOENT') {
-      return Boom.notFound();
-    }
+      // we use and manage a file descriptor mostly because
+      // that's what Inert does, and since we are accessing
+      // the file 2 or 3 times per request it seems logical
+      fd = yield (0, _bluebird.fromNode)(function (cb) {
+        return (0, _fs.open)(path, 'r', cb);
+      });
 
-    return Boom.boomify(error);
-  }
-}
+      const stat = yield (0, _bluebird.fromNode)(function (cb) {
+        return (0, _fs.fstat)(fd, cb);
+      });
+      const hash = yield (0, _file_hash.getFileHash)(fileHashCache, path, stat, fd);
+
+      const read = (0, _fs.createReadStream)(null, {
+        fd,
+        start: 0,
+        autoClose: true
+      });
+      fd = null; // read stream is now responsible for fd
+
+      const response = request.generateResponse((0, _public_path_placeholder.replacePlaceholder)(read, publicPath));
+      response.code(200);
+      response.etag(`${hash}-${publicPath}`);
+      response.header('cache-control', 'must-revalidate');
+      response.type(request.server.mime.path(path).type);
+      return response;
+    } catch (error) {
+      if (fd) {
+        try {
+          yield (0, _bluebird.fromNode)(function (cb) {
+            return (0, _fs.close)(fd, cb);
+          });
+        } catch (error) {
+          // ignore errors from close, we already have one to report
+          // and it's very likely they are the same
+        }
+      }
+
+      if (error.code === 'ENOENT') {
+        return _boom2.default.notFound();
+      }
+
+      return _boom2.default.boomify(error);
+    }
+  });
+
+  return function createDynamicAssetResponse(_x) {
+    return _ref.apply(this, arguments);
+  };
+})();
+
+var _path = require('path');
+
+var _fs = require('fs');
+
+var _boom = require('boom');
+
+var _boom2 = _interopRequireDefault(_boom);
+
+var _bluebird = require('bluebird');
+
+var _file_hash = require('./file_hash');
+
+var _public_path_placeholder = require('../public_path_placeholder');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }

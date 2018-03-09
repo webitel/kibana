@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.trimIdPrefix = trimIdPrefix;
 function assertNonEmptyString(value, name) {
   if (!value || typeof value !== 'string') {
     throw new TypeError(`Expected "${value}" to be a ${name}`);
@@ -11,7 +17,7 @@ function assertNonEmptyString(value, name) {
  *  @param  {string} type
  *  @return {string}
  */
-export function trimIdPrefix(id, type) {
+function trimIdPrefix(id, type) {
   assertNonEmptyString(id, 'document id');
   assertNonEmptyString(type, 'saved object type');
 

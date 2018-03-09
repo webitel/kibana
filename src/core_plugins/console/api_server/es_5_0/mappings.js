@@ -1,27 +1,19 @@
-let _ = require("lodash");
+'use strict';
 
-var BOOLEAN = {
-  __one_of: [true, false]
-};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-export default function (api) {
+exports.default = function (api) {
   api.addEndpointDescription('_get_mapping', {
     methods: ['GET'],
     priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping",
-      "{indices}/_mapping/{types}",
-      "{indices}/{types}/_mapping",
-      "_mapping"
-    ]
+    patterns: ["{indices}/_mapping", "{indices}/_mapping/{types}", "{indices}/{types}/_mapping", "_mapping"]
   });
   api.addEndpointDescription('_get_field_mapping', {
     methods: ['GET'],
     priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping/field/{fields}",
-      "{indices}/_mapping/{type}/field/{fields}"
-    ],
+    patterns: ["{indices}/_mapping/field/{fields}", "{indices}/_mapping/{type}/field/{fields}"],
     url_params: {
       "include_defaults": "__flag__"
     }
@@ -29,19 +21,11 @@ export default function (api) {
   api.addEndpointDescription('_delete_mapping', {
     methods: ['DELETE'],
     priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping",
-      "{indices}/_mapping/{types}",
-      "{indices}/{types}/_mapping",
-      "_mapping"
-    ]
+    patterns: ["{indices}/_mapping", "{indices}/_mapping/{types}", "{indices}/{types}/_mapping", "_mapping"]
   });
   api.addEndpointDescription('_put_type_mapping', {
     methods: ['PUT', 'POST'],
-    patterns: [
-      "{indices}/{type}/_mapping",
-      "{indices}/_mapping/{type}"
-    ],
+    patterns: ["{indices}/{type}/_mapping", "{indices}/_mapping/{type}"],
     priority: 10, // collides with put doc by id
     data_autocomplete_rules: {
       __template: {
@@ -59,7 +43,7 @@ export default function (api) {
         'index': BOOLEAN
       },
       '_routing': {
-        'required': BOOLEAN,
+        'required': BOOLEAN
       },
       '_index': {
         'enabled': BOOLEAN
@@ -81,9 +65,7 @@ export default function (api) {
       'properties': {
         '*': {
           type: {
-            __one_of: ['text', 'keyword', 'float', 'half_float', 'scaled_float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
-              'binary', 'object', 'nested', "geo_point", "geo_shape"
-            ]
+            __one_of: ['text', 'keyword', 'float', 'half_float', 'scaled_float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean', 'binary', 'object', 'nested', "geo_point", "geo_shape"]
           },
 
           // strings
@@ -154,20 +136,9 @@ export default function (api) {
 
           // dates
           format: {
-            __one_of: _.flatten([_.map(['date', 'date_time', 'date_time_no_millis',
-              'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis',
-              'time', 'time_no_millis', 't_time', 't_time_no_millis',
-              'week_date', 'week_date_time', 'week_date_time_no_millis'], function (s) {
+            __one_of: _.flatten([_.map(['date', 'date_time', 'date_time_no_millis', 'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis', 'time', 'time_no_millis', 't_time', 't_time_no_millis', 'week_date', 'week_date_time', 'week_date_time_no_millis'], function (s) {
               return ['basic_' + s, 'strict_' + s];
-            }),
-              [
-                'date', 'date_hour', 'date_hour_minute', 'date_hour_minute_second', 'date_hour_minute_second_fraction',
-                'date_hour_minute_second_millis', 'date_optional_time', 'date_time', 'date_time_no_millis',
-                'hour', 'hour_minute', 'hour_minute_second', 'hour_minute_second_fraction', 'hour_minute_second_millis',
-                'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis', 'time', 'time_no_millis',
-                't_time', 't_time_no_millis', 'week_date', 'week_date_time', 'weekDateTimeNoMillis', 'week_year',
-                'weekyearWeek', 'weekyearWeekDay', 'year', 'year_month', 'year_month_day', 'epoch_millis', 'epoch_second'
-              ]])
+            }), ['date', 'date_hour', 'date_hour_minute', 'date_hour_minute_second', 'date_hour_minute_second_fraction', 'date_hour_minute_second_millis', 'date_optional_time', 'date_time', 'date_time_no_millis', 'hour', 'hour_minute', 'hour_minute_second', 'hour_minute_second_fraction', 'hour_minute_second_millis', 'ordinal_date', 'ordinal_date_time', 'ordinal_date_time_no_millis', 'time', 'time_no_millis', 't_time', 't_time_no_millis', 'week_date', 'week_date_time', 'weekDateTimeNoMillis', 'week_year', 'weekyearWeek', 'weekyearWeekDay', 'year', 'year_month', 'year_month_day', 'epoch_millis', 'epoch_second']])
           },
 
           fielddata: {
@@ -207,13 +178,19 @@ export default function (api) {
   });
   api.addEndpointDescription('_put_mapping', {
     methods: ['PUT'],
-    patterns: [
-      "{indices}/_mapping"
-    ],
+    patterns: ["{indices}/_mapping"],
     data_autocomplete_rules: {
       '{type}': {
         __scope_link: '_put_type_mapping'
       }
     }
   });
-}
+};
+
+let _ = require("lodash");
+
+var BOOLEAN = {
+  __one_of: [true, false]
+};
+
+module.exports = exports['default'];

@@ -1,5 +1,10 @@
+'use strict';
 
-export function serverExtensionsMixin(kbnServer, server) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.serverExtensionsMixin = serverExtensionsMixin;
+function serverExtensionsMixin(kbnServer, server) {
   /**
    *  Decorate all request objects with a new method, `methodName`,
    *  that will call the `factory` on first invocation and return

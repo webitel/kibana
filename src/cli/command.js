@@ -1,35 +1,45 @@
-import _ from 'lodash';
+'use strict';
 
-import help from './help';
-import { Command } from 'commander';
-import { red } from './color';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-Command.prototype.error = function (err) {
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _help = require('./help');
+
+var _help2 = _interopRequireDefault(_help);
+
+var _commander = require('commander');
+
+var _color = require('./color');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_commander.Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;
 
-  console.log(
-    `
-${red(' ERROR ')} ${err}
+  console.log(`
+${(0, _color.red)(' ERROR ')} ${err}
 
-${help(this, '  ')}
-`
-  );
+${(0, _help2.default)(this, '  ')}
+`);
 
   process.exit(64); // eslint-disable-line no-process-exit
 };
 
-Command.prototype.defaultHelp = function () {
-  console.log(
-    `
-${help(this, '  ')}
+_commander.Command.prototype.defaultHelp = function () {
+  console.log(`
+${(0, _help2.default)(this, '  ')}
 
-`
-  );
+`);
 
   process.exit(64); // eslint-disable-line no-process-exit
 };
 
-Command.prototype.unknownArgv = function (argv) {
+_commander.Command.prototype.unknownArgv = function (argv) {
   if (argv) this.__unknownArgv = argv;
   return this.__unknownArgv ? this.__unknownArgv.slice(0) : [];
 };
@@ -38,7 +48,7 @@ Command.prototype.unknownArgv = function (argv) {
  * setup the command to accept arbitrary configuration via the cli
  * @return {[type]} [description]
  */
-Command.prototype.collectUnknownOptions = function () {
+_commander.Command.prototype.collectUnknownOptions = function () {
   const title = `Extra ${this._name} options`;
 
   this.allowUnknownOption();
@@ -61,10 +71,13 @@ Command.prototype.collectUnknownOptions = function () {
       }
 
       let val = opt[1];
-      try { val = JSON.parse(opt[1]); }
-      catch (e) { val = opt[1]; }
+      try {
+        val = JSON.parse(opt[1]);
+      } catch (e) {
+        val = opt[1];
+      }
 
-      _.set(opts, opt[0].slice(2), val);
+      _lodash2.default.set(opts, opt[0].slice(2), val);
     }
 
     return opts;
@@ -73,13 +86,13 @@ Command.prototype.collectUnknownOptions = function () {
   return this;
 };
 
-Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function (parse, argv) {
+_commander.Command.prototype.parseOptions = _lodash2.default.wrap(_commander.Command.prototype.parseOptions, function (parse, argv) {
   const opts = parse.call(this, argv);
   this.unknownArgv(opts.unknown);
   return opts;
 });
 
-Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
+_commander.Command.prototype.action = _lodash2.default.wrap(_commander.Command.prototype.action, function (action, fn) {
   return action.call(this, function (...args) {
     const ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
@@ -91,4 +104,5 @@ Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn
   });
 });
 
-export default Command;
+exports.default = _commander.Command;
+module.exports = exports['default'];

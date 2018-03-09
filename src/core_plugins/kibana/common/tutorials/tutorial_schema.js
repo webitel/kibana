@@ -1,65 +1,78 @@
-import Joi from 'joi';
-import { PARAM_TYPES } from './param_types';
-import { TUTORIAL_CATEGORY } from './tutorial_category';
+'use strict';
 
-const dashboardSchema = Joi.object({
-  id: Joi.string().required(), // Dashboard saved object id
-  linkLabel: Joi.string().when('isOverview', {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.tutorialSchema = undefined;
+
+var _joi = require('joi');
+
+var _joi2 = _interopRequireDefault(_joi);
+
+var _param_types = require('./param_types');
+
+var _tutorial_category = require('./tutorial_category');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const dashboardSchema = _joi2.default.object({
+  id: _joi2.default.string().required(), // Dashboard saved object id
+  linkLabel: _joi2.default.string().when('isOverview', {
     is: true,
-    then: Joi.required(),
+    then: _joi2.default.required()
   }),
   // Is this an Overview / Entry Point dashboard?
-  isOverview: Joi.boolean().required()
+  isOverview: _joi2.default.boolean().required()
 });
 
-const artifactsSchema = Joi.object({
+const artifactsSchema = _joi2.default.object({
   // Fields present in Elasticsearch documents created by this product.
-  exportedFields: Joi.object({
-    documentationUrl: Joi.string().required()
+  exportedFields: _joi2.default.object({
+    documentationUrl: _joi2.default.string().required()
   }),
   // Kibana dashboards created by this product.
-  dashboards: Joi.array().items(dashboardSchema).required()
+  dashboards: _joi2.default.array().items(dashboardSchema).required()
 });
 
-const instructionSchema = Joi.object({
-  title: Joi.string(),
-  textPre: Joi.string(),
-  commands: Joi.array().items(Joi.string()),
-  textPost: Joi.string()
+const instructionSchema = _joi2.default.object({
+  title: _joi2.default.string(),
+  textPre: _joi2.default.string(),
+  commands: _joi2.default.array().items(_joi2.default.string()),
+  textPost: _joi2.default.string()
 });
 
-const instructionVariantSchema = Joi.object({
-  id: Joi.string().required(),
-  instructions: Joi.array().items(instructionSchema).required()
+const instructionVariantSchema = _joi2.default.object({
+  id: _joi2.default.string().required(),
+  instructions: _joi2.default.array().items(instructionSchema).required()
 });
 
-const instructionSetSchema = Joi.object({
-  title: Joi.string(),
+const instructionSetSchema = _joi2.default.object({
+  title: _joi2.default.string(),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: Joi.array().items(instructionVariantSchema).required()
+  instructionVariants: _joi2.default.array().items(instructionVariantSchema).required()
 });
 
-const paramSchema = Joi.object({
-  defaultValue: Joi.required(),
-  id: Joi.string().regex(/^[a-zA-Z_]+$/).required(),
-  label: Joi.string().required(),
-  type: Joi.string().valid(Object.values(PARAM_TYPES)).required()
+const paramSchema = _joi2.default.object({
+  defaultValue: _joi2.default.required(),
+  id: _joi2.default.string().regex(/^[a-zA-Z_]+$/).required(),
+  label: _joi2.default.string().required(),
+  type: _joi2.default.string().valid(Object.values(_param_types.PARAM_TYPES)).required()
 });
 
-const instructionsSchema = Joi.object({
-  instructionSets: Joi.array().items(instructionSetSchema).required(),
-  params: Joi.array().items(paramSchema)
+const instructionsSchema = _joi2.default.object({
+  instructionSets: _joi2.default.array().items(instructionSetSchema).required(),
+  params: _joi2.default.array().items(paramSchema)
 });
 
-export const tutorialSchema = {
-  id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
-  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
-  name: Joi.string().required(),
-  shortDescription: Joi.string().required(),
-  iconPath: Joi.string(),
-  longDescription: Joi.string().required(),
-  completionTimeMinutes: Joi.number().integer(),
-  previewImagePath: Joi.string(),
+const tutorialSchema = exports.tutorialSchema = {
+  id: _joi2.default.string().regex(/^[a-zA-Z0-9-]+$/).required(),
+  category: _joi2.default.string().valid(Object.values(_tutorial_category.TUTORIAL_CATEGORY)).required(),
+  name: _joi2.default.string().required(),
+  shortDescription: _joi2.default.string().required(),
+  iconPath: _joi2.default.string(),
+  longDescription: _joi2.default.string().required(),
+  completionTimeMinutes: _joi2.default.number().integer(),
+  previewImagePath: _joi2.default.string(),
 
   // kibana and elastic cluster running on prem
   onPrem: instructionsSchema.required(),
@@ -71,5 +84,5 @@ export const tutorialSchema = {
   onPremElasticCloud: instructionsSchema,
 
   // Elastic stack artifacts produced by product when it is setup and run.
-  artifacts: artifactsSchema,
+  artifacts: artifactsSchema
 };

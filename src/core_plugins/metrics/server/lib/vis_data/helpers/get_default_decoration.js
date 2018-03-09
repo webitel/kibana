@@ -1,4 +1,10 @@
-export default series => {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = series => {
   const pointSize = series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;
   return {
@@ -21,3 +27,5 @@ export default series => {
     }
   };
 };
+
+module.exports = exports['default'];

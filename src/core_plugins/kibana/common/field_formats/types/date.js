@@ -1,8 +1,24 @@
-import _ from 'lodash';
-import moment from 'moment';
+'use strict';
 
-export function createDateFormat(FieldFormat) {
-  return class DateFormat extends FieldFormat {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createDateFormat = createDateFormat;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function createDateFormat(FieldFormat) {
+  var _class, _temp;
+
+  return _temp = _class = class DateFormat extends FieldFormat {
     constructor(params, getConfig) {
       super(params);
 
@@ -28,12 +44,12 @@ export function createDateFormat(FieldFormat) {
         this._timeZone = timezone;
         this._memoizedPattern = pattern;
 
-        this._memoizedConverter = _.memoize(function converter(val) {
+        this._memoizedConverter = _lodash2.default.memoize(function converter(val) {
           if (val === null || val === undefined) {
             return '-';
           }
 
-          const date = moment(val);
+          const date = (0, _moment2.default)(val);
           if (date.isValid()) {
             return date.format(pattern);
           } else {
@@ -45,8 +61,5 @@ export function createDateFormat(FieldFormat) {
       return this._memoizedConverter(val);
     }
 
-    static id = 'date';
-    static title = 'Date';
-    static fieldType = 'date';
-  };
+  }, _class.id = 'date', _class.title = 'Date', _class.fieldType = 'date', _temp;
 }

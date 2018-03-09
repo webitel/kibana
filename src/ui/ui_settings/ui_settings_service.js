@@ -1,18 +1,27 @@
-import { defaultsDeep } from 'lodash';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UiSettingsService = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _lodash = require('lodash');
+
+var _create_or_upgrade_saved_config = require('./create_or_upgrade_saved_config');
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function hydrateUserSettings(userSettings) {
-  return Object.keys(userSettings)
-    .map(key => ({ key, userValue: userSettings[key] }))
-    .filter(({ userValue }) => userValue !== null)
-    .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
+  return Object.keys(userSettings).map(key => ({ key, userValue: userSettings[key] })).filter(({ userValue }) => userValue !== null).reduce((acc, { key, userValue }) => _extends({}, acc, { [key]: { userValue } }), {});
 }
 
 /**
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
  */
-export class UiSettingsService {
+class UiSettingsService {
   /**
    *  @constructor
    *  @param {Object} options
@@ -24,17 +33,15 @@ export class UiSettingsService {
    *  @property {Function} [options.log]
    */
   constructor(options) {
-    const {
-      type,
-      id,
-      buildNum,
-      savedObjectsClient,
-      // we use a function for getDefaults() so that defaults can be different in
-      // different scenarios, and so they can change over time
-      getDefaults = () => ({}),
-      // function that accepts log messages in the same format as server.log
-      log = () => {},
-    } = options;
+    const type = options.type,
+          id = options.id,
+          buildNum = options.buildNum,
+          savedObjectsClient = options.savedObjectsClient;
+    var _options$getDefaults = options.getDefaults;
+    const getDefaults = _options$getDefaults === undefined ? () => ({}) : _options$getDefaults;
+    var _options$log = options.log;
+    const log = _options$log === undefined ? () => {} : _options$log;
+
 
     this._type = type;
     this._id = id;
@@ -44,113 +51,153 @@ export class UiSettingsService {
     this._log = log;
   }
 
-  async getDefaults() {
-    return await this._getDefaults();
+  getDefaults() {
+    var _this = this;
+
+    return _asyncToGenerator(function* () {
+      return yield _this._getDefaults();
+    })();
   }
 
   // returns a Promise for the value of the requested setting
-  async get(key) {
-    const all = await this.getAll();
-    return all[key];
+  get(key) {
+    var _this2 = this;
+
+    return _asyncToGenerator(function* () {
+      const all = yield _this2.getAll();
+      return all[key];
+    })();
   }
 
-  async getAll() {
-    const raw = await this.getRaw();
+  getAll() {
+    var _this3 = this;
 
-    return Object.keys(raw)
-      .reduce((all, key) => {
+    return _asyncToGenerator(function* () {
+      const raw = yield _this3.getRaw();
+
+      return Object.keys(raw).reduce(function (all, key) {
         const item = raw[key];
         const hasUserValue = 'userValue' in item;
         all[key] = hasUserValue ? item.userValue : item.value;
         return all;
       }, {});
+    })();
   }
 
-  async getRaw() {
-    const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, await this.getDefaults());
-  }
+  getRaw() {
+    var _this4 = this;
 
-  /*WEBITEL*/
-  async getUserProvided(options, domainName) {
-    return hydrateUserSettings(await this._read(options, domainName));
-  }
-
-  /*WEBITEL*/
-  async setMany(changes, domainName) {
-    await this._write({ changes }, domainName);
+    return _asyncToGenerator(function* () {
+      const userProvided = yield _this4.getUserProvided();
+      return (0, _lodash.defaultsDeep)(userProvided, (yield _this4.getDefaults()));
+    })();
   }
 
   /*WEBITEL*/
-  async set(key, value, domainName) {
-    await this.setMany({ [key]: value }, domainName);
+  getUserProvided(options, domainName) {
+    var _this5 = this;
+
+    return _asyncToGenerator(function* () {
+      return hydrateUserSettings((yield _this5._read(options, domainName)));
+    })();
   }
 
   /*WEBITEL*/
-  async remove(key, domainName) {
-    await this.set(key, null, domainName);
-  }
+  setMany(changes, domainName) {
+    var _this6 = this;
 
-  async removeMany(keys) {
-    const changes = {};
-    keys.forEach(key => {
-      changes[key] = null;
-    });
-    await this.setMany(changes);
+    return _asyncToGenerator(function* () {
+      yield _this6._write({ changes }, domainName);
+    })();
   }
 
   /*WEBITEL*/
-  async _write({ changes, autoCreateOrUpgradeIfMissing = true }, domainName) {
-    try {
-      await this._savedObjectsClient.update(this._type, this._id, changes, undefined, domainName);
-    } catch (error) {
-      const { isNotFoundError } = this._savedObjectsClient.errors;
-      if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
+  set(key, value, domainName) {
+    var _this7 = this;
+
+    return _asyncToGenerator(function* () {
+      yield _this7.setMany({ [key]: value }, domainName);
+    })();
+  }
+
+  /*WEBITEL*/
+  remove(key, domainName) {
+    var _this8 = this;
+
+    return _asyncToGenerator(function* () {
+      yield _this8.set(key, null, domainName);
+    })();
+  }
+
+  removeMany(keys) {
+    var _this9 = this;
+
+    return _asyncToGenerator(function* () {
+      const changes = {};
+      keys.forEach(function (key) {
+        changes[key] = null;
+      });
+      yield _this9.setMany(changes);
+    })();
+  }
+
+  /*WEBITEL*/
+  _write({ changes, autoCreateOrUpgradeIfMissing = true }, domainName) {
+    var _this10 = this;
+
+    return _asyncToGenerator(function* () {
+      try {
+        yield _this10._savedObjectsClient.update(_this10._type, _this10._id, changes, undefined, domainName);
+      } catch (error) {
+        const isNotFoundError = _this10._savedObjectsClient.errors.isNotFoundError;
+
+        if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
+          throw error;
+        }
+
+        yield (0, _create_or_upgrade_saved_config.createOrUpgradeSavedConfig)({
+          savedObjectsClient: _this10._savedObjectsClient,
+          version: _this10._id,
+          buildNum: _this10._buildNum,
+          log: _this10._log
+        });
+
+        yield _this10._write({
+          changes,
+          autoCreateOrUpgradeIfMissing: false
+        });
+      }
+    })();
+  }
+
+  _read(options = {}, domainName) {
+    var _this11 = this;
+
+    return _asyncToGenerator(function* () {
+      var _options$ignore401Err = options.ignore401Errors;
+      const ignore401Errors = _options$ignore401Err === undefined ? false : _options$ignore401Err;
+      var _savedObjectsClient$e = _this11._savedObjectsClient.errors;
+      const isNotFoundError = _savedObjectsClient$e.isNotFoundError,
+            isForbiddenError = _savedObjectsClient$e.isForbiddenError,
+            isEsUnavailableError = _savedObjectsClient$e.isEsUnavailableError,
+            isNotAuthorizedError = _savedObjectsClient$e.isNotAuthorizedError;
+
+
+      const isIgnorableError = function isIgnorableError(error) {
+        return isNotFoundError(error) || isForbiddenError(error) || isEsUnavailableError(error) || ignore401Errors && isNotAuthorizedError(error);
+      };
+
+      try {
+        const resp = yield _this11._savedObjectsClient.get(_this11._type, _this11._id, domainName);
+        return resp.attributes;
+      } catch (error) {
+        if (isIgnorableError(error)) {
+          return {};
+        }
+
         throw error;
       }
-
-      await createOrUpgradeSavedConfig({
-        savedObjectsClient: this._savedObjectsClient,
-        version: this._id,
-        buildNum: this._buildNum,
-        log: this._log,
-      });
-
-      await this._write({
-        changes,
-        autoCreateOrUpgradeIfMissing: false
-      });
-    }
-  }
-
-  async _read(options = {}, domainName) {
-    const {
-      ignore401Errors = false
-    } = options;
-
-    const {
-      isNotFoundError,
-      isForbiddenError,
-      isEsUnavailableError,
-      isNotAuthorizedError
-    } = this._savedObjectsClient.errors;
-
-    const isIgnorableError = error => (
-      isNotFoundError(error) ||
-      isForbiddenError(error) ||
-      isEsUnavailableError(error) ||
-      (ignore401Errors && isNotAuthorizedError(error))
-    );
-
-    try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id, domainName);
-      return resp.attributes;
-    } catch (error) {
-      if (isIgnorableError(error)) {
-        return {};
-      }
-
-      throw error;
-    }
+    })();
   }
 }
+exports.UiSettingsService = UiSettingsService;

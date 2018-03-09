@@ -1,4 +1,14 @@
-import _ from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function Samples(max) {
   this.vals = {};
@@ -10,7 +20,7 @@ Samples.prototype.add = function (sample) {
   const vals = this.vals;
   const length = this.length = Math.min(this.length + 1, this.max);
 
-  _.forOwn(sample, function (val, name) {
+  _lodash2.default.forOwn(sample, function (val, name) {
     if (val == null) val = null;
 
     if (!vals[name]) vals[name] = new Array(length);
@@ -23,4 +33,5 @@ Samples.prototype.toJSON = function () {
   return this.vals;
 };
 
-export default Samples;
+exports.default = Samples;
+module.exports = exports['default'];

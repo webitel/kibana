@@ -1,7 +1,14 @@
-import { fromNode } from 'bluebird';
-import { get, once } from 'lodash';
+'use strict';
 
-export default (kbnServer, server, config) => {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _bluebird = require('bluebird');
+
+var _lodash = require('lodash');
+
+exports.default = (kbnServer, server, config) => {
 
   server.route({
     path: '/bundles/{path*}',
@@ -17,20 +24,20 @@ export default (kbnServer, server, config) => {
     config: { auth: false }
   });
 
-  return fromNode(cb => {
+  return (0, _bluebird.fromNode)(cb => {
     const timeout = setTimeout(() => {
       cb(new Error('Timeout waiting for the optimizer to become ready'));
     }, config.get('optimize.watchProxyTimeout'));
 
-    const waiting = once(() => {
+    const waiting = (0, _lodash.once)(() => {
       server.log(['info', 'optimize'], 'Waiting for optimizer to be ready');
     });
 
     if (!process.connected) return;
 
     process.send(['WORKER_BROADCAST', { optimizeReady: '?' }]);
-    process.on('message', (msg) => {
-      switch (get(msg, 'optimizeReady')) {
+    process.on('message', msg => {
+      switch ((0, _lodash.get)(msg, 'optimizeReady')) {
         case true:
           clearTimeout(timeout);
           cb();
@@ -41,5 +48,6 @@ export default (kbnServer, server, config) => {
       }
     });
   });
-
 };
+
+module.exports = exports['default'];

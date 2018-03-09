@@ -1,16 +1,29 @@
-import _ from 'lodash';
-import moment from 'moment';
-import dateMath from '@elastic/datemath';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parseInterval = parseInterval;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var _datemath = require('@elastic/datemath');
+
+var _datemath2 = _interopRequireDefault(_datemath);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Assume interval is in the form (value)(unit), such as "1h"
-const INTERVAL_STRING_RE = new RegExp(
-  '^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$'
-);
+const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + _datemath2.default.units.join('|') + ')$');
 
-export function parseInterval(interval) {
-  const matches = String(interval)
-    .trim()
-    .match(INTERVAL_STRING_RE);
+function parseInterval(interval) {
+  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
 
   if (!matches) return null;
 
@@ -18,7 +31,7 @@ export function parseInterval(interval) {
     const value = parseFloat(matches[1]) || 1;
     const unit = matches[2];
 
-    const duration = moment.duration(value, unit);
+    const duration = _moment2.default.duration(value, unit);
 
     // There is an error with moment, where if you have a fractional interval between 0 and 1, then when you add that
     // interval to an existing moment object, it will remain unchanged, which causes problems in the ordered_x_keys
@@ -27,11 +40,11 @@ export function parseInterval(interval) {
     // adding 0.5 days until we hit the end date. However, since there is a bug in moment, when you add 0.5 days to
     // the start date, you get the same exact date (instead of being ahead by 12 hours). So instead of returning
     // a duration corresponding to 0.5 hours, we return a duration corresponding to 12 hours.
-    const selectedUnit = _.find(dateMath.units, unit => {
+    const selectedUnit = _lodash2.default.find(_datemath2.default.units, unit => {
       return Math.abs(duration.as(unit)) >= 1;
     });
 
-    return moment.duration(duration.as(selectedUnit), selectedUnit);
+    return _moment2.default.duration(duration.as(selectedUnit), selectedUnit);
   } catch (e) {
     return null;
   }

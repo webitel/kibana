@@ -1,10 +1,21 @@
-import _ from 'lodash';
+'use strict';
 
-export default function preProcessChainFn(tlConfig) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = preProcessChainFn;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function preProcessChainFn(tlConfig) {
   return function preProcessChain(chain, queries) {
     queries = queries || {};
     function validateAndStore(item) {
-      if (_.isObject(item) && item.type === 'function') {
+      if (_lodash2.default.isObject(item) && item.type === 'function') {
         const functionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
 
         if (functionDef.datasource) {
@@ -22,8 +33,8 @@ export default function preProcessChainFn(tlConfig) {
 
     if (!Array.isArray(chain)) return;
 
-    _.each(chain, function (operator) {
-      if (!_.isObject(operator)) {
+    _lodash2.default.each(chain, function (operator) {
+      if (!_lodash2.default.isObject(operator)) {
         return;
       }
       switch (operator.type) {
@@ -46,3 +57,4 @@ export default function preProcessChainFn(tlConfig) {
     return queries;
   };
 }
+module.exports = exports['default'];

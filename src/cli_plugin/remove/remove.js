@@ -1,11 +1,23 @@
-import { statSync } from 'fs';
-import rimraf from 'rimraf';
+'use strict';
 
-export default function remove(settings, logger) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = remove;
+
+var _fs = require('fs');
+
+var _rimraf = require('rimraf');
+
+var _rimraf2 = _interopRequireDefault(_rimraf);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function remove(settings, logger) {
   try {
     let stat;
     try {
-      stat = statSync(settings.pluginPath);
+      stat = (0, _fs.statSync)(settings.pluginPath);
     } catch (e) {
       throw new Error(`Plugin [${settings.plugin}] is not installed`);
     }
@@ -15,9 +27,10 @@ export default function remove(settings, logger) {
     }
 
     logger.log(`Removing ${settings.plugin}...`);
-    rimraf.sync(settings.pluginPath);
+    _rimraf2.default.sync(settings.pluginPath);
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);
     process.exit(74); // eslint-disable-line no-process-exit
   }
 }
+module.exports = exports['default'];

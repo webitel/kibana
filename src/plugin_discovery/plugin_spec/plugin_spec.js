@@ -1,12 +1,25 @@
-import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
+'use strict';
 
-import toPath from 'lodash/internal/toPath';
-import { get } from 'lodash';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PluginSpec = undefined;
 
-import { createInvalidPluginError } from '../errors';
-import { isVersionCompatible } from './is_version_compatible';
+var _path = require('path');
 
-export class PluginSpec {
+var _toPath = require('lodash/internal/toPath');
+
+var _toPath2 = _interopRequireDefault(_toPath);
+
+var _lodash = require('lodash');
+
+var _errors = require('../errors');
+
+var _is_version_compatible = require('./is_version_compatible');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class PluginSpec {
   /**
    * @param {PluginPack} pack The plugin pack that produced this spec
    * @param {Object} opts the options for this plugin
@@ -31,20 +44,19 @@ export class PluginSpec {
    * this to false to disable exposure of a public directory
    */
   constructor(pack, options) {
-    const {
-      id,
-      require,
-      version,
-      kibanaVersion,
-      uiExports,
-      publicDir,
-      configPrefix,
-      config,
-      deprecations,
-      preInit,
-      init,
-      isEnabled,
-    } = options;
+    const id = options.id,
+          require = options.require,
+          version = options.version,
+          kibanaVersion = options.kibanaVersion,
+          uiExports = options.uiExports,
+          publicDir = options.publicDir,
+          configPrefix = options.configPrefix,
+          config = options.config,
+          deprecations = options.deprecations,
+          preInit = options.preInit,
+          init = options.init,
+          isEnabled = options.isEnabled;
+
 
     this._id = id;
     this._pack = pack;
@@ -64,23 +76,23 @@ export class PluginSpec {
     this._init = init;
 
     if (!this.getId()) {
-      throw createInvalidPluginError(this, 'Unable to determine plugin id');
+      throw (0, _errors.createInvalidPluginError)(this, 'Unable to determine plugin id');
     }
 
     if (!this.getVersion()) {
-      throw createInvalidPluginError(this, 'Unable to determine plugin version');
+      throw (0, _errors.createInvalidPluginError)(this, 'Unable to determine plugin version');
     }
 
     if (this.getRequiredPluginIds() !== undefined && !Array.isArray(this.getRequiredPluginIds())) {
-      throw createInvalidPluginError(this, '"plugin.require" must be an array of plugin ids');
+      throw (0, _errors.createInvalidPluginError)(this, '"plugin.require" must be an array of plugin ids');
     }
 
     if (this._publicDir) {
-      if (!isAbsolutePath(this._publicDir)) {
-        throw createInvalidPluginError(this, 'plugin.publicDir must be an absolute path');
+      if (!(0, _path.isAbsolute)(this._publicDir)) {
+        throw (0, _errors.createInvalidPluginError)(this, 'plugin.publicDir must be an absolute path');
       }
-      if (basename(this._publicDir) !== 'public') {
-        throw createInvalidPluginError(this, `publicDir for plugin ${this.getId()} must end with a "public" directory.`);
+      if ((0, _path.basename)(this._publicDir) !== 'public') {
+        throw (0, _errors.createInvalidPluginError)(this, `publicDir for plugin ${this.getId()} must end with a "public" directory.`);
       }
     }
   }
@@ -122,11 +134,11 @@ export class PluginSpec {
     // the version of kibana down to the patch level. If these two versions need
     // to diverge, they can specify a kibana.version in the package to indicate the
     // version of kibana the plugin is intended to work with.
-    return this._kibanaVersion || get(this.getPack().getPkg(), 'kibana.version') || this.getVersion();
+    return this._kibanaVersion || (0, _lodash.get)(this.getPack().getPkg(), 'kibana.version') || this.getVersion();
   }
 
   isVersionCompatible(actualKibanaVersion) {
-    return isVersionCompatible(this.getExpectedKibanaVersion(), actualKibanaVersion);
+    return (0, _is_version_compatible.isVersionCompatible)(this.getExpectedKibanaVersion(), actualKibanaVersion);
   }
 
   getRequiredPluginIds() {
@@ -139,7 +151,7 @@ export class PluginSpec {
     }
 
     if (!this._publicDir) {
-      return resolve(this.getPack().getPath(), 'public');
+      return (0, _path.resolve)(this.getPack().getPath(), 'public');
     }
 
     return this._publicDir;
@@ -166,10 +178,11 @@ export class PluginSpec {
   }
 
   readConfigValue(config, key) {
-    return config.get([...toPath(this.getConfigPrefix()), ...toPath(key)]);
+    return config.get([...(0, _toPath2.default)(this.getConfigPrefix()), ...(0, _toPath2.default)(key)]);
   }
 
   getDeprecationsProvider() {
     return this._configDeprecationsProvider;
   }
 }
+exports.PluginSpec = PluginSpec;

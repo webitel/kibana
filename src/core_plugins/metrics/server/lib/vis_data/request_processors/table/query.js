@@ -1,9 +1,31 @@
-import getTimerange from '../../helpers/get_timerange';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
-export default function query(req, panel) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = query;
+
+var _get_timerange = require('../../helpers/get_timerange');
+
+var _get_timerange2 = _interopRequireDefault(_get_timerange);
+
+var _get_interval_and_timefield = require('../../get_interval_and_timefield');
+
+var _get_interval_and_timefield2 = _interopRequireDefault(_get_interval_and_timefield);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function query(req, panel) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel);
-    const { from, to } = getTimerange(req);
+    var _getIntervalAndTimefi = (0, _get_interval_and_timefield2.default)(panel);
+
+    const timeField = _getIntervalAndTimefi.timeField;
+
+    var _getTimerange = (0, _get_timerange2.default)(req);
+
+    const from = _getTimerange.from,
+          to = _getTimerange.to;
+
 
     doc.size = 0;
     doc.query = {
@@ -17,7 +39,7 @@ export default function query(req, panel) {
         [timeField]: {
           gte: from.valueOf(),
           lte: to.valueOf(),
-          format: 'epoch_millis',
+          format: 'epoch_millis'
         }
       }
     };
@@ -38,6 +60,6 @@ export default function query(req, panel) {
     }
 
     return next(doc);
-
   };
 }
+module.exports = exports['default'];

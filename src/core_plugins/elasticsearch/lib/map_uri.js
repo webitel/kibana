@@ -1,11 +1,27 @@
-import { defaults, omit, trimLeft, trimRight } from 'lodash';
-import { parse as parseUrl, format as formatUrl } from 'url';
-import filterHeaders from './filter_headers';
-import setHeaders from './set_headers';
+'use strict';
 
-export default function mapUri(cluster, proxyPrefix) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = mapUri;
+
+var _lodash = require('lodash');
+
+var _url = require('url');
+
+var _filter_headers = require('./filter_headers');
+
+var _filter_headers2 = _interopRequireDefault(_filter_headers);
+
+var _set_headers = require('./set_headers');
+
+var _set_headers2 = _interopRequireDefault(_set_headers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function mapUri(cluster, proxyPrefix) {
   function joinPaths(pathA, pathB) {
-    return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
+    return (0, _lodash.trimRight)(pathA, '/') + '/' + (0, _lodash.trimLeft)(pathB, '/');
   }
 
   return function (request, done) {
@@ -16,18 +32,18 @@ export default function mapUri(cluster, proxyPrefix) {
       return done(new Error('Session unauthorized'));
     }
 
+    var _parseUrl = (0, _url.parse)(cluster.getUrl(), true);
 
-    const {
-      protocol: esUrlProtocol,
-      slashes: esUrlHasSlashes,
-      auth: esUrlAuth,
-      hostname: esUrlHostname,
-      port: esUrlPort,
-      pathname: esUrlBasePath,
-      query: esUrlQuery
-    } = parseUrl(cluster.getUrl(), true);
+    const esUrlProtocol = _parseUrl.protocol,
+          esUrlHasSlashes = _parseUrl.slashes,
+          esUrlAuth = _parseUrl.auth,
+          esUrlHostname = _parseUrl.hostname,
+          esUrlPort = _parseUrl.port,
+          esUrlBasePath = _parseUrl.pathname,
+          esUrlQuery = _parseUrl.query;
 
     // copy most url components directly from the elasticsearch.url
+
     const mappedUrlComponents = {
       protocol: esUrlProtocol,
       slashes: esUrlHasSlashes,
@@ -47,7 +63,7 @@ export default function mapUri(cluster, proxyPrefix) {
       if (_r) {
         const _paths = reqSubPath.split('/');
         if (_paths.length > 2 && !~_r.indexOf(_paths[1])) {
-          _paths[1] +=  '-' + credentials.domain;
+          _paths[1] += '-' + credentials.domain;
         }
 
         reqSubPath = _paths.join('/');
@@ -62,11 +78,12 @@ export default function mapUri(cluster, proxyPrefix) {
 
         for (let i = 0; i < payloadLines.length; i += 2) {
           //console.log(payloadLines[i]);
-          if (!payloadLines[i])
-          {continue;}
+          if (!payloadLines[i]) {
+            continue;
+          }
 
           const topLineJson = JSON.parse(payloadLines[i]);
-          let indx = (topLineJson.index || topLineJson._index);
+          let indx = topLineJson.index || topLineJson._index;
           if (indx instanceof Array) {
             indx = indx.map(i => {
               if (i.endsWith(credentials.domain)) {
@@ -75,7 +92,6 @@ export default function mapUri(cluster, proxyPrefix) {
 
               return i + credentials.domain;
             });
-
           } else if (indx && !indx.endsWith(credentials.domain)) {
             indx += credentials.domain;
           }
@@ -104,14 +120,15 @@ export default function mapUri(cluster, proxyPrefix) {
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
     // querystring
-    const mappedQuery = defaults(omit(request.query, '_'), esUrlQuery);
+    const mappedQuery = (0, _lodash.defaults)((0, _lodash.omit)(request.query, '_'), esUrlQuery);
     if (Object.keys(mappedQuery).length) {
       mappedUrlComponents.query = mappedQuery;
     }
 
-    const filteredHeaders = filterHeaders(request.headers, cluster.getRequestHeadersWhitelist());
-    const mappedHeaders = setHeaders(filteredHeaders, cluster.getCustomHeaders());
-    const mappedUrl = formatUrl(mappedUrlComponents);
+    const filteredHeaders = (0, _filter_headers2.default)(request.headers, cluster.getRequestHeadersWhitelist());
+    const mappedHeaders = (0, _set_headers2.default)(filteredHeaders, cluster.getCustomHeaders());
+    const mappedUrl = (0, _url.format)(mappedUrlComponents);
     done(null, mappedUrl, mappedHeaders);
   };
 }
+module.exports = exports['default'];

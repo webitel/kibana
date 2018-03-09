@@ -1,3 +1,8 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 const _ = require("lodash");
 
 'use strict';
@@ -37,9 +42,9 @@ function Api(name) {
       "name": this.name,
       "globals": this.globalRules,
       "endpoints": this.endpoints
-    }
+    };
   };
+})(Api.prototype);
 
-}(Api.prototype));
-
-export default Api;
+exports.default = Api;
+module.exports = exports["default"];

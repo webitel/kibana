@@ -1,4 +1,11 @@
-import { Readable } from 'stream';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createListStream = createListStream;
+
+var _stream = require('stream');
 
 /**
  *  Create a Readable stream that provides the items
@@ -7,10 +14,10 @@ import { Readable } from 'stream';
  *  @param  {Array<any>} items - the list of items to provide
  *  @return {Readable}
  */
-export function createListStream(items = []) {
+function createListStream(items = []) {
   const queue = [].concat(items);
 
-  return new Readable({
+  return new _stream.Readable({
     objectMode: true,
     read(size) {
       queue.splice(0, size).forEach(item => {

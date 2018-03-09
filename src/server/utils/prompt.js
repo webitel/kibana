@@ -1,4 +1,12 @@
-import { createInterface } from 'readline';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.confirm = confirm;
+exports.question = question;
+
+var _readline = require('readline');
 
 /**
  * @param {String} question
@@ -8,8 +16,8 @@ import { createInterface } from 'readline';
  * @property {Stream} options.output - defaults to process.stdout
  */
 
-export function confirm(question, options = {}) {
-  const rl = createInterface({
+function confirm(question, options = {}) {
+  const rl = (0, _readline.createInterface)({
     input: options.input || process.stdin,
     output: options.output || process.stdout
   });
@@ -39,15 +47,15 @@ export function confirm(question, options = {}) {
  * @property {Stream} options.output - defaults to process.stdout
  */
 
-export function question(question, options = {}) {
+function question(question, options = {}) {
   const input = options.input || process.stdin;
   const output = options.output || process.stdout;
 
   const questionPrompt = `${question}: `;
-  const rl = createInterface({ input, output });
+  const rl = (0, _readline.createInterface)({ input, output });
 
   return new Promise(resolve => {
-    input.on('data', (char) => {
+    input.on('data', char => {
       char = char + '';
 
       switch (char) {

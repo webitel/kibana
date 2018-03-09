@@ -1,3 +1,15 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
+
+  api.addGlobalAutocompleteRules('aggregations', rules);
+  api.addGlobalAutocompleteRules('aggs', rules);
+};
+
 var simple_metric = {
   __template: { field: "" },
   field: "{field}",
@@ -5,12 +17,15 @@ var simple_metric = {
   script: {
     // populated by a global rule
   }
-}, field_metric = {
+},
+    field_metric = {
   __template: { field: "" },
   field: "{field}"
-}, gap_policy = {
+},
+    gap_policy = {
   __one_of: ["skip", "insert_zeros"]
-}, simple_pipeline = {
+},
+    simple_pipeline = {
   __template: {
     buckets_path: ""
   },
@@ -134,14 +149,10 @@ var rules = {
     "range": {
       __template: {
         "field": "",
-        "ranges": [
-          { "from": 50, "to": 100 },
-        ]
+        "ranges": [{ "from": 50, "to": 100 }]
       },
       "field": "{field}",
-      "ranges": [
-        { "to": 50, "from": 100, "key": "" }
-      ],
+      "ranges": [{ "to": 50, "from": 100, "key": "" }],
       "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
@@ -150,15 +161,11 @@ var rules = {
     "date_range": {
       __template: {
         "field": "",
-        "ranges": [
-          { "from": "now-10d/d", "to": "now" },
-        ]
+        "ranges": [{ "from": "now-10d/d", "to": "now" }]
       },
       "field": "{field}",
       "format": "MM-yyy",
-      "ranges": [
-        { "to": "", "from": "", "key": "" }
-      ],
+      "ranges": [{ "to": "", "from": "", "key": "" }],
       "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
@@ -167,15 +174,11 @@ var rules = {
     "ip_range": {
       __template: {
         "field": "",
-        "ranges": [
-          { "from": "10.0.0.5", "to": "10.0.0.10" },
-        ]
+        "ranges": [{ "from": "10.0.0.5", "to": "10.0.0.10" }]
       },
       "field": "{field}",
       "format": "MM-yyy",
-      "ranges": [
-        { "to": "", "from": "", "key": "", "mask": "10.0.0.127/25" }
-      ],
+      "ranges": [{ "to": "", "from": "", "key": "", "mask": "10.0.0.127/25" }],
       "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
@@ -247,16 +250,12 @@ var rules = {
       __template: {
         "field": "location",
         "origin": { "lat": 52.3760, "lon": 4.894 },
-        "ranges": [
-          { "from": 100, "to": 300 },
-        ]
+        "ranges": [{ "from": 100, "to": 300 }]
       },
       "field": "{field}",
       "origin": { "lat": 0.0, "lon": 0.0 },
       "unit": { __one_of: ["mi", "km", "in", "yd", "m", "cm", "mm"] },
-      "ranges": [
-        { "from": 50, "to": 100 }
-      ],
+      "ranges": [{ "from": 50, "to": 100 }],
       "distance_type": { __one_of: ["arc", "sloppy_arc", "plane"] }
 
     },
@@ -272,24 +271,20 @@ var rules = {
     },
     "composite": {
       __template: {
-        "sources": [
-          {
-            "NAME": {
-              "AGG_TYPE": {}
-            }
+        "sources": [{
+          "NAME": {
+            "AGG_TYPE": {}
           }
-        ]
+        }]
       },
-      "sources": [
-        {
-          __scope_link: ".",
-          __template: {
-            "NAME": {
-              "AGG_TYPE": {}
-            }
+      "sources": [{
+        __scope_link: ".",
+        __template: {
+          "NAME": {
+            "AGG_TYPE": {}
           }
         }
-      ],
+      }],
       "size": 10,
       "after": {}
     },
@@ -400,7 +395,7 @@ var rules = {
     },
     "children": {
       __template: {
-        "type": "",
+        "type": ""
       },
       "type": ""
     },
@@ -475,8 +470,4 @@ var rules = {
   }
 };
 
-export default function (api) {
-
-  api.addGlobalAutocompleteRules('aggregations', rules);
-  api.addGlobalAutocompleteRules('aggs', rules);
-}
+module.exports = exports["default"];

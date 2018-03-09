@@ -1,27 +1,31 @@
-import { uiSettingsServiceFactory } from './ui_settings_service_factory';
-import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
-import {
-  deleteRoute,
-  getRoute,
-  setManyRoute,
-  setRoute,
-} from './routes';
+'use strict';
 
-export function uiSettingsMixin(kbnServer, server) {
-  const getDefaults = () => (
-    kbnServer.uiExports.uiSettingDefaults
-  );
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.uiSettingsMixin = uiSettingsMixin;
+
+var _ui_settings_service_factory = require('./ui_settings_service_factory');
+
+var _ui_settings_service_for_request = require('./ui_settings_service_for_request');
+
+var _routes = require('./routes');
+
+function uiSettingsMixin(kbnServer, server) {
+  const getDefaults = () => kbnServer.uiExports.uiSettingDefaults;
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
-    return uiSettingsServiceFactory(server, {
-      getDefaults,
-      ...options
-    });
+    return (0, _ui_settings_service_factory.uiSettingsServiceFactory)(server, _extends({
+      getDefaults
+    }, options));
   });
 
   server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
-    return getUiSettingsServiceForRequest(server, request, {
-      getDefaults,
+    return (0, _ui_settings_service_for_request.getUiSettingsServiceForRequest)(server, request, {
+      getDefaults
     });
   });
 
@@ -31,8 +35,8 @@ export function uiSettingsMixin(kbnServer, server) {
     `);
   });
 
-  server.route(deleteRoute);
-  server.route(getRoute);
-  server.route(setManyRoute);
-  server.route(setRoute);
+  server.route(_routes.deleteRoute);
+  server.route(_routes.getRoute);
+  server.route(_routes.setManyRoute);
+  server.route(_routes.setRoute);
 }

@@ -1,4 +1,12 @@
-import { isString, startsWith } from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.toJson = toJson;
+exports.replacer = replacer;
+
+var _lodash = require('lodash');
 
 /**
  * Serializes the given object into a JSON string
@@ -9,7 +17,7 @@ import { isString, startsWith } from 'lodash';
  *
  * The space argument is passed unaltered to the native stringify.
  */
-export function toJson(object, jsonFn, space) {
+function toJson(object, jsonFn, space) {
   if (jsonFn) {
     // We reparse the stringified json so that we can lean on JSON.stringify's
     // avoiding-infinite-recursion capabilities when stripping out any
@@ -22,6 +30,6 @@ export function toJson(object, jsonFn, space) {
 /**
  * Returns the given value if the key does not begin with a dollar sign ($)
  */
-export function replacer(key, value) {
-  return isString(key) && startsWith(key, '$') ? undefined : value;
+function replacer(key, value) {
+  return (0, _lodash.isString)(key) && (0, _lodash.startsWith)(key, '$') ? undefined : value;
 }

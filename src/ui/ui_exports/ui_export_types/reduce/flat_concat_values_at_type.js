@@ -1,8 +1,11 @@
-import {
-  createTypeReducer,
-  flatConcat,
-  mergeWith,
-} from './lib';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.flatConcatValuesAtType = undefined;
+
+var _lib = require('./lib');
 
 /**
  *  Reducer that merges specs by concatenating the values of
@@ -10,6 +13,4 @@ import {
  *  @param  {[type]} initial [description]
  *  @return {[type]}         [description]
  */
-export const flatConcatValuesAtType = createTypeReducer((objectA, objectB) => (
-  mergeWith(objectA || {}, objectB || {}, flatConcat)
-));
+const flatConcatValuesAtType = exports.flatConcatValuesAtType = (0, _lib.createTypeReducer)((objectA, objectB) => (0, _lib.mergeWith)(objectA || {}, objectB || {}, _lib.flatConcat));

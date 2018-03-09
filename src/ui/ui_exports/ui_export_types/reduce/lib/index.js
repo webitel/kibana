@@ -1,3 +1,32 @@
-export { flatConcat } from './flat_concat';
-export { mergeWith } from './merge_with';
-export { createTypeReducer } from './create_type_reducer';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _flat_concat = require('./flat_concat');
+
+Object.defineProperty(exports, 'flatConcat', {
+  enumerable: true,
+  get: function get() {
+    return _flat_concat.flatConcat;
+  }
+});
+
+var _merge_with = require('./merge_with');
+
+Object.defineProperty(exports, 'mergeWith', {
+  enumerable: true,
+  get: function get() {
+    return _merge_with.mergeWith;
+  }
+});
+
+var _create_type_reducer = require('./create_type_reducer');
+
+Object.defineProperty(exports, 'createTypeReducer', {
+  enumerable: true,
+  get: function get() {
+    return _create_type_reducer.createTypeReducer;
+  }
+});

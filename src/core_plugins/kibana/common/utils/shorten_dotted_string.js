@@ -1,3 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shortenDottedString = shortenDottedString;
 const DOT_PREFIX_RE = /(.).+?\./g;
 
 /**
@@ -7,6 +13,6 @@ const DOT_PREFIX_RE = /(.).+?\./g;
  * @param {string} str - the long string to convert
  * @return {string}
  */
-export function shortenDottedString(input) {
+function shortenDottedString(input) {
   return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }

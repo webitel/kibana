@@ -1,8 +1,19 @@
-import _ from 'lodash';
+'use strict';
 
-export class FieldFormatsService {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.FieldFormatsService = undefined;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class FieldFormatsService {
   constructor(fieldFormatClasses, getConfig) {
-    this._fieldFormats = _.indexBy(fieldFormatClasses, 'id');
+    this._fieldFormats = _lodash2.default.indexBy(fieldFormatClasses, 'id');
     this.getConfig = getConfig;
   }
 
@@ -51,3 +62,4 @@ export class FieldFormatsService {
     return this._fieldFormats[fieldFormatId];
   }
 }
+exports.FieldFormatsService = FieldFormatsService;

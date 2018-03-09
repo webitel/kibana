@@ -1,16 +1,24 @@
-import Logger from '../cli_plugin/lib/logger';
+'use strict';
 
-export function list(keystore, command, options = {}) {
-  const logger = new Logger(options);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.list = list;
+exports.listCli = listCli;
+
+var _logger = require('../cli_plugin/lib/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function list(keystore, command, options = {}) {
+  const logger = new _logger2.default(options);
   const keys = keystore.keys();
 
   logger.log(keys.join('\n'));
 }
 
-export function listCli(program, keystore) {
-  program
-    .command('list')
-    .description('List entries in the keystore')
-    .option('-s, --silent', 'prevent all logging')
-    .action(list.bind(null, keystore));
+function listCli(program, keystore) {
+  program.command('list').description('List entries in the keystore').option('-s, --silent', 'prevent all logging').action(list.bind(null, keystore));
 }

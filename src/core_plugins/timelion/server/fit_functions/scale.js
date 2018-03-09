@@ -1,4 +1,15 @@
-import _ from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = scale;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Downsampling of cummulative metrics
 // Good: count, sum
@@ -10,10 +21,12 @@ import _ from 'lodash';
 // Empty is currently 0, which is not right
 
 function sum(set) {
-  return _.reduce(set, function (sum, num) { return sum + num; }, 0);
+  return _lodash2.default.reduce(set, function (sum, num) {
+    return sum + num;
+  }, 0);
 }
 
-export default function scale(dataTuples, targetTuples) {
+function scale(dataTuples, targetTuples) {
 
   let i = 0;
   let j = 0;
@@ -59,15 +72,14 @@ export default function scale(dataTuples, targetTuples) {
         }
       }
       result.push([time, step]);
-
     } else {
       result.push([time, null]);
       spreadCount++;
     }
 
     i++;
-
   }
 
   return result;
 }
+module.exports = exports['default'];

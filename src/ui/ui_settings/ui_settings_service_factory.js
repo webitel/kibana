@@ -1,4 +1,11 @@
-import { UiSettingsService } from './ui_settings_service';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.uiSettingsServiceFactory = uiSettingsServiceFactory;
+
+var _ui_settings_service = require('./ui_settings_service');
 
 /**
  *  Create an instance of UiSettingsService that will use the
@@ -12,20 +19,19 @@ import { UiSettingsService } from './ui_settings_service';
  *                            the uiSettings.
  *  @return {UiSettingsService}
  */
-export function uiSettingsServiceFactory(server, options) {
+function uiSettingsServiceFactory(server, options) {
   const config = server.config();
 
-  const {
-    savedObjectsClient,
-    getDefaults,
-  } = options;
+  const savedObjectsClient = options.savedObjectsClient,
+        getDefaults = options.getDefaults;
 
-  return new UiSettingsService({
+
+  return new _ui_settings_service.UiSettingsService({
     type: 'config',
     id: config.get('pkg.version'),
     buildNum: config.get('pkg.buildNum'),
     savedObjectsClient,
     getDefaults,
-    log: (...args) => server.log(...args),
+    log: (...args) => server.log(...args)
   });
 }

@@ -1,14 +1,22 @@
-import _ from 'lodash';
+'use strict';
 
-export default function argType(arg) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = argType;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function argType(arg) {
   if (Array.isArray(arg)) {
-    return _.chain(arg)
-      .map(argType)
-      .flattenDeep()
-      .value();
+    return _lodash2.default.chain(arg).map(argType).flattenDeep().value();
   }
 
-  if (_.isObject(arg) && arg) {
+  if (_lodash2.default.isObject(arg) && arg) {
     return arg.type;
   }
   if (arg == null) {
@@ -16,3 +24,4 @@ export default function argType(arg) {
   }
   return typeof arg;
 }
+module.exports = exports['default'];

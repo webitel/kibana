@@ -1,27 +1,45 @@
-import { createUrlFormat } from '../../common/field_formats/types/url';
-import { createBytesFormat } from '../../common/field_formats/types/bytes';
-import { createDateFormat } from '../../common/field_formats/types/date';
-import { createDurationFormat } from '../../common/field_formats/types/duration';
-import { createIpFormat } from '../../common/field_formats/types/ip';
-import { createNumberFormat } from '../../common/field_formats/types/number';
-import { createPercentFormat } from '../../common/field_formats/types/percent';
-import { createStringFormat } from '../../common/field_formats/types/string';
-import { createSourceFormat } from '../../common/field_formats/types/source';
-import { createColorFormat } from '../../common/field_formats/types/color';
-import { createTruncateFormat } from '../../common/field_formats/types/truncate';
-import { createBoolFormat } from '../../common/field_formats/types/boolean';
+'use strict';
 
-export function registerFieldFormats(server) {
-  server.registerFieldFormat(createUrlFormat);
-  server.registerFieldFormat(createBytesFormat);
-  server.registerFieldFormat(createDateFormat);
-  server.registerFieldFormat(createDurationFormat);
-  server.registerFieldFormat(createIpFormat);
-  server.registerFieldFormat(createNumberFormat);
-  server.registerFieldFormat(createPercentFormat);
-  server.registerFieldFormat(createStringFormat);
-  server.registerFieldFormat(createSourceFormat);
-  server.registerFieldFormat(createColorFormat);
-  server.registerFieldFormat(createTruncateFormat);
-  server.registerFieldFormat(createBoolFormat);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.registerFieldFormats = registerFieldFormats;
+
+var _url = require('../../common/field_formats/types/url');
+
+var _bytes = require('../../common/field_formats/types/bytes');
+
+var _date = require('../../common/field_formats/types/date');
+
+var _duration = require('../../common/field_formats/types/duration');
+
+var _ip = require('../../common/field_formats/types/ip');
+
+var _number = require('../../common/field_formats/types/number');
+
+var _percent = require('../../common/field_formats/types/percent');
+
+var _string = require('../../common/field_formats/types/string');
+
+var _source = require('../../common/field_formats/types/source');
+
+var _color = require('../../common/field_formats/types/color');
+
+var _truncate = require('../../common/field_formats/types/truncate');
+
+var _boolean = require('../../common/field_formats/types/boolean');
+
+function registerFieldFormats(server) {
+  server.registerFieldFormat(_url.createUrlFormat);
+  server.registerFieldFormat(_bytes.createBytesFormat);
+  server.registerFieldFormat(_date.createDateFormat);
+  server.registerFieldFormat(_duration.createDurationFormat);
+  server.registerFieldFormat(_ip.createIpFormat);
+  server.registerFieldFormat(_number.createNumberFormat);
+  server.registerFieldFormat(_percent.createPercentFormat);
+  server.registerFieldFormat(_string.createStringFormat);
+  server.registerFieldFormat(_source.createSourceFormat);
+  server.registerFieldFormat(_color.createColorFormat);
+  server.registerFieldFormat(_truncate.createTruncateFormat);
+  server.registerFieldFormat(_boolean.createBoolFormat);
 }

@@ -1,4 +1,11 @@
-import { uiSettingsServiceFactory } from './ui_settings_service_factory';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getUiSettingsServiceForRequest = getUiSettingsServiceForRequest;
+
+var _ui_settings_service_factory = require('./ui_settings_service_factory');
 
 /**
  *  Get/create an instance of UiSettingsService bound to a specific request.
@@ -13,12 +20,11 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  *                            the uiSettings.
  *  @return {UiSettingsService}
  */
-export function getUiSettingsServiceForRequest(server, request, options = {}) {
-  const {
-    getDefaults
-  } = options;
+function getUiSettingsServiceForRequest(server, request, options = {}) {
+  const getDefaults = options.getDefaults;
 
-  const uiSettingsService = uiSettingsServiceFactory(server, {
+
+  const uiSettingsService = (0, _ui_settings_service_factory.uiSettingsServiceFactory)(server, {
     getDefaults,
     savedObjectsClient: request.getSavedObjectsClient()
   });

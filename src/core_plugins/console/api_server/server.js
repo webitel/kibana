@@ -1,6 +1,12 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.resolveApi = resolveApi;
 let _ = require("lodash");
 
-export function resolveApi(sense_version, apis, reply) {
+function resolveApi(sense_version, apis, reply) {
   let result = {};
   _.each(apis, function (name) {
     {

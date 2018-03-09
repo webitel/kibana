@@ -1,12 +1,14 @@
-export default function (api) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
   api.addEndpointDescription('_search', {
     methods: ['GET', 'POST'],
     priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/{types}/_search",
-      "{indices}/_search",
-      "_search"
-    ],
+    patterns: ["{indices}/{types}/_search", "{indices}/_search", "_search"],
     url_params: {
       q: "",
       df: "",
@@ -51,73 +53,59 @@ export default function (api) {
       },
       from: 0,
       sort: {
-        __template: [
-          {
-            'FIELD': {
-              'order': 'desc'
+        __template: [{
+          'FIELD': {
+            'order': 'desc'
+          }
+        }],
+        __any_of: [{
+          '{field}': {
+            'order': {
+              __one_of: ['desc', 'asc']
+            },
+            missing: {
+              __one_of: ['_last', '_first']
+            },
+            mode: {
+              __one_of: ['min', 'max', 'avg', 'sum']
+            },
+            nested_path: "",
+            nested_filter: {
+              __scope_link: "GLOBAL.filter"
             }
           }
-        ],
-        __any_of: [
-          {
-            '{field}': {
-              'order': {
-                __one_of: ['desc', 'asc']
+        }, '{field}', '_score', {
+          '_geo_distance': {
+            __template: {
+              "FIELD": {
+                lat: 40,
+                lon: -70
               },
-              missing: {
-                __one_of: ['_last', '_first']
-              },
-              mode: {
-                __one_of: ['min', 'max', 'avg', 'sum']
-              },
-              nested_path: "",
-              nested_filter: {
-                __scope_link: "GLOBAL.filter"
-              }
-            }
-          },
-          '{field}',
-          '_score',
-          {
-            '_geo_distance': {
-              __template: {
-                "FIELD": {
+              order: "asc"
+            },
+            "{field}": {
+              __one_of: [{
+                __template: {
                   lat: 40,
                   lon: -70
                 },
-                order: "asc"
-              },
-              "{field}": {
-                __one_of: [
-                  {
-                    __template: {
-                      lat: 40,
-                      lon: -70
-                    },
-                    lat: 40,
-                    lon: -70
-                  },
-                  [
-                    {
-                      __template: {
-                        lat: 40,
-                        lon: -70
-                      },
-                      lat: 40,
-                      lon: -70
-                    }
-                  ],
-                  [""],
-                  ""
-                ]
-              },
-              distance_type: { __one_of: ["sloppy_arc", "arc", "plane"] },
-              sort_mode: { __one_of: ["min", "max", "avg"] },
-              order: { __one_of: ["asc", "desc"] },
-              unit: "km"
-            }
+                lat: 40,
+                lon: -70
+              }, [{
+                __template: {
+                  lat: 40,
+                  lon: -70
+                },
+                lat: 40,
+                lon: -70
+              }], [""], ""]
+            },
+            distance_type: { __one_of: ["sloppy_arc", "arc", "plane"] },
+            sort_mode: { __one_of: ["min", "max", "avg"] },
+            order: { __one_of: ["asc", "desc"] },
+            unit: "km"
           }
-        ]
+        }]
       },
       stored_fields: ['{field}'],
       docvalue_fields: ["{field}"],
@@ -148,24 +136,14 @@ export default function (api) {
         // populated by a global rule
       },
       _source: {
-        __one_of: [
-          "{field}",
-          ["{field}"],
-          {
-            "includes": {
-              __one_of: [
-                "{field}",
-                ["{field}"]
-              ]
-            },
-            "excludes": {
-              __one_of: [
-                "{field}",
-                ["{field}"]
-              ]
-            }
+        __one_of: ["{field}", ["{field}"], {
+          "includes": {
+            __one_of: ["{field}", ["{field}"]]
+          },
+          "excludes": {
+            __one_of: ["{field}", ["{field}"]]
           }
-        ]
+        }]
       },
       explain: {
         __one_of: [true, false]
@@ -178,17 +156,10 @@ export default function (api) {
 
   api.addEndpointDescription('_search_template', {
     methods: ['GET'],
-    patterns: [
-      "{indices}/{types}/_search/template",
-      "{indices}/_search/template",
-      "_search/template"
-    ],
+    patterns: ["{indices}/{types}/_search/template", "{indices}/_search/template", "_search/template"],
     data_autocomplete_rules: {
       "template": {
-        __one_of: [
-          { __scope_link: "_search" },
-          { __scope_link: "GLOBAL.script" }
-        ]
+        __one_of: [{ __scope_link: "_search" }, { __scope_link: "GLOBAL.script" }]
       },
       "params": {}
     }
@@ -196,23 +167,16 @@ export default function (api) {
 
   api.addEndpointDescription('_render_search_template', {
     methods: ['GET'],
-    patterns: [
-      "_render/template"
-    ],
+    patterns: ["_render/template"],
     data_autocomplete_rules: {
-      __one_of: [
-        { "inline": { __scope_link: "_search" } },
-        { __scope_link: "GLOBAL.script" }
-      ],
+      __one_of: [{ "inline": { __scope_link: "_search" } }, { __scope_link: "GLOBAL.script" }],
       "params": {}
     }
   });
 
   api.addEndpointDescription('_render_search_template_with_id', {
     methods: ['GET'],
-    patterns: [
-      "_render/template/{id}"
-    ],
+    patterns: ["_render/template/{id}"],
     data_autocomplete_rules: {
       "params": {}
     }
@@ -220,16 +184,12 @@ export default function (api) {
 
   api.addEndpointDescription('_get_delete_search_template', {
     methods: ['GET', 'DELETE'],
-    patterns: [
-      "_search/template/{id}"
-    ]
+    patterns: ["_search/template/{id}"]
   });
 
   api.addEndpointDescription('_put_search_template', {
     methods: ['PUT'],
-    patterns: [
-      "_search/template/{id}"
-    ],
+    patterns: ["_search/template/{id}"],
     data_autocomplete_rules: {
       "template": {
         __scope_link: "_search"
@@ -240,15 +200,13 @@ export default function (api) {
   api.addEndpointDescription('_search_shards', {
     methods: ['GET'],
     priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/{types}/_search_shards",
-      "{indices}/_search_shards",
-      "_search_shards"
-    ],
+    patterns: ["{indices}/{types}/_search_shards", "{indices}/_search_shards", "_search_shards"],
     url_params: {
       preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
       routing: "",
       local: "__flag__"
     }
   });
-}
+};
+
+module.exports = exports['default'];

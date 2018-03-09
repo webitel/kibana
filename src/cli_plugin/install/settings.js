@@ -1,18 +1,28 @@
-import expiry from 'expiry-js';
-import { resolve } from 'path';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parseMilliseconds = parseMilliseconds;
+exports.parse = parse;
+
+var _expiryJs = require('expiry-js');
+
+var _expiryJs2 = _interopRequireDefault(_expiryJs);
+
+var _path = require('path');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function generateUrls({ version, plugin }) {
-  return [
-    plugin,
-    `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`
-  ];
+  return [plugin, `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`];
 }
 
-export function parseMilliseconds(val) {
+function parseMilliseconds(val) {
   let result;
 
   try {
-    const timeVal = expiry(val);
+    const timeVal = (0, _expiryJs2.default)(val);
     result = timeVal.asMilliseconds();
   } catch (ex) {
     result = 0;
@@ -21,7 +31,7 @@ export function parseMilliseconds(val) {
   return result;
 }
 
-export function parse(command, options, kbnPackage) {
+function parse(command, options, kbnPackage) {
   const settings = {
     timeout: options.timeout || 0,
     quiet: options.quiet || false,
@@ -33,12 +43,12 @@ export function parse(command, options, kbnPackage) {
   };
 
   settings.urls = generateUrls(settings);
-  settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
-  settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
-  settings.tempPackageFile = resolve(settings.workingPath, 'package.json');
+  settings.workingPath = (0, _path.resolve)(settings.pluginDir, '.plugin.installing');
+  settings.tempArchiveFile = (0, _path.resolve)(settings.workingPath, 'archive.part');
+  settings.tempPackageFile = (0, _path.resolve)(settings.workingPath, 'package.json');
   settings.setPlugin = function (plugin) {
     settings.plugin = plugin;
-    settings.pluginPath = resolve(settings.pluginDir, settings.plugin.name);
+    settings.pluginPath = (0, _path.resolve)(settings.pluginDir, settings.plugin.name);
   };
 
   return settings;

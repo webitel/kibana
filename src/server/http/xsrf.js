@@ -1,6 +1,10 @@
-import { badRequest } from 'boom';
+'use strict';
 
-export default function (kbnServer, server, config) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (kbnServer, server, config) {
   const disabled = config.get('server.xsrf.disableProtection');
   const whitelist = config.get('server.xsrf.whitelist');
   const versionHeader = 'kbn-version';
@@ -20,9 +24,13 @@ export default function (kbnServer, server, config) {
     const hasXsrfHeader = xsrfHeader in req.headers;
 
     if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-      return reply(badRequest(`Request must contain a ${xsrfHeader} header.`));
+      return reply((0, _boom.badRequest)(`Request must contain a ${xsrfHeader} header.`));
     }
 
     return reply.continue();
   });
-}
+};
+
+var _boom = require('boom');
+
+module.exports = exports['default'];

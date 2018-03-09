@@ -1,14 +1,22 @@
-import { UiApp } from './ui_app';
+'use strict';
 
-export function uiAppsMixin(kbnServer, server) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.uiAppsMixin = uiAppsMixin;
 
-  const { uiAppSpecs = [] } = kbnServer.uiExports;
+var _ui_app = require('./ui_app');
+
+function uiAppsMixin(kbnServer, server) {
+  var _kbnServer$uiExports$ = kbnServer.uiExports.uiAppSpecs;
+  const uiAppSpecs = _kbnServer$uiExports$ === undefined ? [] : _kbnServer$uiExports$;
+
   const existingIds = new Set();
   const appsById = new Map();
   const hiddenAppsById = new Map();
 
-  kbnServer.uiApps = uiAppSpecs.map((spec) => {
-    const app = new UiApp(kbnServer, spec);
+  kbnServer.uiApps = uiAppSpecs.map(spec => {
+    const app = new _ui_app.UiApp(kbnServer, spec);
     const id = app.getId();
 
     if (!existingIds.has(id)) {

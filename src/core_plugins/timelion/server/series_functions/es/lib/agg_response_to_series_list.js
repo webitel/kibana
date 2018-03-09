@@ -1,13 +1,26 @@
-import _ from 'lodash';
+'use strict';
 
-export function timeBucketsToPairs(buckets) {
-  const timestamps = _.pluck(buckets, 'key');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.timeBucketsToPairs = timeBucketsToPairs;
+exports.flattenBucket = flattenBucket;
+exports.default = toSeriesList;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function timeBucketsToPairs(buckets) {
+  const timestamps = _lodash2.default.pluck(buckets, 'key');
   const series = {};
-  _.each(buckets, function (bucket) {
-    _.forOwn(bucket, function (val, key) {
-      if (_.isPlainObject(val)) {
+  _lodash2.default.each(buckets, function (bucket) {
+    _lodash2.default.forOwn(bucket, function (val, key) {
+      if (_lodash2.default.isPlainObject(val)) {
         if (val.values) {
-          _.forOwn(val.values, function (bucketValue, bucketKey) {
+          _lodash2.default.forOwn(val.values, function (bucketValue, bucketKey) {
             const k = key + ':' + bucketKey;
             const v = isNaN(bucketValue) ? NaN : bucketValue;
             series[k] = series[k] || [];
@@ -21,24 +34,24 @@ export function timeBucketsToPairs(buckets) {
     });
   });
 
-  return _.mapValues(series, function (values) {
-    return _.zip(timestamps, values);
+  return _lodash2.default.mapValues(series, function (values) {
+    return _lodash2.default.zip(timestamps, values);
   });
 }
 
-export function flattenBucket(bucket, splitKey, path, result) {
+function flattenBucket(bucket, splitKey, path, result) {
   result = result || {};
   path = path || [];
-  _.forOwn(bucket, function (val, key) {
-    if (!_.isPlainObject(val)) return;
-    if (_.get(val, 'meta.type') === 'split') {
-      _.each(val.buckets, function (bucket, bucketKey) {
+  _lodash2.default.forOwn(bucket, function (val, key) {
+    if (!_lodash2.default.isPlainObject(val)) return;
+    if (_lodash2.default.get(val, 'meta.type') === 'split') {
+      _lodash2.default.each(val.buckets, function (bucket, bucketKey) {
         if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, eg filters agg
         flattenBucket(bucket, bucket.key, path.concat([key + ':' + bucket.key]), result);
       });
-    } else if (_.get(val, 'meta.type') === 'time_buckets') {
+    } else if (_lodash2.default.get(val, 'meta.type') === 'time_buckets') {
       const metrics = timeBucketsToPairs(val.buckets);
-      _.each(metrics, function (pairs, metricName) {
+      _lodash2.default.each(metrics, function (pairs, metricName) {
         result[path.concat([metricName]).join(' > ')] = {
           data: pairs,
           splitKey: splitKey
@@ -49,8 +62,8 @@ export function flattenBucket(bucket, splitKey, path, result) {
   return result;
 }
 
-export default function toSeriesList(aggs, config) {
-  return _.map(flattenBucket(aggs), function (metrics, name) {
+function toSeriesList(aggs, config) {
+  return _lodash2.default.map(flattenBucket(aggs), function (metrics, name) {
     return {
       data: metrics.data,
       type: 'series',

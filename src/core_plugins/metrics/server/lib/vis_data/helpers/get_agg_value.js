@@ -1,14 +1,28 @@
-import _ from 'lodash';
-import extendStatsTypes from './extended_stats_types';
-export default (row, metric) => {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _extended_stats_types = require('./extended_stats_types');
+
+var _extended_stats_types2 = _interopRequireDefault(_extended_stats_types);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (row, metric) => {
   // Extended Stats
-  if (_.includes(extendStatsTypes, metric.type)) {
+  if (_lodash2.default.includes(_extended_stats_types2.default, metric.type)) {
     const isStdDeviation = /^std_deviation/.test(metric.type);
     const modeIsBounds = ~['upper', 'lower'].indexOf(metric.mode);
     if (isStdDeviation && modeIsBounds) {
-      return _.get(row, `${metric.id}.std_deviation_bounds.${metric.mode}`);
+      return _lodash2.default.get(row, `${metric.id}.std_deviation_bounds.${metric.mode}`);
     }
-    return _.get(row, `${metric.id}.${metric.type}`);
+    return _lodash2.default.get(row, `${metric.id}.${metric.type}`);
   }
 
   // Percentiles
@@ -26,10 +40,11 @@ export default (row, metric) => {
   }
 
   // Derivatives
-  const normalizedValue = _.get(row, `${metric.id}.normalized_value`, null);
+  const normalizedValue = _lodash2.default.get(row, `${metric.id}.normalized_value`, null);
 
   // Everything else
-  const value = _.get(row, `${metric.id}.value`, null);
+  const value = _lodash2.default.get(row, `${metric.id}.value`, null);
   return normalizedValue || value;
-
 };
+
+module.exports = exports['default'];

@@ -1,4 +1,9 @@
-export const appEntryTemplate = (bundle) => `
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+const appEntryTemplate = exports.appEntryTemplate = bundle => `
 /**
  * Test entry file
  *

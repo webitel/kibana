@@ -1,7 +1,19 @@
-import _ from 'lodash';
-import { contentTypesSetup } from './content_types';
+'use strict';
 
-export function FieldFormat(params) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.FieldFormat = FieldFormat;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _content_types = require('./content_types');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function FieldFormat(params) {
   // give the constructor a more appropriate name
   this.type = this.constructor;
 
@@ -9,15 +21,15 @@ export function FieldFormat(params) {
   this._params = params || {};
 
   // one content type, so assume text
-  if (_.isFunction(this._convert)) {
+  if (_lodash2.default.isFunction(this._convert)) {
     this._convert = { text: this._convert };
   }
 
-  contentTypesSetup(this);
+  (0, _content_types.contentTypesSetup)(this);
 }
 
 FieldFormat.from = function (converter) {
-  _.class(FieldFormatFromConverter).inherits(FieldFormat);
+  _lodash2.default.class(FieldFormatFromConverter).inherits(FieldFormat);
   function FieldFormatFromConverter(params) {
     FieldFormatFromConverter.Super.call(this, params);
   }
@@ -77,7 +89,7 @@ FieldFormat.prototype.param = function (name) {
  * @return {object}
  */
 FieldFormat.prototype.params = function () {
-  return _.cloneDeep(_.defaults({}, this._params, this.getParamDefaults()));
+  return _lodash2.default.cloneDeep(_lodash2.default.defaults({}, this._params, this.getParamDefaults()));
 };
 
 /**
@@ -90,13 +102,13 @@ FieldFormat.prototype.toJSON = function () {
   const type = this.type;
   const defaults = this.getParamDefaults();
 
-  let params = _.transform(this._params, function (uniqParams, val, param) {
+  let params = _lodash2.default.transform(this._params, function (uniqParams, val, param) {
     if (val !== defaults[param]) {
       uniqParams[param] = val;
     }
   }, {});
 
-  if (!_.size(params)) {
+  if (!_lodash2.default.size(params)) {
     params = undefined;
   }
 

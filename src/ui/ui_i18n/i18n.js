@@ -1,48 +1,70 @@
-import path from 'path';
-import Promise from 'bluebird';
-import { readFile } from 'fs';
-import _ from 'lodash';
+'use strict';
 
-const asyncReadFile = Promise.promisify(readFile);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.I18n = undefined;
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _bluebird = require('bluebird');
+
+var _bluebird2 = _interopRequireDefault(_bluebird);
+
+var _fs = require('fs');
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _bluebird2.default(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _bluebird2.default.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+const asyncReadFile = _bluebird2.default.promisify(_fs.readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
 function getLocaleFromFileName(fullFileName) {
-  if (_.isEmpty(fullFileName)) throw new Error('Filename empty');
+  if (_lodash2.default.isEmpty(fullFileName)) throw new Error('Filename empty');
 
-  const fileExt = path.extname(fullFileName);
+  const fileExt = _path2.default.extname(fullFileName);
   if (fileExt.length <= 0 || fileExt !== TRANSLATION_FILE_EXTENSION) {
     throw new Error('Translations must be in a JSON file. File being registered is ' + fullFileName);
   }
 
-  return path.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
+  return _path2.default.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
 }
 
 function getBestLocaleMatch(languageTag, registeredLocales) {
-  if (_.contains(registeredLocales, languageTag)) {
+  if (_lodash2.default.contains(registeredLocales, languageTag)) {
     return languageTag;
   }
 
   // Find the first registered locale that begins with one of the language codes from the provided language tag.
   // For example, if there is an 'en' language code, it would match an 'en-US' registered locale.
-  const languageCode = _.first(languageTag.split('-')) || [];
-  return _.find(registeredLocales, (locale) => _.startsWith(locale, languageCode));
+  const languageCode = _lodash2.default.first(languageTag.split('-')) || [];
+  return _lodash2.default.find(registeredLocales, locale => _lodash2.default.startsWith(locale, languageCode));
 }
 
-export class I18n {
-  static async getAllTranslationsFromPaths(paths) {
-    const i18n = new I18n();
+class I18n {
+  static getAllTranslationsFromPaths(paths) {
+    return _asyncToGenerator(function* () {
+      const i18n = new I18n();
 
-    paths.forEach(path => {
-      i18n.registerTranslations(path);
-    });
+      paths.forEach(function (path) {
+        i18n.registerTranslations(path);
+      });
 
-    return await i18n.getAllTranslations();
+      return yield i18n.getAllTranslations();
+    })();
   }
 
-  _registeredTranslations = {};
-
   constructor(defaultLocale = 'en') {
+    this._registeredTranslations = {};
+
     this._defaultLocale = defaultLocale;
   }
 
@@ -56,15 +78,13 @@ export class I18n {
     const localeTranslations = {};
 
     const locales = this._getRegisteredTranslationLocales();
-    const translations = _.map(locales, (locale) => {
-      return this._getTranslationsForLocale(locale)
-        .then(function (translations) {
-          localeTranslations[locale] = translations;
-        });
+    const translations = _lodash2.default.map(locales, locale => {
+      return this._getTranslationsForLocale(locale).then(function (translations) {
+        localeTranslations[locale] = translations;
+      });
     });
 
-    return Promise.all(translations)
-      .then(() => _.assign({}, localeTranslations));
+    return _bluebird2.default.all(translations).then(() => _lodash2.default.assign({}, localeTranslations));
   }
 
   /**
@@ -96,17 +116,13 @@ export class I18n {
    * @param {String} absolutePluginTranslationFilePath - Absolute path to the translation file to register.
    */
   registerTranslations(absolutePluginTranslationFilePath) {
-    if (!path.isAbsolute(absolutePluginTranslationFilePath)) {
-      throw new TypeError(
-        'Paths to translation files must be absolute. ' +
-        `Got relative path: "${absolutePluginTranslationFilePath}"`
-      );
+    if (!_path2.default.isAbsolute(absolutePluginTranslationFilePath)) {
+      throw new TypeError('Paths to translation files must be absolute. ' + `Got relative path: "${absolutePluginTranslationFilePath}"`);
     }
 
     const locale = getLocaleFromFileName(absolutePluginTranslationFilePath);
 
-    this._registeredTranslations[locale] =
-      _.uniq(_.get(this._registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath));
+    this._registeredTranslations[locale] = _lodash2.default.uniq(_lodash2.default.get(this._registeredTranslations, locale, []).concat(absolutePluginTranslationFilePath));
   }
 
   _getRegisteredTranslationLocales() {
@@ -116,7 +132,7 @@ export class I18n {
   _getTranslationLocale(languageTags) {
     let locale = '';
     const registeredLocales = this._getRegisteredTranslationLocales();
-    _.forEach(languageTags, (tag) => {
+    _lodash2.default.forEach(languageTags, tag => {
       locale = locale || getBestLocaleMatch(tag, registeredLocales);
     });
     return locale;
@@ -124,22 +140,19 @@ export class I18n {
 
   _getTranslationsForLocale(locale) {
     if (!this._registeredTranslations.hasOwnProperty(locale)) {
-      return Promise.resolve({});
+      return _bluebird2.default.resolve({});
     }
 
     const translationFiles = this._registeredTranslations[locale];
-    const translations = _.map(translationFiles, (filename) => {
-      return asyncReadFile(filename, 'utf8')
-        .then(fileContents => JSON.parse(fileContents))
-        .catch(SyntaxError, function () {
-          throw new Error('Invalid json in ' + filename);
-        })
-        .catch(function () {
-          throw new Error('Cannot read file ' + filename);
-        });
+    const translations = _lodash2.default.map(translationFiles, filename => {
+      return asyncReadFile(filename, 'utf8').then(fileContents => JSON.parse(fileContents)).catch(SyntaxError, function () {
+        throw new Error('Invalid json in ' + filename);
+      }).catch(function () {
+        throw new Error('Cannot read file ' + filename);
+      });
     });
 
-    return Promise.all(translations)
-      .then(translations => _.assign({}, ...translations));
+    return _bluebird2.default.all(translations).then(translations => _lodash2.default.assign({}, ...translations));
   }
 }
+exports.I18n = I18n;

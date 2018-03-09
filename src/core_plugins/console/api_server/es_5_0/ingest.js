@@ -1,3 +1,53 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (api) {
+
+  // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
+  // may recursively use the autocomplete rules for any processor.
+  api.addEndpointDescription('_processor', {
+    data_autocomplete_rules: processorDefinition
+  });
+
+  api.addEndpointDescription('_put_ingest_pipeline', {
+    methods: ['PUT'],
+    patterns: ['_ingest/pipeline/{name}'],
+    data_autocomplete_rules: pipelineDefinition
+  });
+
+  api.addEndpointDescription('_get_ingest_pipeline', {
+    methods: ['GET'],
+    patterns: ['_ingest/pipeline/{id}']
+  });
+
+  api.addEndpointDescription('_delete_ingest_pipeline', {
+    methods: ['DELETE'],
+    patterns: ['_ingest/pipeline/{id}']
+  });
+
+  api.addEndpointDescription('_simulate_new_ingest_pipeline', {
+    methods: ['POST'],
+    patterns: ['_ingest/pipeline/_simulate'],
+    url_params: simulateUrlParamsDefinition,
+    data_autocomplete_rules: {
+      pipeline: pipelineDefinition,
+      docs: []
+    }
+  });
+
+  api.addEndpointDescription('_simulate_existing_ingest_pipeline', {
+    methods: ['POST'],
+    patterns: ['_ingest/pipeline/{name}/_simulate'],
+    url_params: simulateUrlParamsDefinition,
+    data_autocomplete_rules: {
+      docs: []
+    }
+  });
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
@@ -19,11 +69,11 @@ const convertProcessorDefinition = {
     },
     field: '',
     type: {
-      __one_of: [ 'integer', 'float', 'string', 'boolean', 'auto' ]
+      __one_of: ['integer', 'float', 'string', 'boolean', 'auto']
     },
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -52,7 +102,7 @@ const dateIndexNameProcessorDefinition = {
     },
     field: '',
     date_rounding: {
-      __one_of: [ 'y', 'M', 'w', 'd', 'h', 'm', 's' ]
+      __one_of: ['y', 'M', 'w', 'd', 'h', 'm', 's']
     },
     date_formats: [],
     timezone: 'UTC',
@@ -96,10 +146,10 @@ const grokProcessorDefinition = {
     patterns: [],
     pattern_definitions: {},
     trace_match: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     },
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -139,7 +189,7 @@ const jsonProcessorDefinition = {
     field: '',
     target_field: '',
     add_to_root: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -158,7 +208,7 @@ const kvProcessorDefinition = {
     target_field: '',
     include_keys: [],
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -171,7 +221,7 @@ const lowercaseProcessorDefinition = {
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -196,7 +246,7 @@ const renameProcessorDefinition = {
     field: '',
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -223,7 +273,7 @@ const setProcessorDefinition = {
     field: '',
     value: '',
     override: {
-      __one_of: [ true, false ]
+      __one_of: [true, false]
     }
   }
 };
@@ -238,7 +288,7 @@ const splitProcessorDefinition = {
     field: '',
     separator: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -262,7 +312,7 @@ const trimProcessorDefinition = {
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -275,7 +325,7 @@ const uppercaseProcessorDefinition = {
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true]
     }
   }
 };
@@ -292,95 +342,17 @@ const dotExpanderProcessorDefinition = {
 };
 
 const processorDefinition = {
-  __one_of: [
-    appendProcessorDefinition,
-    convertProcessorDefinition,
-    dateProcessorDefinition,
-    dateIndexNameProcessorDefinition,
-    failProcessorDefinition,
-    foreachProcessorDefinition,
-    grokProcessorDefinition,
-    gsubProcessorDefinition,
-    joinProcessorDefinition,
-    jsonProcessorDefinition,
-    kvProcessorDefinition,
-    lowercaseProcessorDefinition,
-    removeProcessorDefinition,
-    renameProcessorDefinition,
-    scriptProcessorDefinition,
-    setProcessorDefinition,
-    splitProcessorDefinition,
-    sortProcessorDefinition,
-    trimProcessorDefinition,
-    uppercaseProcessorDefinition,
-    dotExpanderProcessorDefinition
-  ]
+  __one_of: [appendProcessorDefinition, convertProcessorDefinition, dateProcessorDefinition, dateIndexNameProcessorDefinition, failProcessorDefinition, foreachProcessorDefinition, grokProcessorDefinition, gsubProcessorDefinition, joinProcessorDefinition, jsonProcessorDefinition, kvProcessorDefinition, lowercaseProcessorDefinition, removeProcessorDefinition, renameProcessorDefinition, scriptProcessorDefinition, setProcessorDefinition, splitProcessorDefinition, sortProcessorDefinition, trimProcessorDefinition, uppercaseProcessorDefinition, dotExpanderProcessorDefinition]
 };
 
 const pipelineDefinition = {
   description: '',
-  processors: [
-    processorDefinition
-  ],
-  version: 123,
+  processors: [processorDefinition],
+  version: 123
 };
 
 const simulateUrlParamsDefinition = {
   "verbose": "__flag__"
 };
 
-export default function (api) {
-
-  // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
-  // may recursively use the autocomplete rules for any processor.
-  api.addEndpointDescription('_processor', {
-    data_autocomplete_rules: processorDefinition
-  });
-
-  api.addEndpointDescription('_put_ingest_pipeline', {
-    methods: ['PUT'],
-    patterns: [
-      '_ingest/pipeline/{name}'
-    ],
-    data_autocomplete_rules: pipelineDefinition
-  });
-
-  api.addEndpointDescription('_get_ingest_pipeline', {
-    methods: ['GET'],
-    patterns: [
-      '_ingest/pipeline/{id}'
-    ]
-  });
-
-  api.addEndpointDescription('_delete_ingest_pipeline', {
-    methods: ['DELETE'],
-    patterns: [
-      '_ingest/pipeline/{id}'
-    ]
-  });
-
-  api.addEndpointDescription('_simulate_new_ingest_pipeline', {
-    methods: ['POST'],
-    patterns: [
-      '_ingest/pipeline/_simulate'
-    ],
-    url_params: simulateUrlParamsDefinition,
-    data_autocomplete_rules: {
-      pipeline: pipelineDefinition,
-      docs: [
-      ]
-    }
-  });
-
-  api.addEndpointDescription('_simulate_existing_ingest_pipeline', {
-    methods: ['POST'],
-    patterns: [
-      '_ingest/pipeline/{name}/_simulate'
-    ],
-    url_params: simulateUrlParamsDefinition,
-    data_autocomplete_rules: {
-      docs: [
-      ]
-    }
-  });
-}
+module.exports = exports['default'];

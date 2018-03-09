@@ -1,16 +1,27 @@
-import _ from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = repositionArguments;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Applies to unresolved arguments in the AST
-export default function repositionArguments(functionDef, unorderedArgs) {
+function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
 
-  _.each(unorderedArgs, function (unorderedArg, i) {
+  _lodash2.default.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
     let targetIndex;
     let value;
     let storeAsArray;
 
-    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+    if (_lodash2.default.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];
 
       if (!argDef) {
@@ -25,11 +36,10 @@ export default function repositionArguments(functionDef, unorderedArgs) {
           storeAsArray = true;
         }
       } else {
-        targetIndex = _.findIndex(functionDef.args, function (orderedArg) {
+        targetIndex = _lodash2.default.findIndex(functionDef.args, function (orderedArg) {
           return unorderedArg.name === orderedArg.name;
         });
         storeAsArray = argDef.multi;
-
       }
       value = unorderedArg.value;
     } else {
@@ -39,7 +49,7 @@ export default function repositionArguments(functionDef, unorderedArgs) {
       value = unorderedArg;
     }
 
-    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
+    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || '#' + i));
 
     if (storeAsArray) {
       args[targetIndex] = args[targetIndex] || [];
@@ -50,5 +60,5 @@ export default function repositionArguments(functionDef, unorderedArgs) {
   });
 
   return args;
-
 }
+module.exports = exports['default'];

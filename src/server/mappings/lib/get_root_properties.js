@@ -1,4 +1,11 @@
-import { getRootType } from './get_root_type';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getRootProperties = getRootProperties;
+
+var _get_root_type = require('./get_root_type');
 
 /**
  *  Get the property mappings for the root type in the EsMappingsDsl
@@ -18,8 +25,8 @@ import { getRootType } from './get_root_type';
  *  @param  {EsMappingsDsl} mappings
  *  @return {EsPropertyMappings}
  */
-export function getRootProperties(mappings) {
-  const mapping = mappings[getRootType(mappings)];
+function getRootProperties(mappings) {
+  const mapping = mappings[(0, _get_root_type.getRootType)(mappings)];
 
   if (mapping.type !== 'object' && !mapping.properties) {
     throw new TypeError('Unable to get property names non-object root mapping');

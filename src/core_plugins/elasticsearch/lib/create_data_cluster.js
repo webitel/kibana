@@ -1,12 +1,26 @@
-import { clientLogger } from './client_logger';
+'use strict';
 
-export function createDataCluster(server) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.createDataCluster = createDataCluster;
+
+var _client_logger = require('./client_logger');
+
+function createDataCluster(server) {
   const config = server.config();
-  const ElasticsearchClientLogging = clientLogger(server);
+  const ElasticsearchClientLogging = (0, _client_logger.clientLogger)(server);
 
   class DataClientLogging extends ElasticsearchClientLogging {
-    tags = ['data'];
-    logQueries = getConfig().logQueries;
+    constructor(...args) {
+      var _temp;
+
+      return _temp = super(...args), this.tags = ['data'], this.logQueries = getConfig().logQueries, _temp;
+    }
+
   }
 
   function getConfig() {
@@ -17,11 +31,7 @@ export function createDataCluster(server) {
     return config.get('elasticsearch');
   }
 
-  server.plugins.elasticsearch.createCluster(
-    'data',
-    {
-      log: DataClientLogging,
-      ...getConfig()
-    }
-  );
+  server.plugins.elasticsearch.createCluster('data', _extends({
+    log: DataClientLogging
+  }, getConfig()));
 }

@@ -1,10 +1,22 @@
-import Stream from 'stream';
-import { get, isEqual } from 'lodash';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.LogInterceptor = undefined;
+
+var _stream = require('stream');
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _lodash = require('lodash');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const GET_CLIENT_HELLO = /GET_CLIENT_HELLO:http/;
 
 function doTagsMatch(event, tags) {
-  return isEqual(get(event, 'tags'), tags);
+  return (0, _lodash.isEqual)((0, _lodash.get)(event, 'tags'), tags);
 }
 
 function doesMessageMatch(errorMessage, match) {
@@ -16,7 +28,7 @@ function doesMessageMatch(errorMessage, match) {
 // converts the given event into a debug log if it's an error of the given type
 function downgradeIfErrorType(errorType, event, field = 'errno') {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  const matchesErrorType = isClientError && get(event, `data.${field}`) === errorType;
+  const matchesErrorType = isClientError && (0, _lodash.get)(event, `data.${field}`) === errorType;
 
   if (!matchesErrorType) return null;
 
@@ -33,8 +45,8 @@ function downgradeIfErrorType(errorType, event, field = 'errno') {
 
 function downgradeIfErrorMessage(match, event) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  const errorMessage = get(event, 'data.message');
-  const matchesErrorMessage = isClientError &&  doesMessageMatch(errorMessage, match);
+  const errorMessage = (0, _lodash.get)(event, 'data.message');
+  const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
 
   if (!matchesErrorMessage) return null;
 
@@ -47,7 +59,7 @@ function downgradeIfErrorMessage(match, event) {
   };
 }
 
-export class LogInterceptor extends Stream.Transform {
+class LogInterceptor extends _stream2.default.Transform {
   constructor() {
     super({
       readableObjectMode: true,
@@ -106,13 +118,10 @@ export class LogInterceptor extends Stream.Transform {
   }
 
   _transform(event, enc, next) {
-    const downgraded = this.downgradeIfEconnreset(event)
-      || this.downgradeIfEpipe(event)
-      || this.downgradeIfEcanceled(event)
-      || this.downgradeIfHTTPSWhenHTTP(event)
-      || this.downgradeIfHTTPWhenHTTPS(event);
+    const downgraded = this.downgradeIfEconnreset(event) || this.downgradeIfEpipe(event) || this.downgradeIfEcanceled(event) || this.downgradeIfHTTPSWhenHTTP(event) || this.downgradeIfHTTPWhenHTTPS(event);
 
     this.push(downgraded || event);
     next();
   }
 }
+exports.LogInterceptor = LogInterceptor;

@@ -1,4 +1,10 @@
-export const INSTRUCTION_VARIANT = {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getDisplayText = getDisplayText;
+const INSTRUCTION_VARIANT = exports.INSTRUCTION_VARIANT = {
   OSX: 'osx',
   DEB: 'deb',
   RPM: 'rpm',
@@ -9,7 +15,7 @@ export const INSTRUCTION_VARIANT = {
   FLASK: 'flask',
   RAILS: 'rails',
   RACK: 'rack',
-  JS: 'js',
+  JS: 'js'
 };
 
 const DISPLAY_MAP = {
@@ -23,7 +29,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.FLASK]: 'Flask',
   [INSTRUCTION_VARIANT.RAILS]: 'Ruby on Rails',
   [INSTRUCTION_VARIANT.RACK]: 'Rack',
-  [INSTRUCTION_VARIANT.JS]: 'JS',
+  [INSTRUCTION_VARIANT.JS]: 'JS'
 };
 
 /**
@@ -32,7 +38,7 @@ const DISPLAY_MAP = {
  * @params {String} id - instruction variant id as defined from INSTRUCTION_VARIANT
  * @return {String} display name
  */
-export function getDisplayText(id) {
+function getDisplayText(id) {
   if (id in DISPLAY_MAP) {
     return DISPLAY_MAP[id];
   }

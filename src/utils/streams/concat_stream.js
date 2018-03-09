@@ -1,4 +1,11 @@
-import { createReduceStream } from './reduce_stream';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createConcatStream = createConcatStream;
+
+var _reduce_stream = require('./reduce_stream');
 
 /**
  *  Creates a Transform stream that consumes all provided
@@ -23,6 +30,6 @@ import { createReduceStream } from './reduce_stream';
  *                       items will concat with
  *  @return {Transform}
  */
-export function createConcatStream(initial) {
-  return createReduceStream((acc, chunk) => acc.concat(chunk), initial);
+function createConcatStream(initial) {
+  return (0, _reduce_stream.createReduceStream)((acc, chunk) => acc.concat(chunk), initial);
 }
