@@ -10,11 +10,11 @@
     "dashboards",
     "dashboarding"
   ],
-  "version": "6.2.2",
+  "version": "6.2.3",
   "branch": "6.x",
   "build": {
-    "number": 16588,
-    "sha": "24d8d9d6e66efdf6c3686b47641b1a8513de6d3e"
+    "number": 8467,
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
   "dependencies": {
     "@elastic/datemath": "4.0.2",

@@ -10,7 +10,7 @@ export function validateIndex (server, domainName, cb) {
     const config = server.config();
     const index = `${config.get('kibana.index') || '.kibana'}-${domainName}`;
     const buildNum = config.get('pkg.buildNum') || '8467';
-    const id = 'config:' + (config.get('pkg.version') || '6.2.2');
+    const id = 'config:' + (config.get('pkg.version') || '6.2.3');
     console.log(index, id);
     client.get({
         index: index,
@@ -46,6 +46,79 @@ export function validateIndex (server, domainName, cb) {
             );
         }
     })
+}
+
+export function upgradeConfig(client, from, to) {
+    if (!from || !to) {
+        throw `Webitel upgrade config error, from or to empty`;
+    }
+
+    searchConfig(client, from, to)
+}
+
+function searchConfig(client, from, to) {
+    client.search({
+        index: '.kiban*',
+        type: 'doc',
+        size: 9999, //TODO
+        body: {
+            query: {
+                match: {
+                    _id: `config:${from}`
+                }
+            }
+        }
+    }, (err, res = {}) => {
+        if (err) {
+            console.dir(err);
+            return
+        }
+
+        if (res.hits.total > 0) {
+            console.log(`Found ${res.hits.total} old config`);
+            updateConfig(client, from, to, res.hits.hits)
+        } else {
+            console.log(`Not found old config!`);
+        }
+    })
+}
+
+function updateConfig(client, from, to, items = []) {
+    items.forEach(item => {
+        console.log(`Create config ${item._index} from ${from} to ${to}`);
+
+        client.create({
+            index: item._index,
+            type: item._type,
+            id: `config:${to}`,
+            body: item._source
+        }, err => {
+            if (err) {
+                if (err.statusCode === 409) {
+                    removeOldConfig(client, item._index, item._type, `config:${from}`)
+                } else {
+                    console.log(err.message);
+                }
+                return;
+            }
+
+            removeOldConfig(client, item._index, item._type, `config:${from}`)
+        });
+    })
+}
+
+function removeOldConfig(client, index, type, id) {
+    client.delete({
+        index: index,
+        type: type,
+        id: id
+    }, err => {
+        if (err) {
+          console.log(`Error removeOldConfig: ${err.message}`);
+          return
+        }
+        console.log(`Removed config ${index} ${id}`);
+    });
 }
 
 function setupError(err) {

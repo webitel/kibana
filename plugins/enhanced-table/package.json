@@ -4,7 +4,7 @@
   "description": "This visualization plugin is like a Data Table, but with enhanced features like computed columns and filter bar",
   "main": "index.js",
   "kibana": {
-    "version": "6.2.2"
+    "version": "6.2.3"
   },
   "dependencies": {
     "expr-eval": "^1.2.1"

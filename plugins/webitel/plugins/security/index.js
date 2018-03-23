@@ -10,6 +10,7 @@ import initLogoutView from './server/routes/views/logout';
 import initAuthenticateApi from './server/routes/api/v1/authenticate';
 import createScheme from './server/lib/login_scheme';
 import hapiAuthCookie from 'hapi-auth-cookie';
+import {upgradeConfig} from './server/lib/create_index'
 
 export default (kibana) => {
   return new kibana.Plugin({
@@ -53,6 +54,12 @@ export default (kibana) => {
     init(server) {
       const plugin = this;
       const config = server.config();
+
+      upgradeConfig(
+          server.plugins.elasticsearch.getCluster('admin').getClient(),
+          '6.2.2',
+          config.get('pkg.version')
+      );
 
       server.register(hapiAuthCookie, (error) => {
         if (error != null) throw error;
