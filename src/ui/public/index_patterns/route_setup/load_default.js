@@ -29,6 +29,7 @@ export default function (opts) {
           const exists = _.contains(patterns, defaultId);
 
           if (defined && !exists) {
+              console.warn("REMOVE INDEX PATTERN");
             config.remove('defaultIndex');
             defaultId = defined = false;
           }

@@ -17,33 +17,29 @@ export function validateIndex (server, domainName, cb) {
         type: "doc",
         id: id
     }, (err, exists) => {
-        console.dir(err, {depth: 5});
-
         if (err && err.status !== 404)
             return console.error(err);
 
         if (!exists || !exists.found) {
             console.log(`Try create index`);
 
-          createIndex(client, index)
-            .then(
-              () => {
-                createConfig(client, index, id, buildNum, domainName)
-                  .then(
-                    () => {
-                      createIndexPattern(client, index, (err, res) => {
-                        console.log('RESULT:');
-                        console.log(err, res);
-                        if (err) {
-                          setupError(err)
-                        }
-                      })
-                    },
-                    setupError
-                  )
-              },
-              setupError
-            );
+          createIndex(client, index, (err, res) => {
+              if (err)
+                  return setupError(err);
+
+              createConfig(client, index, id, buildNum, domainName, (err) => {
+                  if (err) {
+                      return setupError(err);
+                  }
+                  createIndexPattern(client, index, (err) => {
+                      if (err) {
+                          return setupError(err)
+                      }
+
+                      createDefaultVisualizations(client, index);
+                  });
+              });
+          })
         }
     })
 }
@@ -125,9 +121,9 @@ function setupError(err) {
     console.log(err)
 }
 
-function createIndex(client, index) {
+function createIndex(client, index, cb) {
     console.log(`Create index ${index}`);
-    return client.indices.create({
+    client.indices.create({
         index: index,
         body: {
           "settings": {
@@ -264,6 +260,12 @@ function createIndex(client, index) {
               "properties": {
                 "buildNum": {
                   "type": "keyword"
+                },
+                "defaultIndex": {
+                  "type": "keyword"
+                },
+                "domainName": {
+                  "type": "keyword"
                 }
               }
             },
@@ -371,12 +373,12 @@ function createIndex(client, index) {
         }
       }
         }
-    });
+    }, cb);
 }
 
-function createConfig(client, index, id, buildNum, domainName) {
-    console.log(`Create config ${index}`);
-    return client.create({
+function createConfig(client, index, id, buildNum, domainName, cb) {
+    console.log(`Create config ${index} ${id}`);
+    client.create({
         index: index,
         type: "doc",
         id: id,
@@ -389,15 +391,13 @@ function createConfig(client, index, id, buildNum, domainName) {
             // "defaultIndex": "cdr-*",
           }
         }
-    });
+    }, cb);
 }
 
 function createIndexPattern(client, index, cb) {
     console.log(`Create pattern ${index}`);
-    createDefaultVisualizations(client, index);
-
     async.forEachOf(DEFAULT_INDEX_PATTERNS, function (item, key, callback) {
-      console.log(`Create: ${item._id}`)
+      console.log(`Create: ${item._id}`);
 
       client.create({
         id: item._id,
