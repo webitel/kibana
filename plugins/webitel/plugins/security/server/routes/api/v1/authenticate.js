@@ -41,7 +41,7 @@ module.exports = (server) => {
       }
 
       request.server.app.webitel.api('POST', '/login', {username: username, password: password}, (err, res, user) => {
-        if (err || res.statusCode != 200) {
+        if (err || res.statusCode !== 200) {
           request.auth.session.clear();
           return reply(Boom.unauthorized(err));
         }
