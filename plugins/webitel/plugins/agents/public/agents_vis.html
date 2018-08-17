@@ -64,14 +64,15 @@
 
     <div class="agents-data" ng-show="!!vis.params.showAgents">
         <ul class="list-unstyled agents-list">
-            <li ng-repeat="(key, item) in users | OrderByLine:'line_status'"
+            <li ng-show="!vis.params.hideLoggedOutAgents || item.line_status!='offline'" ng-repeat="(key, item) in users | OrderByLine:'line_status'"
                 ng-class="{'available': item.line_status=='available', 'busy': item.line_status=='busy', 'onbreak': item.line_status=='onbreak', 'offline': item.line_status=='offline'}">
 
-
-                <span class="" style="width: inherit">{{item.webitel_name}} ({{parseName(item.name)}})</span>
                 <span class="pull-left fa fa-phone"></span>
-                <span class="pull-right text-muted">{{item.state}}</span>
-                <span class="pull-right text-muted">{{item.status}}/</span>
+                <div style="margin-top: 4px;">
+                  <span class="" style="width: inherit">{{item.webitel_name}} ({{parseName(item.name)}})</span>
+                  <span class="pull-right text-muted">{{item.state}}</span>
+                  <span class="pull-right text-muted">{{item.status}}/</span>
+                </div>
                 <span class="clearfix"></span>
             </li>
         </ul>
