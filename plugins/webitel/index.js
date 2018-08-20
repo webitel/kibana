@@ -8,6 +8,7 @@ import { webitelMain } from './plugins/webitel_main';
 import security from './plugins/security';
 import accounts from './plugins/accounts';
 import agents from './plugins/agents';
+import agentsMonitor from './plugins/agents_monitor';
 import calls from './plugins/calls';
 import members from './plugins/members';
 import exports from './plugins/exports';
@@ -19,6 +20,8 @@ module.exports = kibana => [
   webitelMain(kibana),
   security(kibana),
   accounts(kibana),
+  agents(kibana),
+  agentsMonitor(kibana),
   agents(kibana),
   calls(kibana),
   members(kibana),
