@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y --force-yes git build-essential python 
     cd /kibana && npm install && npm cache clear && \
     cd /kibana/plugins/webitel && npm install && npm cache clear && \
     cd /kibana/plugins/enhanced-table && npm install && npm cache clear && \
-    /kibana/bin/kibana-plugin install https://github.com/datasweet/kibana-datasweet-formula/releases/download/1.1.0/datasweet_formula-1.1.0_kibana-6.2.3.zip
+    cd /kibana/plugins/datasweet_formula && npm install && npm cache clear
 
 COPY ./entrypoint.sh /
 
