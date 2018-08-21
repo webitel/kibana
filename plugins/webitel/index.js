@@ -22,7 +22,6 @@ module.exports = kibana => [
   accounts(kibana),
   agents(kibana),
   agentsMonitor(kibana),
-  agents(kibana),
   calls(kibana),
   members(kibana),
   exports(kibana),
