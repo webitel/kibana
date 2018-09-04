@@ -215,6 +215,11 @@ export function VislibVisualizationsPieChartProvider(Private) {
               return;
             }
             if (showValues) {
+              /*WEBITEL*/
+              if (self._attr.labels.showDataValues) {
+                  const value = numeral(d.size).format('0,0');
+                  return `${d.name} (${value})`;
+              }
               const value = numeral(d.value / 100).format('0.[00]%');
               return `${d.name} (${value})`;
             }
