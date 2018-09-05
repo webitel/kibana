@@ -211,7 +211,7 @@ define(function (require) {
                                             hashListChannels.removeAll();
                                         }
                                     })
-                                }, 2000)
+                                }, 5000)
                             }
                         });
                     }
