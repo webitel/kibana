@@ -152,8 +152,13 @@ define(function (require) {
                     webitel.unServerEvent('SE:DTMF', {all:true, domain: activeDomain}, onDTMF);
                 };
 
+                var timerId = null;
+                var timerCount = 0;
+                var timerInterval = 10 * 1000;
+
                 $scope.$on('$destroy', function () {
                     unSubscribeDomain();
+                    clearTimeout(timerId)
                 });
 
                 subscribeDomain(webitel.domainSession || '');
@@ -171,11 +176,39 @@ define(function (require) {
                     })
                 }
 
+                function actualizeChannels() {
+                    timerCount++;
+                    console.warn("actualizeChannels");
+
+                    getChannelsData(function (err, res) {
+                        if (res.row_count > 0) {
+                            angular.forEach(hashListChannels.collection, function (item) {
+                                for (var i = 0; i < res.row_count; i++) {
+                                    var id = res.rows[i].call_uuid || res.rows[i].uuid;
+                                    if (id == item.uuid)
+                                        return;
+                                }
+                                hashListChannels.remove(item.uuid)
+                            });
+
+                            if (timerCount < 2) {
+                                timerId = setTimeout(actualizeChannels, timerInterval * 2)
+                            }
+
+                        } else {
+                            hashListChannels.removeAll();
+                        }
+                    })
+                }
+
                 $scope.$watch('vis.params.domain', function (val, oldVal) {
                     $scope.vis.params.domain = val;
                     $scope.tableParams.reload();
 
                     if (val) {
+                        if (timerId) {
+                            clearTimeout(timerId)
+                        }
 
                         getChannelsData(function (err, res) {
                             hashListChannels.removeAll();
@@ -196,22 +229,24 @@ define(function (require) {
                                     }
                                 });
 
-                                setTimeout(function () {
-                                    getChannelsData(function (err, res) {
-                                        if (res.row_count > 0) {
-                                            angular.forEach(hashListChannels.collection, function (item) {
-                                                for (var i = 0; i < res.row_count; i++) {
-                                                    var id = res.rows[i].call_uuid || res.rows[i].uuid;
-                                                    if (id == item.uuid)
-                                                        return;
-                                                }
-                                                hashListChannels.remove(item.uuid)
-                                            })
-                                        } else {
-                                            hashListChannels.removeAll();
-                                        }
-                                    })
-                                }, 5000)
+                                timerId = setTimeout(actualizeChannels, timerInterval)
+                                //
+                                // setTimeout(function () {
+                                //     getChannelsData(function (err, res) {
+                                //         if (res.row_count > 0) {
+                                //             angular.forEach(hashListChannels.collection, function (item) {
+                                //                 for (var i = 0; i < res.row_count; i++) {
+                                //                     var id = res.rows[i].call_uuid || res.rows[i].uuid;
+                                //                     if (id == item.uuid)
+                                //                         return;
+                                //                 }
+                                //                 hashListChannels.remove(item.uuid)
+                                //             })
+                                //         } else {
+                                //             hashListChannels.removeAll();
+                                //         }
+                                //     })
+                                // }, 2000)
                             }
                         });
                     }
