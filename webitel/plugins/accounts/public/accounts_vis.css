@@ -1,0 +1,50 @@
+tr.w-account-onhook td:first-child {
+  border-left: 5px solid rgb(87, 193, 123);
+}
+tr.w-account-onhook td span.label.label-state{
+  background-color: rgb(87, 193, 123);
+}
+
+tr.w-account-receiving td:first-child {
+  border-left: 5px solid #fcf8e3;
+}
+tr.w-account-receiving td span.label.label-state{
+  background-color: #fcf8e3;
+}
+
+tr.w-account-isbusy td:first-child {
+  border-left: 5px solid rgb(191, 64, 72);
+}
+tr.w-account-isbusy td span.label.label-state{
+  background-color: rgb(191, 64, 72);
+}
+
+tr.w-account-nonreg td:first-child {
+  border-left: 5px solid rgba(171, 171, 171, 0.36);
+}
+tr.w-account-nonreg td span.label.label-state{
+  background-color: rgba(171, 171, 171, 0.36);
+}
+
+tr.w-account-onbreak td:first-child {
+  border-left: 5px solid #f39c12;
+}
+tr.w-account-onbreak td span.label.label-state{
+  background-color: #f39c12;
+}
+
+.kbn-table .ng-table-sort-header th {
+  text-align: center;
+}
+
+
+
+.w-online {
+  color: #4DE28E;
+}
+.w-offline {
+  color: #ea4e00;
+}
+.selected li {
+  background-color: red;
+}

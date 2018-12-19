@@ -1,0 +1,53 @@
+<div class="container" ng-class="{error_login: !!error}">
+    <div class="logo-container">
+        Kibana
+    </div>
+    <div class="form-container">
+        <form class="login-form" ng-submit="submit(username, password)">
+            <!--<div ng-show="login.error" class="form-group error-message">-->
+                <!--<label class="control-label">Oops! Error. Try again.</label>-->
+            <!--</div>-->
+
+            <div class="euiFormRow euiFormRow--fullWidth">
+                <label class="euiFormLabel login_label" aria-invalid="false" for="login_id">Login</label>
+                <div class="euiFormControlLayout euiFormControlLayout--fullWidth">
+                    <div class="euiFormControlLayout__childrenWrapper">
+                        <input type="text" id="login_id" name="login"
+                            placeholder="You login"
+                            class="euiFieldText euiFieldText--fullWidth"
+                            ng-model="username"
+                            value="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="euiFormRow euiFormRow--fullWidth">
+                <label class="euiFormLabel login_label" aria-invalid="false" for="password_id">Password</label>
+                <div class="euiFormControlLayout euiFormControlLayout--fullWidth">
+                    <div class="euiFormControlLayout__childrenWrapper">
+                        <input type="text" id="password_id" name="password"
+                            placeholder="You password"
+                            ng-model="password"
+                            class="euiFieldText euiFieldText--fullWidth"
+                            value="">
+                    </div>
+                </div>
+            </div>
+
+
+            <button type="submit" ng-disabled="isLoading" class="euiButton login_btn">LOG IN
+            </button>
+        </form>
+
+
+        <div ng-if="error" class="info-container">
+            Oops! Error. Try again.
+            <div style="margin-top: 5px;">
+                {{error}}
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
