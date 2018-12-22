@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo 'Webitel Kibana '$VERSION
+echo 'Webitel Kibana '$KIBANA_VERSION
 
 # Add kibana as command if needed
 if [[ "$1" == -* ]]; then
