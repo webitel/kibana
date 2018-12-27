@@ -11,6 +11,8 @@ env:
 before_install:
   - git clone https://github.com/elastic/kibana.git
   - cp disable_enterprise_plugins.patch kibana/
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
+  - export PATH="$HOME/.yarn/bin:$PATH"
   - cd kibana && git checkout v6.5.4 && git apply disable_enterprise_plugins.patch
   - yarn install --network-timeout 1000000000
   - yarn kbn bootstrap
