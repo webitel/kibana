@@ -1,11 +1,8 @@
-Index: x-pack/index.js
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
---- x-pack/index.js	(date 1544821272000)
-+++ x-pack/index.js	(date 1545826206000)
-@@ -34,26 +34,26 @@
+diff --git a/x-pack/index.js b/x-pack/index.js
+index 374cef7..be9ea39 100644
+--- a/x-pack/index.js
++++ b/x-pack/index.js
+@@ -34,26 +34,26 @@ module.exports = function (kibana) {
      xpackMain(kibana),
      graph(kibana),
      monitoring(kibana),
