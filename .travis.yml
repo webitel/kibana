@@ -14,7 +14,7 @@ before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
   - export PATH="$HOME/.yarn/bin:$PATH"
   - cd kibana && git checkout v6.5.4 && git apply disable_enterprise_plugins.patch
-  - yarn install --network-timeout 1000000000
+  - yarn install --production=false --network-timeout 1000000000
   - yarn kbn bootstrap
   - node scripts/build --skip-os-packages --skip-archives --no-oss --release
   - cp -rv ../webitel build/default/kibana-6.5.4-linux-x86_64/plugins && cd build/default/kibana-6.5.4-linux-x86_64/plugins/webitel && yarn install && cd ../../../../../../
