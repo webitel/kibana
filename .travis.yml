@@ -20,6 +20,9 @@ before_install:
 
 install:
   - cp -r webitel kibana/build/default/kibana-6.5.4-linux-x86_64/plugins
+  - cd kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/webitel
+  - yarn install
+  - cd ~/build/webitel/kibana
   - docker login --username=$DOCKER_HUB_USERNAME --password=$DOCKER_HUB_PASSWORD
   - docker build -t $DOCKER_IMAGE_NAME:6.5.4 .
 
