@@ -29,6 +29,24 @@ export default class SpacesClient {
         });
 
         const spaces = saved_objects.map(this.transformSavedObjectToSpace);
+
+        if (!spaces.length) {
+            const attributes = {
+                name: "Default",
+                description: "This is your default space!",
+                color: "#00bfb3",
+                _reserved: true,
+                createdOn: Date.now(),
+                modifyOn: Date.now(),
+                createdBy: this._user.getId(),
+                modifyBy: this._user.getId()
+            };
+
+            const id = "default";
+            await this.callWithRequestSavedObjectRepository.create('space', attributes, { id });
+            return [];
+        }
+
         return spaces.filter((space) => {
             return space._reserved || ~get(space, 'acl.config.r', []).indexOf(this._user.getRole())
         });

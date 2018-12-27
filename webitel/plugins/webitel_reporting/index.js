@@ -1,22 +1,28 @@
 import { resolve } from 'path';
+import initApi from './server/routes/api/v1/jobs';
 
 export const webitel_reporting = (kibana) => {
     return new kibana.Plugin({
         id: 'webitel_reporting',
-        require: ['kibana', 'elasticsearch', 'webitel_main'],
+        require: ['webitel_main', 'elasticsearch'],
         configPrefix: 'webitel.reporting',
+        publicDir: resolve(__dirname, 'public'),
         uiExports: {
-            shareContextMenuExtensions: [
-                'plugins/webitel_reporting/share_context_menu/register_pdf_reporting'
+            managementSections: ['plugins/webitel_reporting/views/management/management'],
+            navbarExtensions: [
+                'plugins/webitel_reporting/controls/visualize'
+            ],
+            inspectorViews: [
+              'plugins/webitel_reporting/spy_report/spy_report'
             ]
         },
-        publicDir: resolve(__dirname, 'public'),
         config(Joi) {
             return Joi.object({
                 enabled: Joi.boolean().default(true)
             }).default()
         },
-        async init (server) {
+        init (server) {
+            initApi(server);
         }
     })
 };

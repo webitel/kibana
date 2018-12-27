@@ -1,0 +1,37 @@
+<div ng-controller="KbnWebitelCallsVisController" class="webitel-plugin-vis table-vis">
+	<div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
+		<h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
+		<h4>No results found</h4>
+	</div>
+
+	<div ng-if="hasSomeRows" >
+        <table ng-table="tableParams" class="kbn-table table table-calls">
+            <thead>
+            <tr>
+                <th>
+                    Time
+                </th>
+                <th ng-repeat="(key, item) in vis.params.columns" ng-if="item.visible">
+                    {{item.title}}
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+            </thead>
+            <tr ng-repeat="row in $data" ng-class="getClass(row.callstate)">
+                <td>
+                    <timer start-time="row.createdOn" interval="1000">{{millis | date:'mm:ss'}}</timer>
+                </td>
+                <td ng-repeat="(key, item) in vis.params.columns" ng-if="item.visible">
+                    <span ng-class="item['class']">{{row[key]}}</span>
+                </td>
+                <td>
+                    <a ng-if="useWebPhone()" ng-click="eavesdrop(row)" style="background-color: rgba(39, 39, 39, 0)">
+                        <i class="fa fa-plug"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+	</div>
+</div>

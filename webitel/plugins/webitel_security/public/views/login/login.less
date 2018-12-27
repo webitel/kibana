@@ -1,83 +1,14 @@
 
-.application {
-  background: #303030;
-  color: #fff;
-}
-
-.container {
-  width: 430px;
-  padding: 0;
-  background: #424242;
-  margin-top: 10%;
-
-  &.error_login {
-    box-shadow: 0 0 2em #D76051;
-  }
-
-  > div {
-    //float: left;
-  }
-
-  .logo-container {
-    width: 100%;
-    font-size: 45px!important;
-    line-height: 48px!important;
-    letter-spacing: normal!important;
-    text-align: left;
-    font-weight: 400;
-    font-family: Roboto,sans-serif!important;
-    padding: 16px;
-  }
+.login-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  bottom: 0;
 
   .login-form {
-    position: relative;
-    padding: 16px;
-    width: 100%;
-
-    .euiFormRow {
-      .euiFormLabel.login_label {
-        color: #9b9b9b;
-      }
-    }
-
-    .login_btn {
-      color: #4caf50 !important;;
-      border-color: #4caf50 !important;;
-      width: 100%;
-    }
-
-    .login_btn[disabled=disabled] {
-      color: #9b9b9b !important;;
-      border-color: #9b9b9b !important;;
-    }
-
-    .form-group.error-message {
-      position: absolute;
-      left: 380px;
-      text-align: left;
-    }
+    min-width: 400px;
+    margin-top: 100px;
   }
 
-  .info-container {
-    text-align: center;
-    padding: 0 10px;
-    width: 100%;
-    margin-bottom: 5px;
-  }
-}
-
-button.login {
-  font-size: 1.25em;
-  border: none;
-
-  &:focus, &:hover {
-    //background-color: @black;
-  }
-}
-
-input.form-control {
-  border: none;
-  font-size: 1.125em;
-  height: auto;
-  padding: 0.5em;
 }

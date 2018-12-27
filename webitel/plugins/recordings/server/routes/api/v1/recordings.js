@@ -22,7 +22,7 @@ module.exports = server => {
                     if (user) {
                         headers['X-Key'] = user.getAuthKey();
                         headers['X-Access-Token'] = user.getAuthToken();
-                        console.dir(headers)
+
                         return cb(
                             null,
                             `${user.getCdrHost()}/api/v2/files/${req.params.hash}${req.url.search}`,

@@ -1,19 +1,19 @@
 import {
     EuiButton,
     EuiButtonEmpty,
-    EuiFieldText,
     EuiFlexGroup,
     EuiFlexItem,
     EuiForm,
-    EuiFormRow,
     EuiHorizontalRule,
-    EuiLoadingSpinner,
     EuiPage,
     EuiPageBody,
     EuiPageContent,
     EuiPageContentBody,
     EuiSpacer,
     EuiTitle,
+    EuiTab,
+    EuiBasicTable,
+    EuiCheckbox,
 } from '@elastic/eui';
 
 import React, { ChangeEvent, Component, Fragment } from 'react';
@@ -25,9 +25,10 @@ export class ManageSpacesACLPage extends Component {
         super(props);
         this.state = {
             isLoading: true,
-            roles: null,
+            roles: [],
             activeTab: null,
             activePerm: null,
+            selectedTabId: null,
 
             createRoles: [],
             readRoles: [],
@@ -137,30 +138,6 @@ export class ManageSpacesACLPage extends Component {
         );
     };
 
-    getRow(role, key) {
-
-        return (
-            <tr>
-               <td>
-                   {role.value}
-               </td>
-
-                <td>
-                    <input type="checkbox" checked={this.state.activePerm.c.indexOf(role.value) !== -1} onChange={e => this.onChangePermission(e, role.value, 'c')}/>
-                </td>
-                <td>
-                    <input type="checkbox" checked={this.state.activePerm.r.indexOf(role.value) !== -1} onChange={e => this.onChangePermission(e, role.value, 'r')}/>
-                </td>
-                <td>
-                    <input type="checkbox" checked={this.state.activePerm.u.indexOf(role.value) !== -1} onChange={e => this.onChangePermission(e, role.value, 'u')}/>
-                </td>
-                <td>
-                    <input type="checkbox" checked={this.state.activePerm.d.indexOf(role.value) !== -1} onChange={e => this.onChangePermission(e, role.value, 'd')}/>
-                </td>
-            </tr>
-        )
-    };
-
     addRoleToAction(role, action) {
         const { activePerm } = this.state;
 
@@ -192,15 +169,109 @@ export class ManageSpacesACLPage extends Component {
         }
     }
 
-    setActiveTab(activeTab) {
+    onSelectedTabChanged = id => {
         const { acl } = this.state.space;
         if (!acl)
             return;
 
-        const activePerm = acl[activeTab];
+        const activePerm = acl[id];
 
-        this.setState({activeTab, activePerm});
+        this.setState({
+            selectedTabId: id,
+            activePerm
+        });
+    };
 
+    getColumns() {
+        return [
+            {
+                field: 'role',
+                name: 'Role',
+                sortable: true
+            },
+            {
+                field: 'c',
+                name: 'Can create',
+                sortable: true,
+                render: (val, row) => {
+                    return (
+                        <EuiCheckbox
+                            id={`${row.role}_c`}
+                            checked={val}
+                            onChange={e => this.onChangePermission(e, row.role, 'c')}
+                        />
+                    )
+                }
+            },
+            {
+                field: 'r',
+                name: 'Can read',
+                sortable: true,
+                render: (val, row) => {
+                    return (
+                        <EuiCheckbox
+                            id={`${row.role}_r`}
+                            checked={val}
+                            onChange={e => this.onChangePermission(e, row.role, 'r')}
+                        />
+                    )
+                }
+            },
+            {
+                field: 'u',
+                name: 'Can update',
+                sortable: true,
+                render: (val, row) => {
+                    return (
+                        <EuiCheckbox
+                            id={`${row.role}_u`}
+                            checked={val}
+                            onChange={e => this.onChangePermission(e, row.role, 'u')}
+                        />
+                    )
+                }
+            },
+            {
+                field: 'd',
+                name: 'Can delete',
+                sortable: true,
+                render: (val, row) => {
+                    return (
+                        <EuiCheckbox
+                            id={`${row.role}_d`}
+                            checked={val}
+                            onChange={e => this.onChangePermission(e, row.role, 'd')}
+                        />
+                    )
+                }
+            }
+        ]
+    };
+
+    getTableItems() {
+        const { roles, activePerm } = this.state;
+        if (!roles || !activePerm) {
+            return [];
+        }
+
+        return roles.map(role => {
+            return {
+                role: role.value,
+                c: activePerm.c.indexOf(role.value) > -1,
+                r: activePerm.r.indexOf(role.value) > -1,
+                u: activePerm.u.indexOf(role.value) > -1,
+                d: activePerm.d.indexOf(role.value) > -1
+            }
+        });
+    }
+
+    getTable() {
+        return (
+            <EuiBasicTable
+                items={this.getTableItems()}
+                columns={this.getColumns()}
+            />
+        )
     }
 
     getTabs() {
@@ -208,54 +279,29 @@ export class ManageSpacesACLPage extends Component {
             return;
 
         const { acl = {} } = this.state.space;
-        const tabs = Object.keys(acl).map(id => {
-            if (!this.state.activeTab) {
-                this.state.activeTab = id;
-                this.state.activePerm = acl[id];
+
+        this.tabs = Object.keys(acl).map(id => {
+            return {
+                id,
+                name: capitalizeFirstLetter(id)
             }
-            return (
-                <button key={id} className={`kuiTab ${this.state.activeTab === id ? 'kuiTab-isSelected' : ''}`} onClick={()=> this.setActiveTab(id)}>
-                    {capitalizeFirstLetter(id)}
-                </button>
-            )
         });
 
-        return (
-            <div>
-                <div className="kuiTabs kuiVerticalRhythm">
-                    {tabs}
-                </div>
-                <form role="form" className="kuiFieldGroup kuiVerticalRhythm">
-                    <table className="kbn-table table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    Role
-                                </th>
-                                <th>
-                                    Can create
-                                </th>
-                                <th>
-                                    Can read
-                                </th>
-                                <th>
-                                    Can update
-                                </th>
-                                <th>
-                                    Can delete
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {this.state.roles.map((r, i) => this.getRow(r, i))}
-                        </tbody>
-                    </table>
-                    <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
-                        {/*{this.getTabContent(acl)}*/}
-                    </div>
-                </form>
-            </div>
-        )
+        if (!this.state.selectedTabId && this.tabs.length) {
+            this.state.selectedTabId = this.tabs[0].id;
+            this.state.activePerm = acl[this.state.selectedTabId];
+        }
+
+        return this.tabs.map((tab, index) => (
+            <EuiTab
+                onClick={() => this.onSelectedTabChanged(tab.id)}
+                isSelected={tab.id === this.state.selectedTabId}
+                disabled={tab.disabled}
+                key={index}
+            >
+                {tab.name}
+            </EuiTab>
+        ));
     };
 
     getForm = () => {
@@ -268,14 +314,11 @@ export class ManageSpacesACLPage extends Component {
         return (
             <EuiForm>
                 {this.getFormHeading()}
-
                 <EuiSpacer />
-
                 {this.getTabs()}
-
-                {/*{this.getIndexPatternAcl()}*/}
-
-                <EuiHorizontalRule />
+                <EuiSpacer />
+                {this.getTable()}
+                <EuiSpacer />
                 {this.getFormButtons()}
             </EuiForm>
         )

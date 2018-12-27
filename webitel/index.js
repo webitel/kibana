@@ -6,6 +6,8 @@ import { agents } from './plugins/agents'
 import { agents_monitor } from './plugins/agents_monitor'
 import { members } from './plugins/members'
 import { recordings } from './plugins/recordings'
+import { exports } from './plugins/exports'
+import { calls } from './plugins/calls'
 
 module.exports = function (kibana) {
     return [
@@ -17,5 +19,7 @@ module.exports = function (kibana) {
         agents_monitor(kibana),
         members(kibana),
         recordings(kibana),
+        exports(kibana),
+        calls(kibana),
     ]
 };

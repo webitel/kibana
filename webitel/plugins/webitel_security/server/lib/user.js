@@ -8,7 +8,7 @@ export default class User {
     _acl = null;
     _role = null;
 
-    constructor({domain, username, expires, token, key, acl, id, roleName}) {
+    constructor({domain, username, expires, token, key, acl, id, roleName, cdr = {}}) {
         this._domain = domain || null;
         this._id = id || username;
         this._expires = expires;
@@ -16,6 +16,7 @@ export default class User {
         this._key = key;
         this._acl = acl;
         this._role = roleName;
+        this._cdrHost = cdr.host;
     }
 
     getDomain() {
@@ -46,7 +47,7 @@ export default class User {
     }
 
     getCdrHost() {
-        return 'http://pre.webitel.com/cdr'
+        return this._cdrHost
     }
 
     whoAMI() {

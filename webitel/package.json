@@ -4,7 +4,7 @@
   "description": "An awesome Kibana plugin",
   "main": "index.js",
   "kibana": {
-    "version": "6.5.3",
+    "version": "6.5.4",
     "templateVersion": "1.0.0"
   },
   "scripts": {
@@ -34,12 +34,17 @@
   "dependencies": {
     "async": "^2.6.1",
     "boom": "3.1.1",
+    "cron-parser": "^2.7.3",
     "hapi-auth-cookie": "6.1.1",
     "html2canvas": "^1.0.0-alpha.12",
     "joi": "^14.1.0",
     "jspdf": "^1.4.1",
+    "jszip": "^3.1.5",
+    "jszip-utils": "^0.0.2",
     "lodash": "^4.17.11",
     "lru-cache": "^5.1.1",
+    "nodemailer": "^4.7.0",
+    "nodemailer-smtp-pool": "^2.8.3",
     "react-select": "^2.1.2",
     "request": "^2.88.0"
   }
