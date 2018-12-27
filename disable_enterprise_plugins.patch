@@ -1,0 +1,45 @@
+Index: x-pack/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- x-pack/index.js	(date 1544821272000)
++++ x-pack/index.js	(date 1545826206000)
+@@ -34,26 +34,26 @@
+     xpackMain(kibana),
+     graph(kibana),
+     monitoring(kibana),
+-    reporting(kibana),
++    // reporting(kibana),
+     spaces(kibana),
+     security(kibana),
+     searchprofiler(kibana),
+-    ml(kibana),
++    // ml(kibana),
+     tilemap(kibana),
+     watcher(kibana),
+-    grokdebugger(kibana),
++    // grokdebugger(kibana),
+     dashboardMode(kibana),
+-    logstash(kibana),
+-    beats(kibana),
+-    apm(kibana),
++    // logstash(kibana),
++    // beats(kibana),
++    // apm(kibana),
+     canvas(kibana),
+-    licenseManagement(kibana),
+-    cloud(kibana),
+-    indexManagement(kibana),
++    // licenseManagement(kibana),
++    // cloud(kibana),
++    // indexManagement(kibana),
+     consoleExtensions(kibana),
+     notifications(kibana),
+     kueryAutocomplete(kibana),
+-    infra(kibana),
+-    rollup(kibana),
++    // infra(kibana),
++    // rollup(kibana),
+   ];
+ };
